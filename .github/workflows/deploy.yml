@@ -31,6 +31,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: configure environment
+        run: |
+          echo "NODE_ENV=production" >> .env.production
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env.production
+          
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

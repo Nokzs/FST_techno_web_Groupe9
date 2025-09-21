@@ -34,12 +34,32 @@ jobs:
       # 4. Exécuter les tests
       - name: Run tests
         working-directory: ${{ matrix.project }}
-        run: npm test
-  pushToprod:
+        run: npm tests
+  
+  changesCheck:
       runs-on: ubuntu-latest
       needs: test
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == "refs/heads/main"
+      outputs:
+        back: ${{ steps.filter.outputs.back }}
+        front: ${{ steps.filter.outputs.front }}
       steps:
+        - name: Check for changes in fst-chat-back folder
+          uses: dorny/paths-filter@v3
+          id: filter
+          with:
+            filters: |
+              back:
+                - 'fst-chat-back/**'
+              front:
+                - 'fst-chat/**'
+
+  pushFrontToprod:
+      runs-on: ubuntu-latest
+      needs: [changesCheck]
+      if: ${{ needs.changesCheck.outputs.front == 'true'}}
+      steps:
+        
         - name: Checkout repository
           uses: actions/checkout@v5
           # Nécessaire pour garder le workflow du repo de déploiement
@@ -58,7 +78,15 @@ jobs:
            destination-repository-name: fst-tchat-front
            user-email: alexischapusot@gmail.com
            target-branch: main
-          #deploiement du back
+ 
+  pushBackToprod:
+      runs-on: ubuntu-latest
+      needs: [changesCheck]
+      if: ${{ needs.changesCheck.outputs.back == 'true'}} 
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v5
+        
         - name: pushBackToDeployRepo
           uses: cpina/github-action-push-to-another-repository@v1.7.2
           env:
@@ -69,4 +97,4 @@ jobs:
            destination-repository-name: fst-tchat-back
            user-email: alexischapusot@gmail.com
            target-branch: main
-          
+            

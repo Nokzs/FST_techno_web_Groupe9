@@ -1,0 +1,23 @@
+#!/bin/sh
+echo . "$(dirname "$0")/_/husky.sh"
+
+CHANGED_FILES=$(git diff --cached --name-only)
+
+if echo "$CHANGED_FILES" | grep -q "^fst-chat/"; then
+  echo "🧪 Lancement des tests FRONT..."
+  testfront=true
+  cd fst-chat
+  npm run lint
+  npx prettier 'src/**/*.{js,ts,mjs,cjs,json}' --write
+
+fi
+
+if echo "$CHANGED_FILES" | grep -q "^fst-chat-back/"; then
+  echo "🧪 Lancement des tests BACK..."
+  if [ "$testfront" = true ]; then
+    cd ..
+  fi
+  cd fst-chat-back
+  npm run lint
+  npx prettier '**/*.{js,ts,mjs,cjs,json}' --write
+fi

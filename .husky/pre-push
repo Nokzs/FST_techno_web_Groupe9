@@ -1,0 +1,10 @@
+echo "🧪 Lancement des tests FRONT..."
+cd fst-chat
+npm run testSinceCommit || exit 1
+cd ..
+
+echo "🧪 Lancement des tests BACK..."
+cd fst-chat-back
+npm test || exit 1
+cd ..
+

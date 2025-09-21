@@ -9,7 +9,8 @@ export default defineConfig({
       usePolling: true
     }
   },
-   test: {
+  base:"/fst-tchat-front/",
+  test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: './vitest.setup.js',

@@ -44,6 +44,9 @@ jobs:
         back: ${{ steps.filter.outputs.back }}
         front: ${{ steps.filter.outputs.front }}
       steps:
+        - uses: actions/checkout@v4
+          with:
+           fetch-depth: 0
         - name: Check for changes in fst-chat-back folder
           uses: dorny/paths-filter@v3
           id: filter

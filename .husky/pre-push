@@ -5,6 +5,6 @@ cd ..
 
 echo "🧪 Lancement des tests BACK..."
 cd fst-chat-back
-npm test || exit 1
+npm run testSinceCommit || exit 1
 cd ..
 

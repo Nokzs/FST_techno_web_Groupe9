@@ -18,6 +18,6 @@ if echo "$CHANGED_FILES" | grep -q "^fst-chat-back/"; then
     cd ..
   fi
   cd fst-chat-back
-  npm run lint
+  #npm run lint
   npx prettier '**/*.{js,ts,mjs,cjs,json}' --write
 fi

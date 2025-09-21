@@ -34,7 +34,7 @@ jobs:
       # 4. Exécuter les tests
       - name: Run tests
         working-directory: ${{ matrix.project }}
-        run: npm tests
+        run: npm test
   
   changesCheck:
       runs-on: ubuntu-latest

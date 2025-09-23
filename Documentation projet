@@ -1,0 +1,31 @@
+chaque domaine de l'application sera composé de l'architecture suivante :
+	DTO si transfere entre front et back
+	|-variations des DTO (create,update, etc...)
+	controller
+	|- blabla.controller.ts
+	|- blabla.controller.spec.ts
+	module
+	|-
+	service
+	|-blabla.service.ts
+	|-blabla.spec.ts
+	schema si base de données 
+	|-blabla.schema.ts
+
+
+
+
+
+Automatisation 
+  à l'aide de la bibliothèque husky les actions suivantes seront executé:
+   avant un commit : eslint sera executé 
+   avant un push : les tests des fichiers qui ont été modifié sont executé
+  lors d'un push ou d'un pull request sur github:
+      un github actions va se declenché afin de :
+         executé les test automatiquement
+	 puis si les tests ont été réalisés avec succes:
+	    si le front (respectivement le back) à été modifié 
+	       le front (respectivement le back) va être push sur un dêpot de déploiment qui sera automatiquement déployé sur github pages (respectivement render)
+
+mongoDb 
+ la base de données de dev et de production sont toutes déployé sur mongoAtlas

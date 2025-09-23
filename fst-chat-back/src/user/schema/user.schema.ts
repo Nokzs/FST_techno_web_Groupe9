@@ -5,7 +5,7 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
- @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   pseudo: string;
 
   @Prop({ required: true, unique: true })
@@ -18,7 +18,7 @@ export class User {
   createdAt: Date;
 
   @Prop({ required: false })
-  lastConnectedAt: Date ;
+  lastConnectedAt: Date;
 
   @Prop({ required: true })
   isAdmin: boolean;

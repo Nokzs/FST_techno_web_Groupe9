@@ -13,11 +13,12 @@ import { User } from '../user/schema/user.schema';
 export class IsUserAlreadyExistConstraint
   implements ValidatorConstraintInterface
 {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async validate(value: string, args: ValidationArguments): Promise<boolean> {
-    const user = await this.userModel.findOne( {[args.property] : value}).exec();
+    const user = await this.userModel
+      .findOne({ [args.property]: value })
+      .exec();
     return !user; // valide seulement si aucun utilisateur trouvé
   }
 

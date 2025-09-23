@@ -1,11 +1,9 @@
-import {  useState,useRef } from 'react'
+import {  useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 function App() {
-  const [count2, setCount2] = useState(0)
   const [count, setCount] = useState(0)
-  const ref = useRef<HTMLButtonElement>(null) 
  return (
     <>
       <div >
@@ -18,12 +16,8 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button ref={ref} onClick={() => setCount2((count) => count + 1)}>
-	  count2 is {count2}	
-	</button>
-	<button onClick={() => {console.log(ref.current?.innerText)}}>
-					maj {count}
-
+	<button onClick={() => {setCount(count => count +1)}}>
+			{count}
 	</button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR

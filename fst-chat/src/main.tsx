@@ -1,8 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
-import { App } from "./App";
+import { HomePage } from "./component/routes" 
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 const router = createBrowserRouter([
   {
@@ -10,15 +9,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        Component: App,
+        Component: HomePage,
       },
       {
         path: "/login",
-        Component: App,
+        Component: HomePage,
       },
       {
         path: "/register",
-        Component: App,
+        Component: HomePage,
       },
     ],
   },

@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@layer components {
+  .scroll-unshow {
+    scrollbar-width: none;
+  }
+
+  .scroll-unshow::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .darkGradient {
+    background: linear-gradient(to right, #010221, #080c3b, #080c3f);
+  }
+}

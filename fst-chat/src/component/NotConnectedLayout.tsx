@@ -1,6 +1,10 @@
 import { Outlet } from "react-router-dom";
-
+import { NavBar } from "./NavBar";
 export function NotConnectedLayout() {
-  //si connecter renvoyer au chat
-  return <Outlet />;
+  return (
+    <>
+      <NavBar />
+      <Outlet />
+    </>
+  );
 }

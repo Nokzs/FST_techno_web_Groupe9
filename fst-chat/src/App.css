@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer components {
   .scroll-unshow {
@@ -13,5 +14,28 @@
 @layer components {
   .darkGradient {
     background: linear-gradient(to right, #010221, #080c3b, #080c3f);
+  }
+}
+
+@utility mlr-* {
+  margin-left: calc(--value(integer) * 1px);
+
+  margin-right: calc(--value(integer) * 1px);
+}
+
+@theme {
+  --animate-fade-in: fade-in 0.3s ease-in-out forwards;
+  --font-home: "nunito", sans-serif;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(100px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

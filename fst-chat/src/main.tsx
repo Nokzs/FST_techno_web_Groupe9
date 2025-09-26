@@ -1,8 +1,9 @@
-import React from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { HomePage } from "./component/routes" 
+import { HomePage } from "./component/routes";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
+import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 const router = createBrowserRouter([
   {
     Component: NotConnectedLayout,
@@ -26,7 +27,9 @@ const router = createBrowserRouter([
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 root.render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
+  <StrictMode>
+    <DarkModeProvider>
+      <RouterProvider router={router} />
+    </DarkModeProvider>
+  </StrictMode>,
 );

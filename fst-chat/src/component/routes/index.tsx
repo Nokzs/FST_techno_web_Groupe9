@@ -1,17 +1,18 @@
 import { ReactTyped } from "react-typed";
-import { useState } from "react";
+import { useRef, useState } from "react";
 export function HomePage() {
   const [showNextText, setShowNextText] = useState<boolean>(false);
+  const secondScreenRef = useRef<HTMLElement | null>(null);
   return (
     <div className="h-screen snap-mandatory scroll-smooth snap-y overflow-y-auto scroll-unshow dark:bg-gradient-to-r dark:from-[#010221] dark:via-[#080c3b] dark:to-[#080c3f] bg-gradient-to-r from-white via-gray-100 to-gray-200  ">
       <div className="h-screen snap-start  text-white justify-center flex-col items-center flex">
         <div
           id="hero"
-          className="dark:text-white text-gray-900 justify-center items-center flex font-bold text-4xl pl-8 pr-8 flex-col gap-10"
+          className="dark:text-white text-gray-900 justify-center items-center flex font-bold pl-8 pr-8 flex-col gap-10"
         >
           <ReactTyped
             strings={["Discuter avec vos amis"]}
-            className="pl-4 pr-4"
+            className="pl-4 pr-4 text-4xl"
             typeSpeed={50}
             showCursor={false}
             onComplete={() => {
@@ -24,19 +25,19 @@ export function HomePage() {
               strings={[
                 "Découvre de nouvelles personnes qui partagent vos passions",
               ]}
-              className="pl-4 pr-4"
-              typeSpeed={80}
+              className="pl-4 pr-4 text-2xl"
+              typeSpeed={20}
             />
           )}
           <button
             className="bg-green-600 hover:bg-green-700 pl-10 pr-10 p-5 text-3xl rounded-2xl cursor-pointer"
-            onClick={() => {}}
+            onClick={() => {secondScreenRef.current?.scrollIntoView({behavior:"smooth"})}}
           >
-            Learn more
+            En apprendre plus
           </button>
         </div>
       </div>
-      <div className="h-screen snap-start"></div>
+      <div className="h-screen snap-start"  ref={secondScreenRef}></div>
     </div>
   );
 }

@@ -176,7 +176,7 @@ export function HomePage() {
         ref={secondScreenRef}
       >
         <div className="flex w-screen flex-row gap-10 mt-5  overflow-y-hidden">
-          <div className="bg-white rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 border-black dark:border-none">
+          <div className="transition-all bg-white rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 border-black dark:border-none">
             {messages.map((el) => (
               <div
                 key={el.id}
@@ -195,10 +195,25 @@ export function HomePage() {
               </div>
             ))}
           </div>
-          <div className="bg-white rounded-3xl w-max-[400px] flex flex-1 flex-col-reverse border-8 border-black dark:border-none mlr-10">
-            <div className="self-start rounded-2xl border-black h-min  border-2 m-10 p-5 text-sm  bg-green-700  text-white">
-              Salut ca va ?
-            </div>
+
+          <div className="transition-all delay-200 bg-white rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 border-black dark:border-none">
+            {message2.map((el) => (
+              <div
+                key={el.id}
+                className={`text-sm flex flex-col border-2 p-2 justify-between rounded-2xl 
+                   ${
+                     el.sender === "Léa"
+                       ? "self-start bg-blue-700"
+                       : "self-end bg-green-700"
+                   } text-white border-black`}
+              >
+                <div className="">{el.text}</div>
+                <div className="flex flex-row justify-between items-center gap-1">
+                  <p>{el.sender}</p>
+                  <p>{el.time}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

@@ -1,42 +1,41 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@layer components {
+  .scroll-unshow {
+    scrollbar-width: none;
   }
-  to {
-    transform: rotate(360deg);
+
+  .scroll-unshow::-webkit-scrollbar {
+    display: none;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@layer components {
+  .darkGradient {
+    background: linear-gradient(to right, #010221, #080c3b, #080c3f);
   }
 }
 
-.card {
-  padding: 2em;
+@utility mlr-* {
+  margin-left: calc(--value(integer) * 1px);
+
+  margin-right: calc(--value(integer) * 1px);
 }
 
-.read-the-docs {
-  color: #888;
+@theme {
+  --animate-fade-in: fade-in 0.3s ease-in-out forwards;
+  --font-home: "nunito", sans-serif;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(100px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

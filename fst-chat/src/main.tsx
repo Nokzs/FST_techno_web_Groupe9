@@ -1,10 +1,36 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { HomePage } from "./component/routes";
+import { NotConnectedLayout } from "./component/NotConnectedLayout";
+import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
+import "./i18n/i18n.js";
+const router = createBrowserRouter([
+  {
+    Component: NotConnectedLayout,
+    children: [
+      {
+        path: "/",
+        Component: HomePage,
+      },
+      {
+        path: "/login",
+        Component: HomePage,
+      },
+      {
+        path: "/register",
+        Component: HomePage,
+      },
+    ],
+  },
+]);
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+root.render(
   <StrictMode>
-    <App />
+    <DarkModeProvider>
+      <RouterProvider router={router} />
+    </DarkModeProvider>
   </StrictMode>,
-)
+);

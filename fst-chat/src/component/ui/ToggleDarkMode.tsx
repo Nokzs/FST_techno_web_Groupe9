@@ -8,7 +8,7 @@ export function ToggleDarkMode() {
       className="rounded-2xl overflow-hidden w-12 h-12 flex items-center justify-center"
       onClick={() => setDarkMode((prev) => !prev)}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         {darkMode ? (
           <motion.div
             key="moon"
@@ -23,9 +23,9 @@ export function ToggleDarkMode() {
         ) : (
           <motion.div
             key="sun"
-            initial={{ y: -50, opacity: 0 }}
+            initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
+            exit={{ y: 50, opacity: 0 }}
             transition={{ duration: 0.4 }}
             className="absolute"
           >

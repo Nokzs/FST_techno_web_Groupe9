@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
 type messagesProp = {
   id: number;
   sender: string;
@@ -9,7 +10,7 @@ type tchatHomePageProp = {
   messages: messagesProp[];
 };
 
-export function TchatHomePage({ messages }: tchatHomePageProp) {
+export function TchatHomePage({ messages }: tchatHomePageProp): ReactNode {
   return (
     <div className="overflow-hidden transition-all delay-200 bg-white rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 border-black dark:border-none">
       <AnimatePresence>

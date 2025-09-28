@@ -23,6 +23,11 @@
   margin-right: calc(--value(integer) * 1px);
 }
 
+@utility plr-* {
+  padding-left: calc(--value(integer) * 1px);
+  padding-right: calc(--value(integer) * 1px);
+}
+
 @theme {
   --animate-fade-in: fade-in 0.3s ease-in-out forwards;
   --font-home: "nunito", sans-serif;

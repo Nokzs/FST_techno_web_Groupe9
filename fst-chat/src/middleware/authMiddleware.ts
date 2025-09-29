@@ -1,16 +1,17 @@
 import { redirect } from "react-router-dom";
 import { authRouterContext } from "../context/authRouterContext";
-interface RouterContextMinimal {
-  set(key: any, value: any): void;
-  get(key: any): any;
-}
-export function authMiddleware({
+import type { User } from "../types/user";
+import type { RouterContextProvider } from "react-router";
+import { getConnectedUser } from "../api/user/getConnectedUser";
+
+export async function authMiddleware({
   context,
 }: {
-  context: RouterContextMinimal;
-}): void {
-  //const user =  await getConnectedUser()
+  context: RouterContextProvider;
+}): Promise<void> {
+  const user: User = await getConnectedUser();
   if (!user) {
     throw redirect("/login");
   }
+  context.set(authRouterContext, user);
 }

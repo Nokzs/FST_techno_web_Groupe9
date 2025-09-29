@@ -10,7 +10,7 @@ export function HomePage() {
   console.log(t("homePage.heroMessage.part1") || "null");
   return (
     <div className="transition-colors  duration-1000 h-screen snap-mandatory overflow-hidden scroll-smooth snap-y font-home overflow-y-auto scroll-unshow dark:bg-gradient-to-r dark:from-[#010221] dark:via-[#080c3b] dark:to-[#080c3f] bg-gradient-to-r from-white via-gray-100 to-gray-200  ">
-      <div className="h-screen snap-start  text-white justify-center flex-col items-center flex">
+      <div className="h-[(calc(100vh-60px))] snap-start  text-white justify-center flex-col items-center flex">
         <div
           id="hero"
           className="dark:text-white text-gray-900 justify-center items-center flex font-bold pl-8 pr-8 flex-col gap-10"
@@ -44,7 +44,7 @@ export function HomePage() {
       </div>
 
       <div
-        className="h-screen snap-start flex items-center justify-center flex-col gap-10"
+        className="h-[calc(100vh-60px)] mt-[60px] snap-start flex items-center justify-center flex-col gap-10"
         ref={secondScreenRef}
       >
         <div className="flex w-screen lg:flex-row flex-col gap-10 mt-5 justify-center lg:items-stretch items-center  overflow-y-hidden">
@@ -62,7 +62,7 @@ export function HomePage() {
           ></ReactTyped>
           <TchatHomePage
             messages={message2}
-            className="mr-2 ml-2 lg:ml-0 pb-5 mb-5"
+            className="mr-2 ml-2 lg:ml-0 pb-5 "
           />
         </div>
 

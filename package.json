@@ -1,8 +1,12 @@
 {
   "dependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "react-router-dom": "^7.9.3"
   },
   "scripts": {
     "prepare": "husky"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.13"
   }
 }

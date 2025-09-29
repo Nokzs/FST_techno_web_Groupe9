@@ -10,7 +10,7 @@ export function HomePage() {
   console.log(t("homePage.heroMessage.part1") || "null");
   return (
     <div className="transition-colors  duration-1000 h-screen snap-mandatory overflow-hidden scroll-smooth snap-y font-home overflow-y-auto scroll-unshow dark:bg-gradient-to-r dark:from-[#010221] dark:via-[#080c3b] dark:to-[#080c3f] bg-gradient-to-r from-white via-gray-100 to-gray-200  ">
-      <div className="h-[(calc(100vh-60px))] snap-start  text-white justify-center flex-col items-center flex">
+      <div className="h-screen snap-start  text-white justify-center flex-col items-center flex">
         <div
           id="hero"
           className="dark:text-white text-gray-900 justify-center items-center flex font-bold pl-8 pr-8 flex-col gap-10"

@@ -28,7 +28,7 @@ export function NavBar(): ReactElement {
       <nav
         className={cn(
           // Position
-          "fixed mr-2 right-0 top-0 mt-10 h-[50px] overflow-hidden",
+          "fixed mr-2 right-0 top-0 mt-10 h-[60px] ",
           "bg-transparent hidden lg:block",
         )}
       >

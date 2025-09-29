@@ -6,8 +6,5 @@ export class responseDto {
   id: string;
 
   @Expose()
-  pseudo: string;
-
-  @Expose()
   email: string;
 }

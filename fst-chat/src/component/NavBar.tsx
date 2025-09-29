@@ -32,7 +32,7 @@ export function NavBar(): ReactElement {
           "bg-transparent hidden lg:block",
         )}
       >
-        <div className="pt-10 flex relative lg:flex-row delay-500 transition-transform flex-col-reverse gap-10 justify-center items-center">
+        <div className="pt-10 flex relative pr-5 lg:flex-row delay-500 transition-transform flex-col-reverse gap-10 justify-center items-center">
           <LanguageSwitcher />
           <ToggleDarkMode />
           <button className="bg-green-600 hover:bg-green-700 pl-5 pr-5 p-2 text-2xl rounded-2xl hover:shadow-[9px_14px_38px_5px_#48bb78,-11px_3px_4px_0px_#00000024] hover:scale-105 transition-all delay-20">
@@ -47,13 +47,13 @@ export function NavBar(): ReactElement {
       <nav
         className={cn(
           "fixed right-0 top-0 h-screen lg:hidden",
-          "bg-gray-500",
+          "bg-blue-1000",
           "transition-transform duration-500",
           // States
           show ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="pt-10 flex relative lg:flex-row delay-500 transition-transform flex-col-reverse gap-10 justify-center items-center">
+        <div className="pt-10 flex relative p-5 lg:flex-row delay-500 transition-transform flex-col-reverse gap-10 justify-center items-center">
           <div className="lg:hidden absolute top-0 right-0">
             <Hamburger
               toggled={show}

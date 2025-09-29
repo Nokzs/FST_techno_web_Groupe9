@@ -1,7 +1,7 @@
-import { type Dispatch, type SetStateAction, createContext } from "react";
+import { createContext } from "react";
 export type darkModeContextType = {
   darkMode: boolean;
-  setDarkMode: Dispatch<SetStateAction<boolean>>;
+  changeDarkMode: () => void;
 };
 
 export const darkModeContext = createContext<darkModeContextType | null>(null);

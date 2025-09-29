@@ -42,7 +42,7 @@ export function TchatHomePage({
                 : "self-end bg-green-700 mr-2",
             )}
           >
-            <div className="text-xs">{el.text}</div>
+            <div className="text-xs lg:text-lg">{el.text}</div>
             <div className="flex justify-between text-xs">
               <p>{el.sender}</p>
               <p>{el.time}</p>

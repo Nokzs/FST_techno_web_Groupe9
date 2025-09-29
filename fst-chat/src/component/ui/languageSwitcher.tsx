@@ -19,7 +19,7 @@ export function LanguageSwitcher() {
               <div
                 key={lang}
                 onClick={() => i18n.changeLanguage(lang)}
-                className="px-4 py-2  cursor-pointer text-center border-black border-2 flex flex-row text-white"
+                className="px-4 py-2  cursor-pointer text-center bg-black dark:bg-blue-900 rounded-2xl border-black border-2 flex flex-row text-white"
               >
                 <p>{lang}</p>
               </div>

@@ -54,19 +54,24 @@ export function HomePage() {
           />
 
           <ReactTyped
-            className="dark:text-white text-dark md:text-2xl text-center font-home lg:hidden"
+            className="dark:text-white text-dark md:text-xl text-lg text-center font-home lg:hidden"
             typeSpeed={10}
             strings={[t("homePage.translate")]}
             startWhenVisible
+            showCursor={false}
           ></ReactTyped>
-          <TchatHomePage messages={message2} className="mr-2 ml-2 lg:ml-0" />
+          <TchatHomePage
+            messages={message2}
+            className="mr-2 ml-2 lg:ml-0 pb-5 mb-5"
+          />
         </div>
 
         <ReactTyped
-          className="dark:text-white text-dark md:text-2xl font-home hidden lg:block  "
+          className="dark:text-white text-dark md:text-xl text-lg font-home hidden lg:block  "
           typeSpeed={10}
           strings={[t("homePage.translate")]}
           startWhenVisible
+          showCursor={false}
         ></ReactTyped>
       </div>
     </div>

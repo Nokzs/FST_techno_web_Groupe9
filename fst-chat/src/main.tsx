@@ -4,13 +4,12 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage } from "./component/routes";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
-import { authMiddleware } from "./middleware/authMiddleware.js";
 import "./i18n/i18n.js";
+import { ConnectedLayout } from "./component/ConnectedLayout.js";
 
 const router = createBrowserRouter([
   {
     Component: NotConnectedLayout,
-    middleware: [authMiddleware],
     children: [
       {
         path: "/",
@@ -25,6 +24,15 @@ const router = createBrowserRouter([
         Component: HomePage,
       },
     ],
+  },
+  {
+    Component: ConnectedLayout,
+    //middleware:authMiddleware,
+    /*children:[
+      path:"/profil",
+      component: ProfilLayout,
+      
+    ]*/
   },
 ]);
 

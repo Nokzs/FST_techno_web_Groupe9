@@ -1,14 +1,14 @@
 /**
- * @description Description de la fonction.
+ * @Interroge le serveur afin de récupérer l'utiliisateur connecté.
  *
- * @returns Valeur retournée par la fonction.
- */
-/**
- * @description
- *
- * @returns
+ * @returns L'utilisateur connecté ou null si non connecté .
  */
 
-export async function getConnectedUser() {
-  return { id: "2" };
+import type { UserID } from "../../types/user";
+
+export async function getConnectedUser(): Promise<UserID | null> {
+  //ToDo : renvoyer l'utilisateur connecté une fois
+  const user = { id: "2" };
+
+  return user || null;
 }

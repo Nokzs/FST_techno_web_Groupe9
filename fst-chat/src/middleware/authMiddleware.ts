@@ -9,7 +9,7 @@ export async function authMiddleware({
 }: {
   context: RouterContextProvider;
 }): Promise<void> {
-  const user: UserID = await getConnectedUser();
+  const user: UserID | null = await getConnectedUser();
   if (!user) {
     throw redirect("/login");
   }

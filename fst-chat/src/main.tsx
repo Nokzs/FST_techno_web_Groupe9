@@ -8,7 +8,8 @@ import "./i18n/i18n.js";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
 import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
-const router = createBrowserRouter([
+import { authMiddleware } from "./middleware/authMiddleware.js";
+const routes = [
   {
     Component: NotConnectedLayout,
     children: [
@@ -28,17 +29,18 @@ const router = createBrowserRouter([
   },
   {
     Component: ConnectedLayout,
-    //middleware:authMiddleware,
     children: [
       {
         path: "/profil",
-        Component: ProfilLayout,
+        middleware: [authMiddleware],
         loader: profilLoader,
+        Component: ProfilLayout,
       },
     ],
   },
-]);
-
+];
+console.log("je suis dans le main");
+const router = createBrowserRouter(routes);
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 root.render(

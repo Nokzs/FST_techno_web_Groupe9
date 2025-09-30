@@ -29,7 +29,6 @@ export function DarkModeProvider({
     });
   };
   useEffect(() => {
-    console.log(darkMode);
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {

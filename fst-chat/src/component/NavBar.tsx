@@ -10,7 +10,7 @@ export function NavBar(): ReactElement {
   const { darkMode } = useDarkMode();
   return (
     <>
-      <div className={cn("lg:hidden absolute right-0")}>
+      <div className={cn("lg:hidden absolute right-0 mr-5")}>
         <Hamburger
           toggled={show}
           toggle={setShow}
@@ -22,7 +22,6 @@ export function NavBar(): ReactElement {
           label="Show menu"
           color={darkMode ? "#ffffff" : "#000000"}
           easing="ease-in"
-          className="lg:hidden"
         />
       </div>
       <nav
@@ -47,7 +46,7 @@ export function NavBar(): ReactElement {
       <nav
         className={cn(
           "fixed right-0 top-0 h-screen lg:hidden",
-          "bg-blue-1000",
+          "bg-blue-950",
           "transition-transform duration-500",
           // States
           show ? "translate-x-0" : "translate-x-full",

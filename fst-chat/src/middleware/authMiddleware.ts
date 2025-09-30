@@ -9,9 +9,11 @@ export async function authMiddleware({
 }: {
   context: RouterContextProvider;
 }): Promise<void> {
+  console.log("je suis dans le middleware");
   const user: UserID | null = await getConnectedUser();
   if (!user) {
     throw redirect("/login");
   }
   context.set(authRouterContext, user);
+  console.log("context du middleware", context);
 }

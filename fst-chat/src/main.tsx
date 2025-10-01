@@ -1,10 +1,11 @@
-import { StrictMode } from "react";
+﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { HomePage } from "./component/routes";
+import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import "./i18n/i18n.js";
+
 const router = createBrowserRouter([
   {
     Component: NotConnectedLayout,
@@ -15,11 +16,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/login",
-        Component: HomePage,
+        Component: LoginPage,
       },
       {
         path: "/register",
-        Component: HomePage,
+        Component: RegisterPage,
       },
     ],
   },

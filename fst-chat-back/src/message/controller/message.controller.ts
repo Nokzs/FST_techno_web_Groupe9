@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { UpdateMessageDto } from '../DTO/update-message.dto';
@@ -16,5 +24,4 @@ export class MessageController {
   findAll() {
     return this.messageService.findAll();
   }
-
 }

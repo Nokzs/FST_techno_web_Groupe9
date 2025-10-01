@@ -1,6 +1,9 @@
 // component/routes/MessagesPage.tsx
 import { useState, useRef, useEffect } from "react";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
 interface Message {
     channelId : string;
     content: string;
@@ -48,7 +51,7 @@ export function Messages() {
         };
 
         try {
-            const res = await fetch("http://localhost:3000/messages", {
+            const res = await fetch(apiUrl + "/messages", {
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body: JSON.stringify(newMessage),
@@ -104,7 +107,7 @@ export function Messages() {
         <input
           type="text"
           placeholder="Écrire un message..."
-          className="flex-1 p-2 rounded-xl border dark:border-gray-700"
+          className="flex-1 p-2 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           id="messageInput"
         />
         <button

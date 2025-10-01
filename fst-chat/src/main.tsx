@@ -7,7 +7,11 @@ import { Messages } from "./component/routes/messages";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import "./i18n/i18n.js";
-const router = createBrowserRouter([
+import { ConnectedLayout } from "./component/ConnectedLayout.js";
+import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
+import { profilLoader } from "./loaders/profilLoader.js";
+import { authMiddleware } from "./middleware/authMiddleware.js";
+const routes = [
   {
     Component: NotConnectedLayout,
     children: [
@@ -33,8 +37,20 @@ const router = createBrowserRouter([
       }
     ],
   },
-]);
-
+  {
+    Component: ConnectedLayout,
+    children: [
+      {
+        path: "/profil",
+        middleware: [authMiddleware],
+        loader: profilLoader,
+        Component: ProfilLayout,
+      },
+    ],
+  },
+];
+console.log("je suis dans le main");
+const router = createBrowserRouter(routes);
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 root.render(

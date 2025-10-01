@@ -9,7 +9,7 @@ export function HomePage() {
   const { t } = useTranslation();
   console.log(t("homePage.heroMessage.part1") || "null");
   return (
-    <div className="transition-colors  duration-1000 h-screen snap-mandatory scroll-smooth snap-y font-home overflow-y-auto scroll-unshow dark:bg-gradient-to-r dark:from-[#010221] dark:via-[#080c3b] dark:to-[#080c3f] bg-gradient-to-r from-white via-gray-100 to-gray-200  ">
+    <div className="transition-colors  duration-1000 h-screen snap-mandatory overflow-hidden scroll-smooth snap-y font-home overflow-y-auto scroll-unshow dark:bg-gradient-to-r dark:from-[#010221] dark:via-[#080c3b] dark:to-[#080c3f] bg-gradient-to-r from-white via-gray-100 to-gray-200  ">
       <div className="h-screen snap-start  text-white justify-center flex-col items-center flex">
         <div
           id="hero"
@@ -17,7 +17,7 @@ export function HomePage() {
         >
           <ReactTyped
             strings={[t("homePage.heroMessage.part1")]}
-            className="pl-4 pr-4 text-4xl"
+            className="pl-4 pr-4 text-4xl text-center"
             typeSpeed={50}
             showCursor={false}
             onComplete={() => {
@@ -28,7 +28,7 @@ export function HomePage() {
             <ReactTyped
               showCursor={false}
               strings={[t("homePage.heroMessage.part2")]}
-              className="pl-4 pr-4 text-2xl"
+              className="pl-4 pr-4 text-2xl text-center"
               typeSpeed={20}
             />
           )}
@@ -44,19 +44,34 @@ export function HomePage() {
       </div>
 
       <div
-        className="h-screen snap-start flex items-center justify-center flex-col gap-10"
+        className="h-[calc(100vh-60px)] mt-[60px] snap-start flex items-center justify-center flex-col gap-10"
         ref={secondScreenRef}
       >
-        <div className="flex w-screen flex-row gap-10 mt-5  overflow-y-hidden">
-          <TchatHomePage messages={messages} />
-          <TchatHomePage messages={message2} />
+        <div className="flex w-screen lg:flex-row flex-col gap-10 mt-5 justify-center lg:items-stretch items-center  overflow-y-hidden">
+          <TchatHomePage
+            messages={messages}
+            className={["ml-2 mr-2 lg:mr-0"]}
+          />
+
+          <ReactTyped
+            className="dark:text-white text-dark md:text-xl text-lg text-center font-home lg:hidden"
+            typeSpeed={10}
+            strings={[t("homePage.translate")]}
+            startWhenVisible
+            showCursor={false}
+          ></ReactTyped>
+          <TchatHomePage
+            messages={message2}
+            className="mr-2 ml-2 lg:ml-0 pb-5 "
+          />
         </div>
 
         <ReactTyped
-          className="dark:text-white text-dark text-2xl font-home"
+          className="dark:text-white text-dark md:text-xl text-lg font-home hidden lg:block  "
           typeSpeed={10}
           strings={[t("homePage.translate")]}
           startWhenVisible
+          showCursor={false}
         ></ReactTyped>
       </div>
     </div>

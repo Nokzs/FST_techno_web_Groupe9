@@ -1,12 +1,12 @@
 import { useDarkMode } from "../../hooks/useDarkMode";
 import { AnimatePresence, motion } from "framer-motion";
 export function ToggleDarkMode() {
-  const { darkMode, setDarkMode } = useDarkMode();
+  const { darkMode, changeDarkMode } = useDarkMode();
 
   return (
     <button
       className="rounded-2xl overflow-hidden w-12 h-12 flex items-center justify-center"
-      onClick={() => setDarkMode((prev) => !prev)}
+      onClick={() => changeDarkMode()}
     >
       <AnimatePresence mode="sync">
         {darkMode ? (

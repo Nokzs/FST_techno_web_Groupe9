@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+* {
+  box-sizing: border-box;
+}
+
 @layer components {
   .scroll-unshow {
     scrollbar-width: none;
@@ -21,6 +25,11 @@
   margin-left: calc(--value(integer) * 1px);
 
   margin-right: calc(--value(integer) * 1px);
+}
+
+@utility plr-* {
+  padding-left: calc(--value(integer) * 1px);
+  padding-right: calc(--value(integer) * 1px);
 }
 
 @theme {

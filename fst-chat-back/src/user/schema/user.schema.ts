@@ -20,7 +20,7 @@ export class User {
   @Prop({ required: false })
   lastConnectedAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: false })
   isAdmin: boolean;
 
   @Prop()

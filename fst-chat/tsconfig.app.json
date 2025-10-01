@@ -23,7 +23,13 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "noImplicitAny": false,
+    "types": [
+      "vitest/gloabals",
+      "jest",
+      "vitest"
+    ]
   },
   "include": [
     "src"

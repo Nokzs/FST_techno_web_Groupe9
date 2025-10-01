@@ -14,14 +14,21 @@ export function DarkModeProvider({
     },
     undefined,
     (prefersDark) => {
+      localStorage.setItem("darkMode", prefersDark ? "true" : "false");
       setDarkMode(prefersDark);
     },
   );
-
-  const [darkMode, setDarkMode] = useState<boolean>(preferMedia);
-
+  const darkModeStorage = localStorage.getItem("darkMode") === "true";
+  const [darkMode, setDarkMode] = useState<boolean>(
+    darkModeStorage || preferMedia,
+  );
+  const changeDarkMode = () => {
+    setDarkMode((darkMode) => {
+      localStorage.setItem("darkMode", !darkMode ? "true" : "false");
+      return !darkMode;
+    });
+  };
   useEffect(() => {
-    console.log(darkMode);
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -30,7 +37,7 @@ export function DarkModeProvider({
   }, [darkMode]);
 
   return (
-    <darkModeContext.Provider value={{ darkMode, setDarkMode }}>
+    <darkModeContext.Provider value={{ darkMode, changeDarkMode }}>
       {children}
     </darkModeContext.Provider>
   );

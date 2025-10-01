@@ -48,3 +48,13 @@
     }
   }
 }
+
+@layer utilities {
+  .bg-main {
+    @apply bg-gradient-to-r from-white via-gray-100 to-gray-200;
+  }
+
+  .dark .bg-main {
+    @apply bg-gradient-to-r from-[#010221] via-[#080c3b] to-[#080c3f];
+  }
+}

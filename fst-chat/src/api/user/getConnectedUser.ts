@@ -8,7 +8,7 @@ import type { UserID } from "../../types/user";
 
 export async function getConnectedUser(): Promise<UserID | null> {
   //ToDo : renvoyer l'utilisateur connecté une fois
-  const user = { id: "2" };
+  const user = { id: "2", jwt: "abc", refreshToken: "abcd" };
 
   return user || null;
 }

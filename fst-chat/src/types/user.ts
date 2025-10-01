@@ -1,5 +1,7 @@
 export type UserID = {
   id: string;
+  jwt: string;
+  refreshToken: string;
 };
 
 export type User = {

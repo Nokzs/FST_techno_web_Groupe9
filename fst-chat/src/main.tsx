@@ -2,7 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage } from "./component/routes";
-import { MessagesPage } from "./component/routes/messagePageTest";
 import { Messages } from "./component/routes/messages";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
@@ -10,10 +9,12 @@ import "./i18n/i18n.js";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
 import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
-import { authMiddleware } from "./middleware/authMiddleware.js";
+import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
+import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
 const routes = [
   {
     Component: NotConnectedLayout,
+    middleware: [notAuthMiddleware],
     children: [
       {
         path: "/",
@@ -27,24 +28,20 @@ const routes = [
         path: "/register",
         Component: HomePage,
       },
-      {
-        path: "/messages-test",
-        Component: MessagesPage,
-      },
-      {
-        path: "/messages",
-        Component: Messages,
-      }
     ],
   },
   {
     Component: ConnectedLayout,
+    middleware: [authMiddleware],
     children: [
       {
         path: "/profil",
-        middleware: [authMiddleware],
         loader: profilLoader,
         Component: ProfilLayout,
+      },
+      {
+        path: "/messages",
+        Component: Messages,
       },
     ],
   },

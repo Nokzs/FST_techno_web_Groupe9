@@ -3,9 +3,11 @@ import { ProfilTabSwitcher } from "./ProfilTabSwitcher.js";
 export function ProfilLayout() {
   console.log("je suis dans le profil layout");
   return (
-    <div className="flex flex-col items-center justify-start text-white bg-red-700">
+    <div className="h-full w-full flex flex-row ">
       <ProfilTabSwitcher />
-      <Outlet />
+      <div className="bg-red-200 h-full flex-1">
+        <Outlet />
+      </div>
     </div>
   );
 }

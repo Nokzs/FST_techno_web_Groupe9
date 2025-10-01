@@ -18,8 +18,8 @@ describe('MessageService', () => {
       providers: [
         MessageService,
         {
-          provide: getModelToken('Message'), 
-          useValue: mockMessageModel,      
+          provide: getModelToken('Message'),
+          useValue: mockMessageModel,
         },
       ],
     }).compile();

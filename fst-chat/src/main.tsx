@@ -2,8 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage } from "./component/routes";
-import { MessagesPage } from "./component/routes/messagePageTest";
-import { Messages } from "./component/routes/messages";
+import { Messages } from "./api/messages/messages.js";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import "./i18n/i18n.js";
@@ -27,14 +26,6 @@ const routes = [
         path: "/register",
         Component: HomePage,
       },
-      {
-        path: "/messages-test",
-        Component: MessagesPage,
-      },
-      {
-        path: "/messages",
-        Component: Messages,
-      }
     ],
   },
   {
@@ -46,6 +37,10 @@ const routes = [
         loader: profilLoader,
         Component: ProfilLayout,
       },
+      {
+        path: "/messages",
+        Component: Messages,
+      }
     ],
   },
 ];

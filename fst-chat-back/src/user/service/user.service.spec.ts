@@ -1,10 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { User } from '../schema/user.schema';
+
 describe('UserService', () => {
   let service: UserService;
-  let userModel: any;
+
   beforeEach(async () => {
     const mockUserModel = {
       find: jest.fn(),
@@ -24,7 +25,6 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    userModel = module.get(getModelToken(User.name));
   });
 
   it('should be defined', () => {

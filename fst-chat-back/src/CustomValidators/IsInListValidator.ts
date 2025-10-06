@@ -8,7 +8,7 @@ export function IsInList(
   property: string[],
   ValidationOptions: ValidationOptions
 ) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'IsInList',
       target: object.constructor,

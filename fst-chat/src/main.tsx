@@ -1,11 +1,11 @@
-import { StrictMode } from "react";
+﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { HomePage } from "./component/routes";
+import { HomePage, LoginPage, RegisterPage } from "./component/routes";
+import "./i18n/i18n.js";
 import { Messages } from "./component/routes/messages";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
-import "./i18n/i18n.js";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
 import { ProfilLayout } from "./component/routes/profil/layout/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
@@ -15,6 +15,7 @@ import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
 import { Compte } from "./component/routes/profil/subRoutes/Compte.js";
 /* Objets concernant les routes utilisé par les application toutes les routes en dessous la route authmiddleware sont protégé alors
 celles en dessous de notauthmiddleware sont accessible uniquement si l'utilisateur n'est pas connecté */
+
 const routes = [
   {
     Component: NotConnectedLayout,
@@ -26,11 +27,11 @@ const routes = [
       },
       {
         path: "/login",
-        Component: HomePage,
+        Component: LoginPage,
       },
       {
         path: "/register",
-        Component: HomePage,
+        Component: RegisterPage,
       },
     ],
   },
@@ -41,17 +42,16 @@ const routes = [
       {
         loader: profilLoader,
         Component: ProfilLayout,
-        children:[
+        children: [
           {
-            path:"/profil",
-            Component:Profil,
+            path: "/profil",
+            Component: Profil,
           },
           {
-            path:"/compte",
-            Component:Compte,
-
-          }
-        ]
+            path: "/compte",
+            Component: Compte,
+          },
+        ],
       },
       {
         path: "/messages",
@@ -60,7 +60,6 @@ const routes = [
     ],
   },
 ];
-console.log("je suis dans le main");
 const router = createBrowserRouter(routes);
 const container = document.getElementById("root")!;
 const root = createRoot(container);

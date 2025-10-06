@@ -22,7 +22,16 @@ export function ProfilLayout() {
         </div>
         <ProfilTabSwitcher />
       </div>
-      <Outlet context={user} />
+      <div className="flex-1 w-full flex justify-center">
+        <div className="rounded-2xl shadow-md p-4 bg-white h-full border border-gray-200 w-full dark:bg-[#0d0f2a] dark:border dark:border-gray-700">
+          <div
+            id="card"
+            className="bg-white dark:bg-[#0d0f2a] shadow-md m-auto h-full border-2 border-black rounded-2xl w-[80%] flex-1 flex flex-col items-center"
+          >
+            <Outlet context={user} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

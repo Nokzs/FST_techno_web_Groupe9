@@ -13,7 +13,7 @@ export async function getUserProfile(
     password: "123456",
     createdAt: new Date(),
     isAdmin: false,
-    language: "fr",
+    language: "French",
     urlPicture: "",
     bio: "",
   };

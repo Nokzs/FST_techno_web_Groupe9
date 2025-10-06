@@ -6,12 +6,14 @@ type updateInputProps = {
   name: string;
   className?: string;
   type?: "input" | "textarea";
+  updatable?: boolean;
 };
 export function UpdateInput({
   value,
   name,
   className,
   type = "input",
+  updatable = true,
 }: updateInputProps) {
   const [update, setUpdate] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -38,8 +40,8 @@ export function UpdateInput({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={!update}
-            onBlur={() => setUpdate(false)}
-            onFocus={() => setUpdate(true)}
+            onBlur={() => setUpdate(updatable && false)}
+            onFocus={() => setUpdate(updatable && true)}
           />
         ) : (
           <textarea
@@ -48,27 +50,29 @@ export function UpdateInput({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={!update}
-            onBlur={() => setUpdate(false)}
-            onFocus={() => setUpdate(true)}
+            onBlur={() => setUpdate(updatable && false)}
+            onFocus={() => setUpdate(updatable && true)}
           />
         )}
-        <img
-          src={penSvg}
-          alt="pen"
-          className="h-[50px] dark:invert-100 cursor-pointer"
-          onClick={(e) => {
-            e.preventDefault();
-            setUpdate(true);
-            requestAnimationFrame(() => {
-              if (type === "input") {
-                inputRef.current?.focus();
-              } else {
-                textareaRef.current?.focus();
-              }
-            });
-            inputRef.current?.focus();
-          }}
-        />
+        {updatable && (
+          <img
+            src={penSvg}
+            alt="pen"
+            className="h-[50px] dark:invert-100 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              setUpdate(true);
+              requestAnimationFrame(() => {
+                if (type === "input") {
+                  inputRef.current?.focus();
+                } else {
+                  textareaRef.current?.focus();
+                }
+              });
+              inputRef.current?.focus();
+            }}
+          />
+        )}
       </div>
     </div>
   );

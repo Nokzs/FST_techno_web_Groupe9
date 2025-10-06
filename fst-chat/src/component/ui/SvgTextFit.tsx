@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../../utils/cn";
 import { useDarkMode } from "../../hooks/useDarkMode";
 type AutoFitTextProps = {
@@ -22,7 +22,7 @@ export function SvgTextFit({
   const textRef = useRef<SVGTextElement>(null);
   const [fontSize, setFontSize] = useState(maxFontSize);
   const { darkMode } = useDarkMode();
-  const fitText = () => {
+  const fitText = useCallback(() => {
     if (!svgRef.current || !textRef.current) return;
     const fontSizeRef = maxFontSize;
     textRef.current.setAttribute("font-size", fontSizeRef.toString());
@@ -36,12 +36,12 @@ export function SvgTextFit({
     newFontSize = Math.max(minFontSize, Math.min(maxFontSize, newFontSize));
 
     setFontSize(newFontSize);
-  };
+  }, [svgRef, textRef, maxFontSize, minFontSize]);
   useEffect(() => {
     fitText();
     window.addEventListener("resize", fitText);
     return () => window.removeEventListener("resize", fitText);
-  }, [text]);
+  }, [text, fitText]);
 
   return (
     <svg

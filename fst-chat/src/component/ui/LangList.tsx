@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-export function LangList() {
+import type { User } from "../../types/user";
+export function LangList({user}:{user:User}) {
   const [lang, setLang] = useState<Set<string> | null>(null);
+  //pour eviter le linter chiant en attendant que je finisse le composant
   useEffect(() => {
     const abortController = new AbortController();
     fetch("https://restcountries.com/v3.1/all?fields=languages", {
@@ -13,6 +15,7 @@ export function LangList() {
           c.languages ? Object.values(c.languages) : [],
         );
         const uniqueLangs = new Set<string>(langs);
+        console.log(uniqueLangs)
         setLang(uniqueLangs);
       })
       .catch((err) => {
@@ -23,6 +26,26 @@ export function LangList() {
     return () => {
       abortController.abort();
     };
-  });
-  return <div>LangList component</div>;
+  },[]);
+  return( <div  className="flex flex-col mt-5 items-center">
+         { lang && <>  <label>
+        Choisir une langue :
+          </label>
+        <select
+          className="border p-2 rounded"
+        >
+          {[...lang].filter(el=>!el.toUpperCase().includes("SIGN")).map(el => (
+            user.language !== el ?
+            <option key={el} value={el}>
+              {el}
+            </option>
+            :
+            <option key={el} value={el} selected>
+            {el}
+            </option>
+          ))}
+        </select>
+        </>
+         }
+       </div> )
 }

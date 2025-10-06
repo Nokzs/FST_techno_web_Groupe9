@@ -14,9 +14,6 @@ export class CompleteUserResponseDto {
   email: string;
 
   @Expose()
-  password: string;
-
-  @Expose()
   createdAt: Date;
 
   @Expose()

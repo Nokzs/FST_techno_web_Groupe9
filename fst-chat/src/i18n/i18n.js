@@ -20,11 +20,12 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    fallbackLng: "en",
-    debug: true,
-    load: "languageOnly",
+    fallbackLng: ["fr"],
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
+    },
+    backend: {
+      loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
   });
 console.log("initialisation");

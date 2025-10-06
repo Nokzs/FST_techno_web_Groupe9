@@ -14,15 +14,18 @@ async function bootstrap(): Promise<void> {
     'FRONTEND_URL',
     'http://localhost:5173'
   );
-  const port = configService.get<number>('PORT', 3000);
-
+const port = configService.get('PORT');
   app.enableCors({
     origin: frontendUrl,
     credentials: true,
   });
-
-  await app.listen(port);
+  
   Logger.log('Application lancee sur le port ' + String(port), 'Bootstrap');
+  // Activer CORS pour ton front
+  
+
+  await app.listen(port || 3000);
+  console.log(`application lance sur le port ${port}`);
 }
 
 void bootstrap();

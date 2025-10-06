@@ -1,7 +1,17 @@
-export type User = {
+export type UserID = {
   id: string;
+};
+
+export type User = {
+  email: string;
 
   pseudo: string;
 
-  email: string;
+  password: string;
+
+  createdAt: Date;
+
+  isAdmin: boolean;
+
+  language: string;
 };

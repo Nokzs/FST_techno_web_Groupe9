@@ -1,4 +1,4 @@
-﻿import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthCard } from "../ui/AuthCard";
 
@@ -28,6 +28,7 @@ export function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email: email.trim(), password }),
       });
 

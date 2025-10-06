@@ -20,11 +20,11 @@ export class User {
   @Prop({ required: false })
   lastConnectedAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ default: false })
   isAdmin: boolean;
 
   @Prop()
-  language: string;
+  language?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

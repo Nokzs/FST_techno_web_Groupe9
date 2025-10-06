@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useImperativeHandle, forwardRef } from "react";
 import penSvg from "../../assets/edit-pen-svgrepo-com.svg";
 import { cn } from "../../utils/cn";
 type updateInputProps = {
@@ -7,73 +7,99 @@ type updateInputProps = {
   className?: string;
   type?: "input" | "textarea";
   updatable?: boolean;
+  ref?: React.Ref<HTMLInputElement> | React.Ref<HTMLTextAreaElement>;
+  handleModif?: () => void;
 };
-export function UpdateInput({
-  value,
-  name,
-  className,
-  type = "input",
-  updatable = true,
-}: updateInputProps) {
-  const [update, setUpdate] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
+/**
+ *
+ *@description Composant d'input ou textarea modifiable avec icône de stylo pour activer la modification.
+ *@param {string} value - Valeur initiale de l'input ou textarea.
+ *@param {string} name - Nom affiché au-dessus de l'input ou textarea.
+ *@param {string} [className] - Classes CSS supplémentaires pour le conteneur.
+ *@param {"input" | "textarea"} [type="input"] - Type de champ, soit "input" soit "textarea".
+ *@param {boolean} [updatable=true] - Indique si le champ est modifiable.
+ *@param {React.Ref<HTMLInputElement> | React.Ref<HTMLTextAreaElement>} [ref] - Référence vers l'élément input ou textarea.
+ *@param {() => void} [handleModif] - Fonction appelée lors de la modification de la valeur.
+ */
+export const UpdateInput = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  updateInputProps
+>(
+  (
+    { value, name, className, type = "input", updatable = true, handleModif },
+    ref,
+  ) => {
+    const [update, setUpdate] = useState(false);
+    const [inputValue, setInputValue] = useState(value);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    //permet d'associer le ref passé en props au ref interne du composant
+    useImperativeHandle(
+      ref,
+      () => (type === "input" ? inputRef.current! : textareaRef.current!),
+      [type],
+    );
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  return (
-    <div
-      className={cn(
-        "flex flex-col  w-full items-center justify-center",
-        className,
-      )}
-    >
-      <p className=" text-dark dark:text-white text-2xl mb-1 uppercase">
-        {name}
-      </p>
-
-      <div className="flex flex-row items-center justify-center h-auto w-full">
-        {type === "input" ? (
-          <input
-            ref={inputRef}
-            type="text"
-            className="border-b-2  border-black dark:text-white dark:border-white p-2 w-full max-w-lg dark:bg-blue-950 bg-gray-100 rounded-3xl pl-5 focus:outline-red-800"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={!update}
-            onBlur={() => setUpdate(updatable && false)}
-            onFocus={() => setUpdate(updatable && true)}
-          />
-        ) : (
-          <textarea
-            ref={textareaRef}
-            className="border-b-2 min-h-32 max-h-64 w-full max-w-lg p-2 shadow-black  border-black dark:border-white outline-black outline-2  dark:bg-blue-950 bg-gray-100 rounded-3xl pl-5 focus:outline-red-800 resize"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={!update}
-            onBlur={() => setUpdate(updatable && false)}
-            onFocus={() => setUpdate(updatable && true)}
-          />
+    return (
+      <div
+        className={cn(
+          "flex flex-col  w-full items-center justify-center",
+          className,
         )}
-        {updatable && (
-          <img
-            src={penSvg}
-            alt="pen"
-            className="h-[50px] dark:invert-100 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setUpdate(true);
-              requestAnimationFrame(() => {
-                if (type === "input") {
-                  inputRef.current?.focus();
-                } else {
-                  textareaRef.current?.focus();
+      >
+        <p className=" text-dark dark:text-white text-2xl mb-1 uppercase">
+          {name}
+        </p>
+
+        <div className="flex flex-row items-center justify-center h-auto w-full">
+          {type === "input" ? (
+            <input
+              ref={inputRef}
+              type="text"
+              className="border-b-2  border-black dark:text-white dark:border-white p-2 mr-2 w-full max-w-lg dark:bg-blue-950 bg-gray-100 rounded-xl pl-5 focus:outline-red-800"
+              value={inputValue}
+              disabled={!update}
+              onBlur={() => setUpdate(updatable && false)}
+              onFocus={() => setUpdate(updatable && true)}
+              onChange={(e) => {
+                if (handleModif) {
+                  handleModif();
+                  setInputValue(e.target.value);
                 }
-              });
-              inputRef.current?.focus();
-            }}
-          />
-        )}
+              }}
+            />
+          ) : (
+            <textarea
+              ref={textareaRef}
+              className="border-b-2 min-h-32 max-h-64 w-full max-w-lg p-2 shadow-black mr-2 border-black dark:text-white dark:border-white outline-black outline-2  dark:bg-blue-950 bg-gray-100 rounded-xl pl-5 focus:outline-red-800 resize"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              disabled={!update}
+              onBlur={() => setUpdate(updatable && false)}
+              onFocus={() => setUpdate(updatable && true)}
+            />
+          )}
+          {updatable && (
+            <img
+              src={penSvg}
+              alt="pen"
+              className="h-[50px] dark:invert-100 cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                setUpdate(true);
+                requestAnimationFrame(() => {
+                  if (type === "input") {
+                    inputRef.current?.focus();
+                  } else {
+                    textareaRef.current?.focus();
+                  }
+                });
+                inputRef.current?.focus();
+              }}
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+);

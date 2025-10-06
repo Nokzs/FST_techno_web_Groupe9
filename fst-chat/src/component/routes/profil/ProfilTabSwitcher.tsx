@@ -13,7 +13,7 @@ export const ProfilTabSwitcher = () => {
             " flex-1 w-full p-5 h-full text-center active:text-indigo-600 active:dark:text-indigo-400 border-b-2 active:border-indigo-600 active:dark:border-b-indigo-400  hover:dark:border-b-indigo-400 hover:border-b-indigo-600   dark:text-gray-300 text-gray-700 hover:text-gray-900 hover:dark:text-gray-100 px-4 py-2",
           )}
         >
-          {el.substring(1)}
+          {el.substring(1).toUpperCase()}
         </NavLink>
       ))}
     </div>

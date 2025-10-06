@@ -17,7 +17,7 @@ export function HomePage() {
         >
           <ReactTyped
             strings={[t("homePage.heroMessage.part1")]}
-            className="pl-4 pr-4 text-4xl text-center"
+            className="pl-4 pr-4 text-3xl text-center"
             typeSpeed={50}
             showCursor={false}
             onComplete={() => {
@@ -33,7 +33,7 @@ export function HomePage() {
             />
           )}
           <button
-            className="bg-green-600 hover:bg-green-700 pl-10 pr-10 p-5 text-3xl rounded-2xl cursor-pointer"
+            className="bg-green-600 hover:bg-green-700 pl-10 pr-10 p-5 text-2xl rounded-xl cursor-pointer"
             onClick={() => {
               secondScreenRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
@@ -44,13 +44,13 @@ export function HomePage() {
       </div>
 
       <div
-        className="h-screen snap-start flex items-center justify-center flex-col gap-10"
+        className="h-[calc(100vh-60px)] snap-start flex items-center justify-center flex-col gap-10"
         ref={secondScreenRef}
       >
         <div className="flex w-screen lg:flex-row flex-col gap-10 mt-5 justify-center lg:items-stretch items-center  overflow-y-hidden">
           <TchatHomePage
             messages={messages}
-            className={["ml-2 mr-2 lg:mr-0"]}
+            className={["ml-2 mr-2 lg:mr-0 pb-5 mb-5"]}
           />
 
           <ReactTyped

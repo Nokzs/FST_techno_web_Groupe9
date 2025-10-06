@@ -20,7 +20,7 @@ export function TchatHomePage({
   return (
     <div
       className={cn(
-        " transition-all delay-200 p-5 bg-white overflow-hidden rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 border-black dark:border-none",
+        " transition-all delay-200 p-5 bg-white overflow-hidden rounded-3xl flex-1 break-all flex flex-col-reverse border-8 gap-1 pt-2 pb-2 outline-black dark:border-none",
         className,
       )}
     >

@@ -7,10 +7,13 @@ import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import "./i18n/i18n.js";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
-import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
+import { ProfilLayout } from "./component/routes/profil/layout/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
 import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
 import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
+import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
+/* Objets concernant les routes utilisé par les application toutes les routes en dessous la route authmiddleware sont protégé alors
+celles en dessous de notauthmiddleware sont accessible uniquement si l'utilisateur n'est pas connecté */
 const routes = [
   {
     Component: NotConnectedLayout,
@@ -35,9 +38,15 @@ const routes = [
     middleware: [authMiddleware],
     children: [
       {
-        path: "/profil",
         loader: profilLoader,
         Component: ProfilLayout,
+        children:[
+          {
+            path:"/profil",
+            Component:Profil,
+
+          }
+        ]
       },
       {
         path: "/messages",

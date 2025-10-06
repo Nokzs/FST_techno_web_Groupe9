@@ -2,8 +2,11 @@
     "homePage": {
         "heroMessage": {
             "part1": "Talk with your friends ",
-            "part2": "Meet new people wich share the same hobies as you"
+            "part2": "Meet new people that share the same hobbies as you"
         },
         "translate": "Don't be scared by the language barrier, our app takes it for you"
+    }
+    "profile": {
+        "config": "settings"
     }
 }

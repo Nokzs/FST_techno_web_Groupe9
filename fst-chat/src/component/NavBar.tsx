@@ -5,6 +5,13 @@ import { ToggleDarkMode } from "./ui/ToggleDarkMode";
 import { LanguageSwitcher } from "./ui/languageSwitcher";
 import Hamburger from "hamburger-react";
 import { useDarkMode } from "../hooks/useDarkMode";
+
+/** * Barre de navigation responsive avec options de connexion, d'inscription,
+ * de changement de langue et de mode sombre.
+ * Affiche un menu hamburger sur les petits écrans.
+ * @return {ReactElement} Composant NavBar
+ */
+
 export function NavBar(): ReactElement {
   const [show, setShow] = useState(false);
   const { darkMode } = useDarkMode();

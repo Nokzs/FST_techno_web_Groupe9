@@ -14,6 +14,8 @@ export async function getUserProfile(
     createdAt: new Date(),
     isAdmin: false,
     language: "fr",
+    urlPicture: "",
+    bio: "",
   };
   return profile;
 }

@@ -7,7 +7,7 @@ import { LangList } from "../../../ui/LangList";
 import { useRef, useState } from "react";
 export function Profil() {
   const user = useOutletContext() as User;
-  const tmpUser = structuredClone(user) as User;
+  //const tmpUser = structuredClone(user) as User;
   const [modif, setModif] = useState(false);
   const pseudoRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);

@@ -38,12 +38,9 @@ export function LoginPage() {
         throw new Error(Array.isArray(message) ? message.join(" ") : message);
       }
 
-      const payload = await response.json().catch(() => ({}));
+      await response.json().catch(() => ({}));
       setSuccess("Connexion reussie. Bienvenue !");
 
-      if (payload?.access_token) {
-        localStorage.setItem("fst-chat.token", payload.access_token);
-      }
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Une erreur est survenue.";
       setError(message);
@@ -107,3 +104,5 @@ export function LoginPage() {
     </AuthCard>
   );
 }
+
+

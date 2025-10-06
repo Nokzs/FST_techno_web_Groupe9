@@ -1,9 +1,10 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from '../service/user.service';
-import { UserAuthController } from '../controller/user.controller';
+import { UserAuthService } from '../../auth/service/auth.service';
+import { UserController } from '../controller/user.controller';
 import { User, UserSchema } from '../schema/user.schema';
 
 @Module({
@@ -20,8 +21,8 @@ import { User, UserSchema } from '../schema/user.schema';
       inject: [ConfigService],
     }),
   ],
-  controllers: [UserAuthController],
-  providers: [UserService],
-  exports: [MongooseModule, UserService],
+  controllers: [UserController],
+  providers: [UserService, UserAuthService],
+  exports: [MongooseModule, UserService, UserAuthService],
 })
 export class UserModule {}

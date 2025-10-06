@@ -1,41 +1,42 @@
-﻿import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { UserAuthController } from './user.controller';
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserController } from './user.controller';
 import { UserService } from '../service/user.service';
+import { UserAuthService } from '../../auth/service/auth.service';
+
+const userServiceMock: Record<string, jest.Mock> = {
+  findByEmail: jest.fn(),
+  create: jest.fn(),
+  comparePassword: jest.fn(),
+  setLastConnection: jest.fn(),
+};
+
+const userAuthServiceMock: Record<string, jest.Mock> = {
+  sanitizeUser: jest.fn(),
+  createAuthToken: jest.fn(),
+  attachAuthCookie: jest.fn(),
+  getUserId: jest.fn(),
+};
 
 describe('UserAuthController', () => {
-  let controller: UserAuthController;
+  let controller: UserController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UserAuthController],
+      controllers: [UserController],
       providers: [
         {
           provide: UserService,
-          useValue: {
-            findByEmail: jest.fn(),
-            create: jest.fn(),
-            comparePassword: jest.fn(),
-            setLastConnection: jest.fn(),
-          },
+          useValue: userServiceMock,
         },
         {
-          provide: JwtService,
-          useValue: {
-            signAsync: jest.fn().mockResolvedValue('token'),
-          },
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn().mockReturnValue('1h'),
-          },
+          provide: UserAuthService,
+          useValue: userAuthServiceMock,
         },
       ],
     }).compile();
 
-    controller = module.get<UserAuthController>(UserAuthController);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    controller = module.get(UserController);
   });
 
   it('should be defined', () => {

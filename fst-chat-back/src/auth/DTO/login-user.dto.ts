@@ -1,4 +1,4 @@
-﻿import { IsEmail, MinLength } from 'class-validator';
+import { IsEmail, MinLength } from 'class-validator';
 
 export class LoginUserDto {
   @IsEmail()

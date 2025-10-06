@@ -1,22 +1,26 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schema/user.schema';
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
-import { RegisterUserDto } from '../DTO/register-user.dto';
+import type { RegisterUserDto } from '../../auth/DTO/register-user.dto';
 
 const SALT_ROUNDS = 10;
+
+type CreatableUser = Pick<
+  RegisterUserDto,
+  'pseudo' | 'email' | 'password' | 'language'
+>;
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: RegisterUserDto): Promise<User> {
+  async create(createUserDto: CreatableUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      SALT_ROUNDS
-    );
+      createUserDto.password as string,
+      SALT_ROUNDS,)
     const user = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
@@ -60,3 +64,5 @@ export class UserService {
     return bcrypt.compare(plain, hashed);
   }
 }
+
+

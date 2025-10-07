@@ -5,7 +5,7 @@ import { getConnectedUser } from "../../api/user/getConnectedUser";
 import { RouterContextProvider } from "react-router";
 import { authRouterContext } from "../../context/authRouterContext";
 
-vi.mock("../api/user/getConnectedUser", () => ({
+vi.mock("../../api/user/getConnectedUser", () => ({
   getConnectedUser: vi.fn(),
 }));
 

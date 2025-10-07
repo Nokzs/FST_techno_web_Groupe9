@@ -6,6 +6,6 @@ import { authRouterContext } from "../context/authRouterContext";
 export const profilLoader: LoaderFunction = async (data) => {
   const userID: UserID | null = data.context.get(authRouterContext);
   const user: User | null = await getUserProfile(userID);
-  console.log(user)
+  console.log(user);
   return user;
 };

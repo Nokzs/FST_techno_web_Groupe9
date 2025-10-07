@@ -4,7 +4,7 @@ import { redirect } from "react-router-dom";
 import { describe, expect, it, vi, type Mock } from "vitest";
 import { getConnectedUser } from "../../api/user/getConnectedUser";
 
-vi.mock("../api/user/getConnectedUser", () => ({
+vi.mock("../../api/user/getConnectedUser", () => ({
   getConnectedUser: vi.fn(),
 }));
 

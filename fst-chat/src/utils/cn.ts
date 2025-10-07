@@ -1,5 +1,5 @@
 /**
- * @description Description de l'utilitaire ou de sa fonction principale.
+ * @description fonction utilitaire nécessaire à la fusion de classes tailwind.
  */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";

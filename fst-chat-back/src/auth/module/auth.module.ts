@@ -5,11 +5,10 @@ import { UserService } from '../../user/service/user.service';
 import { UserAuthService } from '../service/auth.service';
 import { AuthController } from '../controller/auth.controller';
 import { UserModule } from 'src/user/module/user.module';
-
+import { AuthGuard } from '../guards/authGuard';
 
 @Module({
   imports: [
-    
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -19,10 +18,11 @@ import { UserModule } from 'src/user/module/user.module';
         },
       }),
       inject: [ConfigService],
-    }), UserModule
+    }),
+    UserModule,
   ],
   controllers: [AuthController],
-  providers: [UserService, UserAuthService],
+  providers: [UserService, UserAuthService, AuthGuard],
   exports: [UserService, UserAuthService],
 })
 export class AuthModule {}

@@ -1,4 +1,12 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
@@ -6,19 +14,21 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
 @WebSocketGateway({ cors: true })
-export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessageGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   constructor(private readonly messageService: MessageService) {}
 
-handleConnection(client: Socket) {
-  // Optionnel : log, authentification, etc.
-}
+  handleConnection(client: Socket) {
+    // Optionnel : log, authentification, etc.
+  }
 
-handleDisconnect(client: Socket) {
-  // Optionnel : log, cleanup, etc.
-}
+  handleDisconnect(client: Socket) {
+    // Optionnel : log, cleanup, etc.
+  }
 
   @SubscribeMessage('sendMessage')
   async handleSendMessage(@MessageBody() data: any) {
@@ -28,9 +38,9 @@ handleDisconnect(client: Socket) {
     if (errors.length > 0) {
       return { error: 'Validation failed', details: errors };
     }
-    
+
     const message = await this.messageService.create(dto);
-    // Broadcast 
+    // Broadcast
     this.server.emit('newMessage', message);
     return message;
   }

@@ -1,21 +1,31 @@
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-async function bootstrap() {
+import cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
+
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
 
-  // Activer CORS pour ton front
+  const configService = app.get(ConfigService);
+  const frontendUrl = configService.get<string>(
+    'FRONTEND_URL',
+    'http://localhost:5173'
+  );
+const port = configService.get('PORT');
   app.enableCors({
-    origin: 'http://localhost:5173', // ton front React
-    credentials: true, // si tu utilises cookies / auth
+    origin: frontendUrl,
+    credentials: true,
   });
-
-  const configService = app.get<ConfigService>(ConfigService);
-  const port = configService.get('PORT');
+  
+  Logger.log('Application lancee sur le port ' + String(port), 'Bootstrap');
+  // Activer CORS pour ton front
+  
 
   await app.listen(port || 3000);
   console.log(`application lance sur le port ${port}`);
 }
-bootstrap();
+
+void bootstrap();

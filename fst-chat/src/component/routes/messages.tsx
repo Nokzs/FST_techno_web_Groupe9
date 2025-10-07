@@ -60,7 +60,7 @@ export function Messages() {
       console.error("Erreur lors de l'ajout du message: ", error);
     }
   };
-
+  
   //JSX
   if (loading) {
     return (

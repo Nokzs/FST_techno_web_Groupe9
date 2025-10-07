@@ -17,8 +17,14 @@ export class CompleteUserResponseDto {
   createdAt: Date;
 
   @Expose()
-  isAdmin: boolean;
+  lastConnectedAt: Date;
 
   @Expose()
   language: string;
+
+  @Expose()
+  bio: string;
+
+  @Expose()
+  urlPicture: string;
 }

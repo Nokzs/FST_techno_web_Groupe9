@@ -43,27 +43,17 @@ export function LangList({
           <label>Choisir une langue :</label>
           <select
             onChange={() => handleModif && handleModif()}
+            defaultValue={user.language}
             ref={ref}
             className="border p-2 rounded  text-dark dark:text-white"
           >
             {[...lang]
               .filter((el) => !el.toUpperCase().includes("SIGN"))
-              .map((el) =>
-                user.language !== el ? (
-                  <option key={el} value={el} className="text-dark bg-blue-950">
-                    {el}
-                  </option>
-                ) : (
-                  <option
-                    key={el}
-                    value={el}
-                    selected
-                    className="text-dark bg-blue-950"
-                  >
-                    {el}
-                  </option>
-                ),
-              )}
+              .map((el) => (
+                <option key={el} value={el} className="text-dark bg-blue-950">
+                  {el}
+                </option>
+              ))}
           </select>
         </>
       )}

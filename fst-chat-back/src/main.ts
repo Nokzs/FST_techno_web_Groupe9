@@ -21,7 +21,6 @@ async function bootstrap(): Promise<void> {
   });
 
   Logger.log('Application lancee sur le port ' + String(port), 'Bootstrap');
-  // Activer CORS pour ton front
 
   await app.listen(port || 3000);
   console.log(`application lance sur le port ${port}`);

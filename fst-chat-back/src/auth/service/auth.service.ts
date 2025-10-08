@@ -63,7 +63,7 @@ export class UserAuthService {
   attachAuthCookie(res: Response, token: string): void {
     res.cookie(this.authCookieName, token, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: this.isSecureCookie,
       maxAge: this.cookieMaxAgeMs,
     });

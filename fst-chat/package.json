@@ -39,8 +39,7 @@
     "react-router-dom": "^7.9.3",
     "react-typed": "^2.0.12",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.13",
-    "tsdoc": "^0.0.4"
+    "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -63,7 +62,6 @@
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
     "vite-plugin-svgr": "^4.5.0",
-    "vitest": "^3.2.4",
-    "tsdoc": "^0.0.4"
+    "vitest": "^3.2.4"
   }
 }

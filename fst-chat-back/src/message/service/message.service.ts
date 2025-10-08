@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMessageDto } from '../DTO/create-message.dto';
+import { CreateMessageDto } from '../DTO/message.dto';
 import { UpdateMessageDto } from '../DTO/update-message.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';

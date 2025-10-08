@@ -9,20 +9,17 @@ import { UserAuthService } from '../service/auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private authService: UserAuthService,
-    cookieKey: string
-  ) {}
+  constructor(private authService: UserAuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     //récupèrer la clé du cookie dans les paramètre de la guard;
-    const token = request.cookies[cookieKey];
+        const token = request.cookies["fst_chat_token"];
     if (!token) {
       throw new UnauthorizedException();
     }
     try {
-      const payload = await this.authService.verifyToken(token);
+    const payload = await this.authService.verifyToken(token);
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;

@@ -15,6 +15,7 @@ export function Profil() {
   const pictureRef = useRef<File>(null);
 
   const handleModif = () => {
+    console.log("j'affiche")
     if (!modif) setModif(true);
   };
   return (
@@ -26,7 +27,9 @@ export function Profil() {
             : "https://avatar.iran.liara.run/public/20"
         }
         overlay={true}
+        ref={pictureRef}
         overlayPicture={penSvg}
+        handleModif={handleModif}
         className="m-5 h-32 w-32"
       />
       <UpdateInput
@@ -52,7 +55,7 @@ export function Profil() {
                 pseudoRef.current?.value,
                 bioRef.current?.value,
                 langsRef.current?.selectedOptions[0].value,
-                pictureRef.current?.src,
+                pictureRef.current
               )
             }
           >

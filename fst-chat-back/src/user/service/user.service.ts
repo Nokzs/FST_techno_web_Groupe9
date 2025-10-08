@@ -20,7 +20,8 @@ export class UserService {
   async create(createUserDto: CreatableUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(
       createUserDto.password as string,
-      SALT_ROUNDS,)
+      SALT_ROUNDS
+    );
     const user = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
@@ -64,5 +65,3 @@ export class UserService {
     return bcrypt.compare(plain, hashed);
   }
 }
-
-

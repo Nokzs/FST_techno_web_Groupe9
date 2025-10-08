@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 
 @Controller('user')
-export class UserController {constructor() {} 
-
-
+export class UserController {
+  constructor() {}
 }

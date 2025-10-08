@@ -21,7 +21,7 @@ describe('MessageController', () => {
         MessageService,
         {
           provide: getModelToken('Message'),
-          useValue: mockMessageModel,     
+          useValue: mockMessageModel,
         },
       ],
     }).compile();

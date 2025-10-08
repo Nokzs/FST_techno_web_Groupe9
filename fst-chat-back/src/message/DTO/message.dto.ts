@@ -24,5 +24,4 @@ export class MessageDto {
 
   @IsOptional() // optionnel car cree automatiquement par mongoose mais on veut le retourner
   createdAt?: Date;
-
 }

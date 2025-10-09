@@ -15,7 +15,6 @@ import { UserService } from '../../user/service/user.service';
 import { UserAuthService } from '../service/auth.service';
 import { RegisterUserDto } from '../DTO/register-user.dto';
 import { LoginUserDto } from '../DTO/login-user.dto';
-import { JwtPayload } from '../types/jwtPayload';
 
 @Controller('auth')
 export class AuthController {
@@ -83,14 +82,14 @@ export class AuthController {
     const token = request.cookies['fst_chat_token'];
 
     if (!token) {
-      res.clearCookie('fst_chat_token', { httpOnly: true, sameSite: 'lax' });
+      this.authService.clearCookie(res);
       return res.status(401).json({ message: 'Token manquant' });
     }
 
     const payload = await this.authService.verifyToken(token);
 
     if (!payload) {
-      res.clearCookie('fst_chat_token', { httpOnly: true, sameSite: 'lax' });
+      this.authService.clearCookie(res);
       return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
 

@@ -6,7 +6,10 @@ import { UserService } from '../service/user.service';
 import { UserAuthService } from '../../auth/service/auth.service';
 import { UserController } from '../controller/user.controller';
 import { User, UserSchema } from '../schema/user.schema';
-
+import {
+  StorageModule,
+  StorageProviderType,
+} from '../../storage/storageModule';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

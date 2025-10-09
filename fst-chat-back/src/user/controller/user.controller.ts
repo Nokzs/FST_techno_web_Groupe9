@@ -11,7 +11,7 @@ import { UserService } from '../service/user.service';
 import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToClass } from 'class-transformer';
-
+import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -28,4 +28,6 @@ export class UserController {
     const userDto = plainToClass(CompleteUserResponseDto, user);
     return userDto;
   }
+  /* @Get('/update')
+  async updateUser(@Body() body: UpdateUserDTO) {} */
 }

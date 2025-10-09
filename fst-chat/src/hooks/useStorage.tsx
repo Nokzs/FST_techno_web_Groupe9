@@ -1,6 +1,6 @@
-import { useState } from "react";
+//import { useState } from "react";
 
-// Interface commune pour les fournisseurs de stockage
+/*// Interface commune pour les fournisseurs de stockage
 const storageProviders = {
   supabase: {
     connect: (url: string, key: string) => {
@@ -74,4 +74,4 @@ export function useStorage(initialProvider = "supabase") {
     providerName,
     changeProvider,
   };
-}
+}*/

@@ -27,7 +27,7 @@ export async function getConnectedUser(): Promise<UserID | null> {
     const user = userRes ? { id: userRes.sub } : null;
     return user;
   } catch (err) {
-    // On ignore toute erreur réseau ou CORS
+    console.log(err);
     return null;
   }
 }

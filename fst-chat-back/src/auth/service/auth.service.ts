@@ -25,6 +25,7 @@ export type SanitizedUser = {
   lastConnectedAt?: Date;
   createdAt?: Date;
 };
+
 @Injectable()
 export class UserAuthService {
   private readonly authCookieName = 'fst_chat_token';
@@ -61,9 +62,10 @@ export class UserAuthService {
   }
 
   attachAuthCookie(res: Response, token: string): void {
+    console.log('Attaching auth cookie with token:', token);
     res.cookie(this.authCookieName, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: this.isSecureCookie ? 'none' : 'lax',
       secure: this.isSecureCookie,
       maxAge: this.cookieMaxAgeMs,
     });
@@ -157,5 +159,12 @@ export class UserAuthService {
       }
       return null;
     }
+  }
+  public clearCookie(res: Response): void {
+    res.clearCookie('fst_chat_token', {
+      httpOnly: true,
+      sameSite: this.isSecureCookie ? 'none' : 'lax',
+      secure: this.isSecureCookie,
+    });
   }
 }

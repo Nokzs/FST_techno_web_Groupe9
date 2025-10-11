@@ -34,9 +34,9 @@ export function Profil() {
       );
       await uploadFile(pictureRef.current, signedUrl);
       const url = getPublicUrl(path);
-      console.log(url)
-      const pseudo = pseudoRef.current?.value;
-      const bio = bioRef.current?.value;
+      console.log(url);
+      //const pseudo = pseudoRef.current?.value;
+      //const bio = bioRef.current?.value;
       //const lang = langsRef.current?.selectedOptions[-1].value;
     }
   };

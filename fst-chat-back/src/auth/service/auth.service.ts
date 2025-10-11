@@ -31,9 +31,7 @@ export class UserAuthService {
   private readonly cookieMaxAgeMs: number;
   private readonly isSecureCookie: boolean;
 
-  constructor(
-    private readonly configService: ConfigService
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const expires =
       this.configService.get<string>('JWT_EXPIRES_IN', '1h') ?? '1h';
     this.cookieMaxAgeMs = this.resolveCookieMaxAge(expires);
@@ -55,7 +53,6 @@ export class UserAuthService {
       createdAt: rest.createdAt,
     };
   }
-  
 
   attachAuthCookie(res: Response, token: string): void {
     console.log('Attaching auth cookie with token:', token);
@@ -144,7 +141,7 @@ export class UserAuthService {
     return '';
   }
 
- public clearCookie(res: Response): void {
+  public clearCookie(res: Response): void {
     res.clearCookie('fst_chat_token', {
       httpOnly: true,
       sameSite: this.isSecureCookie ? 'none' : 'lax',

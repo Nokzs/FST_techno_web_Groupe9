@@ -8,7 +8,7 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
-import { PublicUrlDTO } from 'src/storage/DTO/publicUrl';
+import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { AuthGuard } from 'src/guards/authGuard';
 import { UserService } from '../service/user.service';
 import { CompleteUserResponseDto } from '../DTO/UserResponseDto';

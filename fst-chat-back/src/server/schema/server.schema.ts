@@ -12,7 +12,7 @@ export class Server {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   ownerId: Types.ObjectId;
 
-  @Prop({required: false})
+  @Prop({ required: false })
   description?: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })

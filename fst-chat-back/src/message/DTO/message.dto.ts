@@ -22,9 +22,9 @@ export class MessageDto {
   @IsArray()
   readBy?: string[]; // liste des utilisateurs ayant lu le message
 
-  @IsOptional() 
+  @IsOptional()
   createdAt?: Date;
 
-  @IsOptional() 
+  @IsOptional()
   updatedAt?: Date;
 }

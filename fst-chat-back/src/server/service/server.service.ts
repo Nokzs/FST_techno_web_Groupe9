@@ -5,8 +5,8 @@ import { Server, ServerDocument } from '../schema/server.schema';
 import { CreateServerDto } from '../DTO/create-server.dto';
 @Injectable()
 export class ServerService {
-    constructor(
-    @InjectModel(Server.name) private serverModel: Model<ServerDocument>,
+  constructor(
+    @InjectModel(Server.name) private serverModel: Model<ServerDocument>
   ) {}
 
   async create(dto: CreateServerDto): Promise<Server> {
@@ -19,13 +19,10 @@ export class ServerService {
   }
 
   async addMember(serverId: string, userId: string) {
-     //TODO
-  }
-
-   async addChannel(serverId: string, channelId: string) {
     //TODO
   }
 
-
-    
+  async addChannel(serverId: string, channelId: string) {
+    //TODO
+  }
 }

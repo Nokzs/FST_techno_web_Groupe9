@@ -24,7 +24,8 @@ export class MessageController {
   @Get()
   findAll() {
     const messages = this.messageService.findAll();
-     return messages.then((tab) => tab.map((message) => plainToInstance(MessageDto, message)) );
-  
+    return messages.then((tab) =>
+      tab.map((message) => plainToInstance(MessageDto, message))
+    );
   }
 }

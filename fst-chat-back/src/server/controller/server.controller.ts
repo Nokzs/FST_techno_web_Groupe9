@@ -5,13 +5,13 @@ import { ServerDto } from '../DTO/server.dto';
 
 @Controller('servers')
 export class ServerController {
-    constructor(private readonly serverService: ServerService) {}
+  constructor(private readonly serverService: ServerService) {}
 
-    @Get()
-    findAll() {
-          const servers = this.serverService.findAll();
-         return servers.then((tab) =>
-      tab.map((server) => plainToInstance(ServerDto, server)),
+  @Get()
+  findAll() {
+    const servers = this.serverService.findAll();
+    return servers.then((tab) =>
+      tab.map((server) => plainToInstance(ServerDto, server))
     );
-    }
+  }
 }

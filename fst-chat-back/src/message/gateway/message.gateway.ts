@@ -33,7 +33,7 @@ export class MessageGateway
   @SubscribeMessage('sendMessage')
   async handleSendMessage(@MessageBody() data: any) {
     // Transforme et valide le DTO (pas automatique comme le controlleur)
-    const dto : CreateMessageDto = plainToInstance(CreateMessageDto, data);
+    const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     const errors = await validate(dto);
     if (errors.length > 0) {
       return { error: 'Validation failed', details: errors };

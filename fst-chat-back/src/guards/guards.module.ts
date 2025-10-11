@@ -4,7 +4,7 @@ import { TokenService } from 'src/token/token.service';
 import { AuthGuard } from './authGuard';
 @Module({
   imports: [TokenModule],
-  providers: [TokenService, AuthGuard],
+  providers: [AuthGuard],
   exports: [AuthGuard],
 })
 export class GuardModule {}

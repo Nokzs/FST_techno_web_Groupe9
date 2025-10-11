@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { AuthGuard } from 'src/guards/authGuard';
@@ -19,7 +20,7 @@ import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly storage: IStorageProvider
+    @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
   @Get('/profile/:id')
   @HttpCode(HttpStatus.OK)

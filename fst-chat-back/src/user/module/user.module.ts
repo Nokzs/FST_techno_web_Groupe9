@@ -5,12 +5,13 @@ import { UserController } from '../controller/user.controller';
 import { User, UserSchema } from '../schema/user.schema';
 import { StorageModule } from 'src/storage/storage.module';
 import { AuthGuard } from 'src/guards/authGuard';
-import { GuardModule } from 'src/guards/guards.module';
+import { TokenModule } from 'src/token/token.module';
+import { provider } from 'src/config/constante';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    GuardModule,
-    StorageModule,
+    TokenModule,
+    StorageModule.register(provider),
   ],
   controllers: [UserController],
   providers: [UserService, AuthGuard],

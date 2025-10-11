@@ -8,6 +8,7 @@ import { AuthModule } from './auth/module/auth.module';
 import { MessageModule } from './message/module/message.module';
 import { StorageModule } from './storage/storage.module';
 import { StorageProviderType } from './storage/storage.module';
+import { provider } from './config/constante';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +24,7 @@ import { StorageProviderType } from './storage/storage.module';
     UserModule,
     AuthModule,
     MessageModule,
-    StorageModule.register(StorageProviderType.supabase),
+    StorageModule.register(provider),
   ],
   controllers: [AppController],
   providers: [AppService],

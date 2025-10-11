@@ -1,8 +1,7 @@
 // component/routes/MessagesPage.tsx
 import { useState, useRef, useEffect } from "react";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-
+import { socket } from "../socket";
 
 interface Message {
     channelId : string;
@@ -30,20 +29,25 @@ export function Messages() {
 
 
     useEffect(() => {
-        async function fetchMessages() {
-            try {
-                const res = await fetch("http://localhost:3000/messages");
-                const data = await res.json();
-                setMessages(data);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchMessages();
+      socket.emit('getMessages', null, (messages) => {
+        console.log(messages);
+        setMessages(messages)
+        setLoading(false);
+        scrollToBottom();
+      });
+
+      socket.on('newMessage', (message: Message) => {
+        setMessages((prev) => [...prev, message]);
+        scrollToBottom();
+      });
+
+      return () => {
+        socket.off('newMessage');
+      }
     }, []);
 
 
-    const addMessage = async (text: string, senderId: string) => {
+    const addMessage = (text: string, senderId: string) => {
         const newMessage = {
             senderId,
             content: text,
@@ -51,16 +55,8 @@ export function Messages() {
         };
 
         try {
-            const res = await fetch(apiUrl + "/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json"},
-                body: JSON.stringify(newMessage),
-            });
+          socket.emit('sendMessage', newMessage);  
 
-            const savedMessage = await res.json();
-            console.log(savedMessage)
-            setMessages((prev) => [...prev, savedMessage]);
-            setTimeout(scrollToBottom, 50);
         } catch (error) {
             console.error("Erreur lors de l'ajout du message: ", error);
         }

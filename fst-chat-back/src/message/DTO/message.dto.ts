@@ -22,6 +22,9 @@ export class MessageDto {
   @IsArray()
   readBy?: string[]; // liste des utilisateurs ayant lu le message
 
-  @IsOptional() // optionnel car cree automatiquement par mongoose mais on veut le retourner
+  @IsOptional() 
   createdAt?: Date;
+
+  @IsOptional() 
+  updatedAt?: Date;
 }

@@ -8,8 +8,9 @@ import {
   Delete,
 } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
-import { CreateMessageDto } from '../DTO/message.dto';
-import { UpdateMessageDto } from '../DTO/update-message.dto';
+import { CreateMessageDto } from '../DTO/create-message.dto';
+import { plainToInstance } from 'class-transformer';
+import { MessageDto } from '../DTO/message.dto';
 
 @Controller('messages')
 export class MessageController {
@@ -22,6 +23,8 @@ export class MessageController {
 
   @Get()
   findAll() {
-    return this.messageService.findAll();
+    const messages = this.messageService.findAll();
+     return messages.then((tab) => tab.map((message) => plainToInstance(MessageDto, message)) );
+  
   }
 }

@@ -1,16 +1,16 @@
 ﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Messages } from "./api/messages/messages.js";
 import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import "./i18n/i18n.js";
-import { MessagesPage } from "./component/routes/messagePageTest";
-import { Messages } from "./component/routes/messages";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
 import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import { Servers } from "./api/servers/servers.js";
 
 
 
@@ -31,12 +31,8 @@ const routes = [
         Component: RegisterPage,
       },
       {
-        path: "/messages-test",
-        Component: MessagesPage,
-      },
-      {
-        path: "/messages",
-        Component: Messages,
+        path:"/servers",
+        Component: Servers
       }
     ],
   },
@@ -48,6 +44,10 @@ const routes = [
         middleware: [authMiddleware],
         loader: profilLoader,
         Component: ProfilLayout,
+      },
+      {
+        path: "/messages",
+        Component: Messages,
       },
     ],
   },

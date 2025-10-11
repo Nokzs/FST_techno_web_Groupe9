@@ -28,19 +28,18 @@ export function Profil() {
   };
   const onUpdateSubmit = async () => {
     if (pictureRef.current) {
-      const { signedUrl, filePath } = await getSignedUrl(
-        pictureRef.current.name,
+      const { signedUrl, path } = await getSignedUrl(
+        "profilPicture",
         "profilPicture",
       );
       await uploadFile(pictureRef.current, signedUrl);
-      //requete api pour recuperer l'adresse public de notre fichier
-      getPublicUrl(filePath);
+      const url = getPublicUrl(path);
+      console.log(url)
+      const pseudo = pseudoRef.current?.value;
+      const bio = bioRef.current?.value;
+      //const lang = langsRef.current?.selectedOptions[-1].value;
     }
   };
-  /*   pseudoRef.current?.value;
-    bioRef.current?.value;
-    langsRef.current?.selectedOptions[0].value;
-    pictureRef.current; */
 
   return (
     <>
@@ -75,7 +74,12 @@ export function Profil() {
           >
             Enregistrer les modifications
           </button>
-          <button onClick={cancelUpdate}>annuler</button>
+          <button
+            onClick={cancelUpdate}
+            className="dark:bg-blue-950 uppercase rounded-xl dark:hover:bg-blue-800 dark:text-white font-bold py-2 px-4 bg-green-700 hover:bg-green-500"
+          >
+            annuler
+          </button>
         </div>
       )}
     </>

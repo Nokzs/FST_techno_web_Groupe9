@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { TYPE_EVENT } from '../typeEvent';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
 
 @Injectable()
 export class SupabaseStorageProvider implements IStorageProvider {
@@ -24,11 +25,12 @@ export class SupabaseStorageProvider implements IStorageProvider {
   async SendSignUploadUrl(
     fileName: string,
     eventType: 'profilePicture'
-  ): Promise<{ signedUrl: string; filePath: string }> {
-    console.log(TYPE_EVENT[eventType]);
+  ): Promise<SignedUrlDTO> {
     const { data, error } = await this.supabaseClient.storage
-      .from('fstChatProfilPictureBucket')
-      .createSignedUploadUrl(fileName);
+      .from(TYPE_EVENT[eventType].bucket)
+      .createSignedUploadUrl(fileName, {
+        upsert: true,
+      });
 
     if (error) {
       throw new Error(
@@ -40,7 +42,7 @@ export class SupabaseStorageProvider implements IStorageProvider {
       throw new Error('No signed URL returned by Supabase');
     }
 
-    return { signedUrl: data.signedUrl, filePath: fileName };
+    return data;
   }
   getPublicUrl(bucket: string, fileName: string): string {
     const { data } = this.supabaseClient.storage

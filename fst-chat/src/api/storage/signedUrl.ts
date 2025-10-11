@@ -1,7 +1,7 @@
 export const getSignedUrl = async (
   fileName: string,
   eventType: "profilPicture",
-): Promise<{ signedUrl: string; filePath: string }> => {
+): Promise<{ signedUrl: string; path: string }> => {
   const apiUrl = import.meta.env.VITE_API_URL;
   return fetch(`${apiUrl}/storage/signedUrl`, {
     headers: {

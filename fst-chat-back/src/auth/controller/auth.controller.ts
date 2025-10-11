@@ -15,12 +15,13 @@ import { UserService } from '../../user/service/user.service';
 import { UserAuthService } from '../service/auth.service';
 import { RegisterUserDto } from '../DTO/register-user.dto';
 import { LoginUserDto } from '../DTO/login-user.dto';
-
+import { TokenService } from '../../token/token.service';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
-    private readonly authService: UserAuthService
+    private readonly authService: UserAuthService,
+    private readonly tokenService: TokenService
   ) {}
   @Post('register')
   async register(
@@ -36,8 +37,7 @@ export class AuthController {
     const user = await this.userService.create(registerDto);
     const userId = this.authService.getUserId(user);
     await this.userService.setLastConnection(userId);
-
-    const token = await this.authService.createAuthToken(user);
+    const token = await this.tokenService.generateToken({ sub: userId });
     this.authService.attachAuthCookie(res, token);
 
     return {
@@ -68,7 +68,7 @@ export class AuthController {
 
     const userId = this.authService.getUserId(user);
     await this.userService.setLastConnection(userId);
-    const token = await this.authService.createAuthToken(user);
+    const token = await this.tokenService.generateToken({ sub: userId });
     this.authService.attachAuthCookie(res, token);
 
     return {
@@ -86,7 +86,7 @@ export class AuthController {
       return res.status(401).json({ message: 'Token manquant' });
     }
 
-    const payload = await this.authService.verifyToken(token);
+    const payload = await this.tokenService.verifyToken(token);
 
     if (!payload) {
       this.authService.clearCookie(res);

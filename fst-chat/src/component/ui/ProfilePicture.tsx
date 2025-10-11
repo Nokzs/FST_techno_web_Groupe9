@@ -23,6 +23,12 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
+      if(file?.size > 3000000){
+        //changer pour une modale
+        window.alert("fichier trop volumineux")
+        return
+      }
+      
       console.log(file)
       if (!file) return;
 

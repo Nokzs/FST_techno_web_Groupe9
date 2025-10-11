@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Response } from 'express';
 import { User, UserDocument } from '../../user/schema/user.schema';
-import type { JwtPayload } from '../types/jwtPayload';
 type PlainUser = {
   id?: string;
   _id?: unknown;
@@ -33,7 +32,6 @@ export class UserAuthService {
   private readonly isSecureCookie: boolean;
 
   constructor(
-    private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {
     const expires =
@@ -57,9 +55,7 @@ export class UserAuthService {
       createdAt: rest.createdAt,
     };
   }
-  async createAuthToken(user: User | UserDocument): Promise<string> {
-    return this.jwtService.signAsync({ sub: this.getUserId(user) });
-  }
+  
 
   attachAuthCookie(res: Response, token: string): void {
     console.log('Attaching auth cookie with token:', token);
@@ -147,20 +143,8 @@ export class UserAuthService {
 
     return '';
   }
-  public async verifyToken(token: string): Promise<JwtPayload | null> {
-    try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
-      return payload;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('JWT verification failed:', err.message);
-      }
-      return null;
-    }
-  }
-  public clearCookie(res: Response): void {
+
+ public clearCookie(res: Response): void {
     res.clearCookie('fst_chat_token', {
       httpOnly: true,
       sameSite: this.isSecureCookie ? 'none' : 'lax',

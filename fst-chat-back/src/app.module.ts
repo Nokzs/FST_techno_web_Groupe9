@@ -6,8 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/module/user.module';
 import { AuthModule } from './auth/module/auth.module';
 import { MessageModule } from './message/module/message.module';
-import { StorageModule } from './storage/storageModule';
-import { StorageProviderType } from './storage/storageModule';
+import { StorageModule } from './storage/storage.module';
+import { StorageProviderType } from './storage/storage.module';
 @Module({
   imports: [
     ConfigModule.forRoot({

@@ -28,7 +28,7 @@ export function Messages() {
   useEffect(() => {
     async function fetchMessages() {
       try {
-        const res = await fetch(`${apiUrl}messages`);
+        const res = await fetch(`${apiUrl}/messages`);
         const data = await res.json();
         setMessages(data);
       } finally {
@@ -46,7 +46,7 @@ export function Messages() {
     };
 
     try {
-      const res = await fetch(apiUrl + "messages", {
+      const res = await fetch(apiUrl + "/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMessage),
@@ -60,7 +60,7 @@ export function Messages() {
       console.error("Erreur lors de l'ajout du message: ", error);
     }
   };
-  
+
   //JSX
   if (loading) {
     return (

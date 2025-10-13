@@ -25,15 +25,9 @@ export class MessageController {
   getPublicUrl(
     @Query('fileName') fileName: string,
     @Query('channelId') channelId: string
-  ): PublicUrlDTO
-{
+  ): PublicUrlDTO {
     console.log(channelId);
-    const url = this.storage.getPublicUrl
-    (
-      fileName,
-      'messageFile',
-      channelId
-    );
-    return plainToInstance(PublicUrlDTO, { publicUrl:url });
+    const url = this.storage.getPublicUrl(fileName, 'messageFile', channelId);
+    return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
 }

@@ -7,7 +7,6 @@ export class UserResponseDto {
 
 @Exclude()
 export class CompleteUserResponseDto {
- 
   @Expose()
   pseudo: string;
 

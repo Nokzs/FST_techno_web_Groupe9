@@ -43,17 +43,17 @@ export class UserService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async updateUser( 
-    id:string,
+  async updateUser(
+    id: string,
     updateUserDTO: UpdateUserDTO
- ): Promise<User | null> {
+  ): Promise<User | null> {
     const { password, ...userUpdate } = { ...updateUserDTO };
     const updatePayload: Partial<User> = { ...userUpdate };
 
     if (password) {
       updatePayload.password = await bcrypt.hash(password, SALT_ROUNDS);
     }
-    Logger.log("user updated") 
+    Logger.log('user updated');
 
     return this.userModel
       .findByIdAndUpdate(id, updatePayload, { new: true })

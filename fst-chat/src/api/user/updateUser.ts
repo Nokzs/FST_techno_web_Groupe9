@@ -7,7 +7,6 @@ export const updateUser = async (user: User) => {
     method: "PUT",
     body: body,
     credentials: "include",
-    headers:
-    { "Content-Type": "application/json" },
-     });
+    headers: { "Content-Type": "application/json" },
+  });
 };

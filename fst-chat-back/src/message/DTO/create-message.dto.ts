@@ -1,5 +1,6 @@
-import { IsString, IsOptional } from 'class-validator';
-
+import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { MessageFileDto } from './MessageFileDto';
 export class CreateMessageDto {
   @IsString()
   senderId: string;
@@ -14,4 +15,11 @@ export class CreateMessageDto {
 
   @IsString()
   content: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MessageFileDto)
+  files?: MessageFileDto[]; 
+
 }

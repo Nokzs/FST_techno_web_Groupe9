@@ -32,9 +32,9 @@ export function Messages() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll automatique apres un message
- /* const scrollToBottom = () => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };*/
+  };
 
   useEffect(() => {
     async function fetchMessages() {
@@ -50,10 +50,10 @@ export function Messages() {
   }, []);
 
   const addMessage = async (text: string, files: File[]) => {
-    /*const newMessage = {
+    const newMessage = {
       content: text,
       channelId: "1",
-    };*/
+    };
     const messagesFiles: MessageFile[] = [];
     if (files.length > 0) {
       // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
@@ -78,7 +78,7 @@ export function Messages() {
         }),
       );      
     }
-    /*
+    
     try {
       const res = await fetch(apiUrl + "/messages", {
         method: "POST",
@@ -92,7 +92,7 @@ export function Messages() {
       setTimeout(scrollToBottom, 50);
     } catch (error) {
       console.error("Erreur lors de l'ajout du message: ", error);
-    }*/
+    }
   };
 
   //JSX

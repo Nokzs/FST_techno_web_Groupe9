@@ -5,6 +5,8 @@ import { UpdateMessageDto } from '../DTO/update-message.dto';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
 import { PublicUrlDTO } from 'src/storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';
+import { MessageFile } from '../schema/messageFile.schema';
+import { MessageFileDto } from '../DTO/MessageFileDto';
 @Controller('messages')
 export class MessageController {
   constructor(
@@ -13,8 +15,14 @@ export class MessageController {
   ) {}
 
   @Post()
-  create(@Body() createMessageDto: CreateMessageDto) {
+  async create(@Body() createMessageDto: CreateMessageDto) {
     return this.messageService.create(createMessageDto);
+  
+   /*  const files: MessageFile[] = await Promise.all(
+    (createMessageDto.files || []).map(async (f: MessageFileDto) => {
+        return this.messageService.createMessageFile(f); // async
+      })
+  ); */
   }
 
   @Get()

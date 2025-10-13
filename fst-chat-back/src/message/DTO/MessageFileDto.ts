@@ -1,9 +1,6 @@
-import { IsString, IsOptional, IsNumber, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUrl } from 'class-validator';
 
 export class MessageFileDto {
-  @IsString()
-  fileName: string; // nom dans le bucket (uuid.ext)
-
   @IsString()
   originalName: string;
 
@@ -13,7 +10,4 @@ export class MessageFileDto {
 
   @IsString()
   mimetype: string;
-
-  @IsNumber()
-  size: number;
 }

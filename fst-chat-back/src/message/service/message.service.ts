@@ -4,12 +4,14 @@ import { UpdateMessageDto } from '../DTO/update-message.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message, MessageDocument } from '../schema/message.schema';
-
+import { MessageFile } from '../schema/messageFile.schema';
+import { MessageFileDto } from '../DTO/MessageFileDto';
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(Message.name)
-    private readonly messageModel: Model<MessageDocument>
+    private readonly messageModel: Model<MessageDocument>,
+    private readonly messageFileModel: Model<MessageFile>
   ) {}
 
   async create(createMessageDto: CreateMessageDto): Promise<Message> {
@@ -17,6 +19,12 @@ export class MessageService {
     return newMessage.save();
   }
 
+  async createMessageFile(
+    createMessageFileDto: MessageFileDto
+  ): Promise<MessageFile> {
+    const newMessage = new this.messageFileModel(createMessageFileDto);
+    return newMessage.save();
+  }
   async findAll(): Promise<Message[]> {
     return this.messageModel.find().exec();
   }

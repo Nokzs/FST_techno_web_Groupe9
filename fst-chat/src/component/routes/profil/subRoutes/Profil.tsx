@@ -8,14 +8,15 @@ import { useRef, useState } from "react";
 import { getSignedUrl } from "../../../../api/storage/signedUrl";
 import { uploadFile } from "../../../../api/storage/uploadFile";
 import { getPublicUrl } from "../../../../api/storage/getPublicUrl";
+import { updateUser } from "../../../../api/user/updateUser";
 export function Profil() {
   const user = useOutletContext() as User;
-  //const tmpUser = structuredClone(user) as User;
   const [modif, setModif] = useState(false);
   const pseudoRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);
   const langsRef = useRef<HTMLSelectElement>(null);
   const pictureRef = useRef<File>(null);
+  const srcRef = user.urlPicture;
   const cancelUpdate = () => {
     /* pseudoRef.current.value = user.pseudo;
     bioRef.current.value = user.bio;
@@ -32,12 +33,17 @@ export function Profil() {
         "profilPicture",
         "profilPicture",
       );
+
       await uploadFile(pictureRef.current, signedUrl);
-      const url = getPublicUrl(path);
-      console.log(url);
-      //const pseudo = pseudoRef.current?.value;
-      //const bio = bioRef.current?.value;
-      //const lang = langsRef.current?.selectedOptions[-1].value;
+      const { publicUrl } = await getPublicUrl(path, user);
+      const pseudo = pseudoRef.current?.value;
+      const bio = bioRef.current?.value;
+      const lang = langsRef.current?.value;
+      user.pseudo = pseudo || user.pseudo;
+      user.bio = bio || user.bio;
+      user.language = lang || user.language;
+      user.urlPicture = publicUrl || user.urlPicture;
+      await updateUser(user);
     }
   };
 

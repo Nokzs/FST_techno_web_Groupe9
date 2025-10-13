@@ -23,7 +23,7 @@ export class User {
   @Prop({ default: false })
   isAdmin: boolean;
 
-  @Prop()
+  @Prop({ default: 'English' })
   language?: string;
 
   @Prop({ default: '' })

@@ -44,7 +44,8 @@ export class SupabaseStorageProvider implements IStorageProvider {
 
     return data;
   }
-  getPublicUrl(bucket: string, fileName: string): string {
+  getPublicUrl(fileName: string, eventType: string): string {
+    const bucket = TYPE_EVENT[eventType]?.bucket;
     const { data } = this.supabaseClient.storage
       .from(bucket)
       .getPublicUrl(fileName);

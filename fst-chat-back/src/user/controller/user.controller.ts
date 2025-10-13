@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Inject,
+  Put,
 } from '@nestjs/common';
 import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { AuthGuard } from 'src/guards/authGuard';
@@ -16,6 +17,8 @@ import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
+import { TYPE_EVENT } from 'src/storage/typeEvent';
+import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')
 export class UserController {
   constructor(
@@ -37,15 +40,26 @@ export class UserController {
     return userDto;
   }
 
-  @UseGuards(AuthGuard)
-  @Get('/publicUrl/:filename')
-  getPublicUrl(@Param(':filename') filename: string): PublicUrlDTO {
-    const publicUrl = this.storage.getPublicUrl(
-      'fstChatProfilPictureBucket',
-      filename
+  @UseGuards(AuthGuard) 
+  @Get(':id/profilPictureUrl')
+  async getPublicProfilePicture(@Param('id') id: string):Promise<PublicUrlDTO> {
+    const user = this.userService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const url = this.storage.getPublicUrl(
+      `${id}/profilePicture`,
+      'profilPicture'
     );
-    return plainToInstance(PublicUrlDTO, { publicUrl });
+    return plainToInstance(PublicUrlDTO,url)
   }
-  /* @Get('/update')
-  async updateUser(@Body() body: UpdateUserDTO) {} */
+  @UseGuards(AuthGuard)
+  @Put(':id/update')
+  async updateUser(@Body() body: UpdateUserDTO){
+    const user = this.userService.findById(body.id);
+    if(!user){
+      throw new NotFoundException();
+    }
+    this.userService.updateUser(body);
+  }
 }

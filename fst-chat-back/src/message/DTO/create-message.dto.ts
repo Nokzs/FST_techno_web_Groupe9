@@ -20,6 +20,5 @@ export class CreateMessageDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MessageFileDto)
-  files?: MessageFileDto[]; 
-
+  files?: MessageFileDto[];
 }

@@ -1,4 +1,3 @@
-
 import { IsString, IsOptional, IsNumber, IsUrl } from 'class-validator';
 
 export class MessageFileDto {

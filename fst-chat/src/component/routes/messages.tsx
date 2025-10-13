@@ -1,7 +1,17 @@
 // component/routes/MessagesPage.tsx
 import { useState, useRef, useEffect } from "react";
-
+import { ChatInput } from "./chat/ChatInput";
+import { getSignedUrl } from "../../api/storage/signedUrl";
+import { v4 as uuidv4 } from "uuid";
+import { getMessageFilePublicUrl } from "../../api/message/getMessageFilePublicUrl";
+import { uploadFile } from "../../api/storage/uploadFile";
 const apiUrl = import.meta.env.VITE_API_URL;
+
+export interface MessageFile {
+  originalName: string; // nom original
+  url?: string; // URL signée ou publique
+  mimetype: string; // image/png, application/pdf, video/mp4...
+}
 
 interface Message {
   channelId: string;
@@ -9,6 +19,7 @@ interface Message {
   createdAt: string;
   senderId: string;
   updatedAt: string;
+  files: MessageFile[];
 }
 
 export function Messages() {
@@ -21,9 +32,9 @@ export function Messages() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll automatique apres un message
-  const scrollToBottom = () => {
+ /* const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  };*/
 
   useEffect(() => {
     async function fetchMessages() {
@@ -38,18 +49,41 @@ export function Messages() {
     fetchMessages();
   }, []);
 
-  const addMessage = async (text: string, senderId: string) => {
-    const newMessage = {
-      senderId,
+  const addMessage = async (text: string, files: File[]) => {
+    /*const newMessage = {
       content: text,
       channelId: "1",
-    };
+    };*/
+    const messagesFiles: MessageFile[] = [];
+    if (files.length > 0) {
+      // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
+    await Promise.all(
+        files.map(async (file) => {
+          const { signedUrl, path } = await getSignedUrl(
+            `file_${uuidv4()}`,
+            "messageFile",
+            "1",
+          );
 
+
+          await uploadFile(file, signedUrl);
+
+          const { publicUrl } = await getMessageFilePublicUrl(path, "1");
+
+          messagesFiles.push({
+            originalName: file.name,
+            url: publicUrl,
+            mimetype: file.type,
+          });
+        }),
+      );      
+    }
+    /*
     try {
       const res = await fetch(apiUrl + "/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMessage),
+        body: JSON.stringify({...newMessage,files:messagesFiles}),
       });
 
       const savedMessage = await res.json();
@@ -58,7 +92,7 @@ export function Messages() {
       setTimeout(scrollToBottom, 50);
     } catch (error) {
       console.error("Erreur lors de l'ajout du message: ", error);
-    }
+    }*/
   };
 
   //JSX
@@ -104,30 +138,7 @@ export function Messages() {
           ))}
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Input */}
-      <div className="mt-2 flex gap-2">
-        <input
-          type="text"
-          placeholder="Écrire un message..."
-          className="flex-1 p-2 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          id="messageInput"
-        />
-        <button
-          className="bg-blue-600 text-white px-4 rounded-xl"
-          onClick={() => {
-            const input = document.getElementById(
-              "messageInput",
-            ) as HTMLInputElement;
-            if (input.value.trim()) {
-              addMessage(input.value, "1"); // backend
-              input.value = "";
-            }
-          }}
-        >
-          Envoyer
-        </button>
-      </div>
+      <ChatInput sendMessage={addMessage} />
     </div>
   );
 }

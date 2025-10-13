@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-
+import { MessageFile, MessageFileSchema } from './messageFile.schema';
 export type MessageDocument = HydratedDocument<Message>;
 
 @Schema({ timestamps: true })
@@ -17,7 +17,10 @@ export class Message {
   @Prop({ required: true })
   content: string;
 
-  @Prop()
+  @Prop({ type: [MessageFileSchema], default: [] })
+  files: MessageFile[];
+
+  @Prop({ default: false })
   read: boolean;
 }
 

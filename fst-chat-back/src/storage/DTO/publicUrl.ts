@@ -1,3 +1,3 @@
 export class PublicUrlDTO {
-  fileName: string;
+  publicUrl: string;
 }

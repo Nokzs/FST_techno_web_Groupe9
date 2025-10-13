@@ -13,6 +13,7 @@ import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
 import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
 import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
 import { Compte } from "./component/routes/profil/subRoutes/Compte.js";
+import { Theme } from "./component/routes/profil/subRoutes/Theme.js";
 /* Objets concernant les routes utilisé par les application toutes les routes en dessous la route authmiddleware sont protégé alors
 celles en dessous de notauthmiddleware sont accessible uniquement si l'utilisateur n'est pas connecté */
 
@@ -50,6 +51,10 @@ const routes = [
           {
             path: "/compte",
             Component: Compte,
+          },
+          {
+            path: "/theme",
+            Component: Theme,
           },
         ],
       },

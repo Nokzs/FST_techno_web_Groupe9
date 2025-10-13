@@ -19,5 +19,7 @@ export type User = {
 
   bio: string;
 
+  password?: string;
+
   urlPicture: string;
 };

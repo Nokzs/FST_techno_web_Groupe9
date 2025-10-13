@@ -9,6 +9,8 @@ import {
   UseGuards,
   Inject,
   Put,
+  Req,
+  Logger,
 } from '@nestjs/common';
 import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { AuthGuard } from 'src/guards/authGuard';
@@ -17,7 +19,7 @@ import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
-import { TYPE_EVENT } from 'src/storage/typeEvent';
+import type { Request } from 'express';
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')
 export class UserController {
@@ -25,6 +27,12 @@ export class UserController {
     private readonly userService: UserService,
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
+  /**
+   * @description retourne le profil de l'utilisateur
+   *
+   *
+   */
+
   @Get('/profile/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
@@ -40,26 +48,30 @@ export class UserController {
     return userDto;
   }
 
-  @UseGuards(AuthGuard) 
-  @Get(':id/profilPictureUrl')
-  async getPublicProfilePicture(@Param('id') id: string):Promise<PublicUrlDTO> {
-    const user = this.userService.findById(id);
+  @UseGuards(AuthGuard)
+  @Get('/profilPictureUrl')
+  async getPublicProfilePicture(@Req() req: Request): Promise<PublicUrlDTO> {
+    const id = req['user'].sub as string;
+    const user = await this.userService.findById(id);
     if (!user) {
       throw new NotFoundException();
     }
     const url = this.storage.getPublicUrl(
-      `${id}/profilePicture`,
-      'profilPicture'
+      `${id}/profilPicture`,
+      'profilePicture'
     );
-    return plainToInstance(PublicUrlDTO,url)
+    return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
   @UseGuards(AuthGuard)
-  @Put(':id/update')
-  async updateUser(@Body() body: UpdateUserDTO){
-    const user = this.userService.findById(body.id);
-    if(!user){
+  @Put('update')
+  async updateUser(@Body() body: UpdateUserDTO, @Req() req: Request) {
+    Logger.log('update requested');
+    console.log(body);
+    const id = req['user'].sub as string;
+    const user = await this.userService.findById(id);
+    if (!user) {
       throw new NotFoundException();
     }
-    this.userService.updateUser(body);
+    await this.userService.updateUser(id, body);
   }
 }

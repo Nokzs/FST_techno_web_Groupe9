@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { plainToInstance } from 'class-transformer';
@@ -32,8 +25,8 @@ export class MessageController {
   @Get('/userId')
   @UseGuards(AuthGuard)
   getUserId(@Req() request: Request) {
-    console.log("dans le userId");
-        const userId = request['user'].sub;
-        return { userId };
+    console.log('dans le userId');
+    const userId = request['user'].sub;
+    return { userId };
   }
 }

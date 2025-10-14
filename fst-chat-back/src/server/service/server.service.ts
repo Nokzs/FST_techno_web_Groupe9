@@ -22,9 +22,9 @@ export class ServerService {
 
   async findByUserId(userId: any): Promise<Server[]> {
     return this.serverModel
-    .find({ members: new Types.ObjectId(userId) })
-    .lean()
-    .exec();
+      .find({ members: new Types.ObjectId(userId) })
+      .lean()
+      .exec();
   }
 
   async addMember(serverId: string, userId: string) {

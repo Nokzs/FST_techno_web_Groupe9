@@ -31,14 +31,20 @@ export class MessageGateway
   }
 
   @SubscribeMessage('joinChannelRoom')
-  handleJoinRoom(@MessageBody() channelId: string, @ConnectedSocket() client: Socket) {
+  handleJoinRoom(
+    @MessageBody() channelId: string,
+    @ConnectedSocket() client: Socket
+  ) {
     client.join(channelId);
     console.log(`Client ${client.id} joined channel room ${channelId}`);
   }
 
   // Quitter une room
   @SubscribeMessage('leaveChannelRoom')
-  handleLeaveRoom(@MessageBody() channelId: string, @ConnectedSocket() client: Socket) {
+  handleLeaveRoom(
+    @MessageBody() channelId: string,
+    @ConnectedSocket() client: Socket
+  ) {
     client.leave(channelId);
     console.log(`Client ${client.id} left channel room ${channelId}`);
   }
@@ -55,8 +61,8 @@ export class MessageGateway
     const message = await this.messageService.create(dto);
     // Broadcast
     this.server.to(dto.channelId).emit('newMessage', message);
-    console.log("Message broadcasted to channel:", dto.channelId);
-    console.log("Message content:", message);
+    console.log('Message broadcasted to channel:', dto.channelId);
+    console.log('Message content:', message);
     return message;
   }
 

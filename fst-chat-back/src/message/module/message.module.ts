@@ -9,7 +9,7 @@ import { AuthModule } from 'src/auth/module/auth.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
-    AuthModule, 
+    AuthModule,
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageGateway],

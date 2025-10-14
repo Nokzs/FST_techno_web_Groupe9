@@ -10,12 +10,11 @@ import { UserAuthService } from '../service/auth.service';
 const cookieKey = 'fst_chat_token';
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private authService: UserAuthService) {}
+  constructor(private authService: UserAuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
     //récupèrer la clé du cookie dans les paramètre de la guard;
     const token = request.cookies[cookieKey];
     if (!token) {

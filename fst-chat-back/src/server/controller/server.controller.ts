@@ -31,9 +31,12 @@ export class ServerController {
 
   @Post()
   @UseGuards(AuthGuard)
-  async createServer(@Req() request: Request, @Body() body: CreateServerRequestDto) {
+  async createServer(
+    @Req() request: Request,
+    @Body() body: CreateServerRequestDto
+  ) {
     const userId = request['user'].sub; // user connecté
-    
+
     const dto: CreateServerDto = {
       ...body,
       ownerId: userId,

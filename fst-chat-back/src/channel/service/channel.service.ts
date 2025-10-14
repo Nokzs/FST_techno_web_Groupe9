@@ -6,11 +6,11 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class ChannelService {
-    constructor(
-    @InjectModel(Channel.name) private channelModel: Model<ChannelDocument>,
+  constructor(
+    @InjectModel(Channel.name) private channelModel: Model<ChannelDocument>
   ) {}
 
-  async create (dto: CreateChannelDto): Promise<Channel> {
+  async create(dto: CreateChannelDto): Promise<Channel> {
     const newChannel = new this.channelModel(dto);
     const saved = await newChannel.save();
     return saved.toObject();
@@ -18,6 +18,5 @@ export class ChannelService {
 
   async getChannelsByServer(serverId: string): Promise<Channel[]> {
     return this.channelModel.find({ serverId }).lean().exec();
-  } 
-
+  }
 }

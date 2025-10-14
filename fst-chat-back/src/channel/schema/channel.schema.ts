@@ -5,13 +5,11 @@ export type ChannelDocument = HydratedDocument<Channel>;
 
 @Schema({ timestamps: true })
 export class Channel {
-
   @Prop({ type: Types.ObjectId, ref: 'Server', required: true })
   serverId: Types.ObjectId;
 
   @Prop({ required: true })
   name: string;
-
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

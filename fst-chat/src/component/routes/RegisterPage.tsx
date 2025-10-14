@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthCard } from "../ui/AuthCard";
 
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
@@ -12,6 +12,7 @@ export function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
   const isValid = useMemo(() => {
     return (
       pseudo.trim().length >= 3 &&
@@ -56,18 +57,28 @@ export function RegisterPage() {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
+      navigate("/profil", { replace: true });
     } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : "Une erreur est survenue.";
+      const message =
+        submitError instanceof Error
+          ? submitError.message
+          : "Une erreur est survenue.";
       setError(message);
     } finally {
       setIsSubmitting(false);
     }
   };
   return (
-    <AuthCard title="Inscription" subtitle="Creez votre compte pour rejoindre la discussion">
-      <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+    <AuthCard
+      title="Inscription"
+      subtitle="Creez votre compte pour rejoindre la discussion"
+    >
+      <form className="space-y-6" onSubmit={(e) => handleSubmit(e)} noValidate>
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="pseudo">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="pseudo"
+          >
             Pseudo
           </label>
           <input
@@ -83,7 +94,10 @@ export function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="email">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="email"
+          >
             Adresse e-mail
           </label>
           <input
@@ -99,7 +113,10 @@ export function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="password">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="password"
+          >
             Mot de passe
           </label>
           <input
@@ -116,7 +133,10 @@ export function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="confirmPassword">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="confirmPassword"
+          >
             Confirmez le mot de passe
           </label>
           <input
@@ -131,7 +151,11 @@ export function RegisterPage() {
             required
           />
         </div>
-        {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+        {error ? (
+          <p className="text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        ) : null}
         {success ? <p className="text-sm text-green-600">{success}</p> : null}
 
         <button
@@ -143,8 +167,11 @@ export function RegisterPage() {
         </button>
 
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Deja inscrit ? {" "}
-          <Link className="font-semibold text-green-600 hover:text-green-500" to="/login">
+          Deja inscrit ?{" "}
+          <Link
+            className="font-semibold text-green-600 hover:text-green-500"
+            to="/login"
+          >
             Connectez-vous
           </Link>
         </p>

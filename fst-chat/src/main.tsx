@@ -1,22 +1,28 @@
 ﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Messages } from "./api/messages/messages.js";
 import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import "./i18n/i18n.js";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
-import { ProfilLayout } from "./component/routes/profil/ProfilLayout.js";
+import { ProfilLayout } from "./component/routes/profil/layout/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
-import { authMiddleware } from "./middleware/authMiddleware.js";
-import { Servers } from "./api/servers/servers.js";
+import { ServersPage } from "./api/servers/servers-page.js";
 
 
+import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
+import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
+import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
+import { Compte } from "./component/routes/profil/subRoutes/Compte.js";
+import { Messages } from "./api/messages/messages.js";
+/* Objets concernant les routes utilisé par les application toutes les routes en dessous la route authmiddleware sont protégé alors
+celles en dessous de notauthmiddleware sont accessible uniquement si l'utilisateur n'est pas connecté */
 
 const routes = [
   {
     Component: NotConnectedLayout,
+    middleware: [notAuthMiddleware],
     children: [
       {
         path: "/",
@@ -30,29 +36,37 @@ const routes = [
         path: "/register",
         Component: RegisterPage,
       },
-      {
-        path:"/servers",
-        Component: Servers
-      }
     ],
   },
   {
     Component: ConnectedLayout,
+    middleware: [authMiddleware],
     children: [
       {
-        path: "/profil",
-        middleware: [authMiddleware],
         loader: profilLoader,
         Component: ProfilLayout,
+        children: [
+          {
+            path: "/profil",
+            Component: Profil,
+          },
+          {
+            path: "/compte",
+            Component: Compte,
+          }
+        ],
       },
       {
-        path: "/messages",
-        Component: Messages,
+        path: "/servers",
+        Component: ServersPage
       },
+      {
+        path: "/messages/:channelId",
+        Component: Messages
+      }
     ],
   },
 ];
-console.log("je suis dans le main");
 const router = createBrowserRouter(routes);
 const container = document.getElementById("root")!;
 const root = createRoot(container);

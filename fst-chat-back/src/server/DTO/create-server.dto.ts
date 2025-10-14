@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsArray } from 'class-validator';
 
 export class CreateServerDto {
   @IsString()
@@ -8,5 +8,9 @@ export class CreateServerDto {
   ownerId: string;
 
   @IsOptional()
+  @IsString()
   description?: string;
+
+  @IsArray()
+  members?: string[];
 }

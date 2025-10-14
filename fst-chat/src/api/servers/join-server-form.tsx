@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Server } from "./servers";
+import type { Server } from "./servers-page";
 
 interface JoinServerFormProps {
     onJoined: (server: Server) => void;

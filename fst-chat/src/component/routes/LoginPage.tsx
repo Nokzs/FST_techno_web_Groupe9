@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthCard } from "../ui/AuthCard";
 
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
@@ -10,7 +10,11 @@ export function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const isValid = useMemo(() => email.trim().length > 0 && password.length >= 6, [email, password]);
+  const navigate = useNavigate();
+  const isValid = useMemo(
+    () => email.trim().length > 0 && password.length >= 6,
+    [email, password],
+  );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,15 +38,20 @@ export function LoginPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
-        const message = payload?.message ?? "Impossible de se connecter. Verifiez vos identifiants.";
+        const message =
+          payload?.message ??
+          "Impossible de se connecter. Verifiez vos identifiants.";
         throw new Error(Array.isArray(message) ? message.join(" ") : message);
       }
 
       await response.json().catch(() => ({}));
       setSuccess("Connexion reussie. Bienvenue !");
-
+      navigate("/profil", { replace: true });
     } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : "Une erreur est survenue.";
+      const message =
+        submitError instanceof Error
+          ? submitError.message
+          : "Une erreur est survenue.";
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -52,7 +61,10 @@ export function LoginPage() {
     <AuthCard title="Connexion" subtitle="Accedez a votre espace de discussion">
       <form className="space-y-6" onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="email">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="email"
+          >
             Adresse e-mail
           </label>
           <input
@@ -68,7 +80,10 @@ export function LoginPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="password">
+          <label
+            className="text-sm font-medium text-gray-700 dark:text-gray-200"
+            htmlFor="password"
+          >
             Mot de passe
           </label>
           <input
@@ -83,7 +98,11 @@ export function LoginPage() {
             required
           />
         </div>
-        {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+        {error ? (
+          <p className="text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        ) : null}
         {success ? <p className="text-sm text-green-600">{success}</p> : null}
 
         <button
@@ -95,8 +114,11 @@ export function LoginPage() {
         </button>
 
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Pas encore de compte ? {" "}
-          <Link className="font-semibold text-green-600 hover:text-green-500" to="/register">
+          Pas encore de compte ?{" "}
+          <Link
+            className="font-semibold text-green-600 hover:text-green-500"
+            to="/register"
+          >
             Inscrivez-vous
           </Link>
         </p>
@@ -104,5 +126,3 @@ export function LoginPage() {
     </AuthCard>
   );
 }
-
-

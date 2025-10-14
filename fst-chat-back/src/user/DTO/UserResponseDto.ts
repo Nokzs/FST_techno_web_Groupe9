@@ -14,14 +14,17 @@ export class CompleteUserResponseDto {
   email: string;
 
   @Expose()
-  password: string;
-
-  @Expose()
   createdAt: Date;
 
   @Expose()
-  isAdmin: boolean;
+  lastConnectedAt: Date;
 
   @Expose()
   language: string;
+
+  @Expose()
+  bio: string;
+
+  @Expose()
+  urlPicture: string;
 }

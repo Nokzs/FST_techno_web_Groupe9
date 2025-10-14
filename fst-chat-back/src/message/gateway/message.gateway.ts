@@ -30,6 +30,19 @@ export class MessageGateway
     // Optionnel : log, cleanup, etc.
   }
 
+  @SubscribeMessage('joinChannelRoom')
+  handleJoinRoom(@MessageBody() channelId: string, @ConnectedSocket() client: Socket) {
+    client.join(channelId);
+    console.log(`Client ${client.id} joined channel room ${channelId}`);
+  }
+
+  // Quitter une room
+  @SubscribeMessage('leaveChannelRoom')
+  handleLeaveRoom(@MessageBody() channelId: string, @ConnectedSocket() client: Socket) {
+    client.leave(channelId);
+    console.log(`Client ${client.id} left channel room ${channelId}`);
+  }
+
   @SubscribeMessage('sendMessage')
   async handleSendMessage(@MessageBody() data: any) {
     // Transforme et valide le DTO (pas automatique comme le controlleur)
@@ -41,13 +54,15 @@ export class MessageGateway
 
     const message = await this.messageService.create(dto);
     // Broadcast
-    this.server.emit('newMessage', message);
+    this.server.to(dto.channelId).emit('newMessage', message);
+    console.log("Message broadcasted to channel:", dto.channelId);
+    console.log("Message content:", message);
     return message;
   }
 
   @SubscribeMessage('getMessages')
-  async handleGetMessages() {
-    const messages = await this.messageService.findAll();
+  async handleGetMessages(@MessageBody() channelId: string) {
+    const messages = await this.messageService.findByChannel(channelId);
     return messages;
   }
 }

@@ -1,9 +1,9 @@
-﻿import { Injectable } from '@nestjs/common';
+﻿import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Response } from 'express';
 import { User, UserDocument } from '../../user/schema/user.schema';
-
+import type { JwtPayload } from '../types/jwtPayload';
 type PlainUser = {
   id?: string;
   _id?: unknown;
@@ -144,5 +144,18 @@ export class UserAuthService {
     }
 
     return '';
+  }
+  public async verifyToken(token: string): Promise<JwtPayload | null> {
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
+      return payload;
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('JWT verification failed:', err.message);
+      }
+      return null;
+    }
   }
 }

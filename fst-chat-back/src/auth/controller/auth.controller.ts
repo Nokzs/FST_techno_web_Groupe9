@@ -5,14 +5,17 @@
   HttpCode,
   HttpStatus,
   Post,
+  Get,
+  Req,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import { UserService } from '../../user/service/user.service';
 import { UserAuthService } from '../service/auth.service';
 import { RegisterUserDto } from '../DTO/register-user.dto';
 import { LoginUserDto } from '../DTO/login-user.dto';
+import { JwtPayload } from '../types/jwtPayload';
 
 @Controller('auth')
 export class AuthController {
@@ -25,6 +28,7 @@ export class AuthController {
     @Body() registerDto: RegisterUserDto,
     @Res({ passthrough: true }) res: Response
   ) {
+    console.log('je passe dans le controller');
     const existingUser = await this.userService.findByEmail(registerDto.email);
     if (existingUser) {
       throw new ConflictException('Un compte existe deja avec cet e-mail.');
@@ -72,5 +76,24 @@ export class AuthController {
       user: this.authService.sanitizeUser(user),
       message: 'Connexion reussie.',
     };
+  }
+  // l'utilisation de res impose la gestion manuelle des status'
+  @Get('user')
+  async getUser(@Req() request: Request, @Res() res: Response) {
+    const token = request.cookies['fst_chat_token'];
+
+    if (!token) {
+      res.clearCookie('fst_chat_token', { httpOnly: true, sameSite: 'lax' });
+      return res.status(401).json({ message: 'Token manquant' });
+    }
+
+    const payload = await this.authService.verifyToken(token);
+
+    if (!payload) {
+      res.clearCookie('fst_chat_token', { httpOnly: true, sameSite: 'lax' });
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
+    }
+
+    return res.status(200).json(payload);
   }
 }

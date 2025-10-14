@@ -3,14 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { plainToInstance } from 'class-transformer';
 import { MessageDto } from '../DTO/message.dto';
+import { AuthGuard } from 'src/auth/guards/authGuard';
 
 @Controller('messages')
 export class MessageController {
@@ -27,5 +27,13 @@ export class MessageController {
     return messages.then((tab) =>
       tab.map((message) => plainToInstance(MessageDto, message))
     );
+  }
+
+  @Get('/userId')
+  @UseGuards(AuthGuard)
+  getUserId(@Req() request: Request) {
+    console.log("dans le userId");
+        const userId = request['user'].sub;
+        return { userId };
   }
 }

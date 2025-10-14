@@ -4,19 +4,28 @@ import { CreateServerForm } from "./create-server-form";
 import { JoinServerForm } from "./join-server-form";
 
 export interface Server {
-  id: string;
+  _id: string;
   name: string;
   ownerId: string;
   description?: string;
   members?: string[];
-  channels?: string[];
+  channels?: Channel[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export function Servers() {
+export interface Channel {
+  _id: string;
+  name: string;
+  topic?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
-  // const [userId, setUserId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -40,6 +49,8 @@ export function Servers() {
 
   const handleServerAdded = (newServer: Server) => {
     setServers((prev) => [...prev, newServer]);
+    console.log("Nouveau serveur ajouté :", newServer);
+    console.log("Serveurs actuels :", servers);
     setActiveForm(null);
   };
 

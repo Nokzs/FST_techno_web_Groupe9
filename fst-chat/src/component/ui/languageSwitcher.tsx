@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  //langue disponible, ne peut pas être génèré de manière automatique
   const languages = ["fr", "en"];
 
   return (

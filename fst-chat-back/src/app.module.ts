@@ -7,6 +7,7 @@ import { UserModule } from './user/module/user.module';
 import { AuthModule } from './auth/module/auth.module';
 import { MessageModule } from './message/module/message.module';
 import { ServerModule } from './server/module/server.module';
+import { ChannelModule } from './channel/module/channel.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ServerModule } from './server/module/server.module';
     AuthModule,
     MessageModule,
     ServerModule,
+    ChannelModule,
   ],
   controllers: [AppController],
   providers: [AppService],

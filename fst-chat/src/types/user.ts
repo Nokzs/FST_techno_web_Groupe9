@@ -7,11 +7,13 @@ export type User = {
 
   pseudo: string;
 
-  password: string;
-
   createdAt: Date;
 
   isAdmin: boolean;
 
   language: string;
+
+  bio: string;
+
+  urlPicture: string;
 };

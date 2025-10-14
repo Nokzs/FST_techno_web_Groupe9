@@ -2,7 +2,7 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { Inject, Body, Req, Post } from '@nestjs/common';
 import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
-import { JwtPayload } from 'src/token/types/jwtPayload';
+import { JwtPayload } from '../../token/types/jwtPayload';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
 type eventType = 'profilePicture';
 @Controller('/storage')

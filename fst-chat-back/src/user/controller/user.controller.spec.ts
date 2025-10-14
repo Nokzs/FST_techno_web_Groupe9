@@ -4,9 +4,10 @@ import { UserService } from '../service/user.service';
 import { UserAuthService } from '../../auth/service/auth.service';
 import { AuthGuard } from '../../guards/authGuard';
 
-// Mocks des services
+// Mock des services
 const userServiceMock: Record<string, jest.Mock> = {
   findByEmail: jest.fn(),
+  findById: jest.fn(),
   create: jest.fn(),
   comparePassword: jest.fn(),
   setLastConnection: jest.fn(),
@@ -19,6 +20,13 @@ const userAuthServiceMock: Record<string, jest.Mock> = {
   getUserId: jest.fn(),
 };
 
+// Mock du STORAGE_PROVIDER
+const storageProviderMock = {
+  upload: jest.fn(),
+  getPublicUrl: jest.fn(),
+  delete: jest.fn(),
+};
+
 describe('UserController', () => {
   let controller: UserController;
 
@@ -28,9 +36,10 @@ describe('UserController', () => {
       providers: [
         { provide: UserService, useValue: userServiceMock },
         { provide: UserAuthService, useValue: userAuthServiceMock },
+        { provide: 'STORAGE_PROVIDER', useValue: storageProviderMock }, // 🔹 obligatoire
       ],
     })
-    // Mock le guard pour les tests
+    // Mock le guard pour que les tests passent
     .overrideGuard(AuthGuard)
     .useValue({ canActivate: jest.fn(() => true) })
     .compile();

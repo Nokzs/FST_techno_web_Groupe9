@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from '../service/user.service';
 import { UserAuthService } from '../../auth/service/auth.service';
-import { AuthGuard } from 'src/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 
 // Mocks des services
 const userServiceMock: Record<string, jest.Mock> = {

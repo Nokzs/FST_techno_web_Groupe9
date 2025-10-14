@@ -99,4 +99,10 @@ export class SupabaseStorageProvider implements IStorageProvider {
       .getPublicUrl(path);
     return data.publicUrl;
   }
+  async createRoomBucket(roomId: string) {
+    this.supabaseClient.storage.createBucket(
+      `fstChatMessageFileBucket${roomId}`,
+      { public: true }
+    );
+  }
 }

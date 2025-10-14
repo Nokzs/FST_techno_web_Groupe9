@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { UpdateMessageDto } from '../DTO/update-message.dto';
 import { Model } from 'mongoose';
@@ -11,11 +11,29 @@ export class MessageService {
   constructor(
     @InjectModel(Message.name)
     private readonly messageModel: Model<MessageDocument>,
+    @InjectModel(MessageFile.name)
     private readonly messageFileModel: Model<MessageFile>
   ) {}
 
-  async create(createMessageDto: CreateMessageDto): Promise<Message> {
-    const newMessage = new this.messageModel(createMessageDto);
+  async create(
+    id: string, // sender's ID
+    createMessageDto: CreateMessageDto
+  ): Promise<Message> {
+    const files: MessageFile[] = await Promise.all(
+      (createMessageDto.files || []).map(async (f: MessageFileDto) => {
+        return this.createMessageFile(f); // async handler
+      })
+    );
+
+    const newMessage = new this.messageModel({
+      senderId: id,
+      receiverId: createMessageDto.receiverId || undefined,
+      channelId: createMessageDto.channelId || undefined,
+      content: createMessageDto.content,
+      files: files,
+      read: false,
+    });
+    Logger.log(`Creating message from ${id} ${newMessage}`);
     return newMessage.save();
   }
 

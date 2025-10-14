@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Query, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Inject,
+  UseGuards,
+  Req,
+  Logger,
+} from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { UpdateMessageDto } from '../DTO/update-message.dto';
@@ -7,6 +17,7 @@ import { PublicUrlDTO } from 'src/storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';
 import { MessageFile } from '../schema/messageFile.schema';
 import { MessageFileDto } from '../DTO/MessageFileDto';
+import { AuthGuard } from 'src/guards/authGuard';
 @Controller('messages')
 export class MessageController {
   constructor(
@@ -15,14 +26,14 @@ export class MessageController {
   ) {}
 
   @Post()
-  async create(@Body() createMessageDto: CreateMessageDto) {
-    return this.messageService.create(createMessageDto);
-  
-   /*  const files: MessageFile[] = await Promise.all(
-    (createMessageDto.files || []).map(async (f: MessageFileDto) => {
-        return this.messageService.createMessageFile(f); // async
-      })
-  ); */
+  @UseGuards(AuthGuard)
+  async create(
+    @Body() createMessageDto: CreateMessageDto,
+    @Req() req: Request
+  ) {
+    Logger.log('je veux creer un message');
+    const id = req['user'].sub;
+    return this.messageService.create(id, createMessageDto);
   }
 
   @Get()

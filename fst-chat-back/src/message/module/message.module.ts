@@ -6,6 +6,8 @@ import { Message, MessageSchema } from '../schema/message.schema';
 import { MessageFile, MessageFileSchema } from '../schema/messageFile.schema';
 import { provider } from 'src/config/constante';
 import { StorageModule } from 'src/storage/storage.module';
+import { AuthGuard } from '../../guards/authGuard';
+import { TokenModule } from '../../token/token.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -13,8 +15,9 @@ import { StorageModule } from 'src/storage/storage.module';
       { name: MessageFile.name, schema: MessageFileSchema },
     ]),
     StorageModule.register(provider),
+    TokenModule,
   ],
   controllers: [MessageController],
-  providers: [MessageService],
+  providers: [MessageService, AuthGuard],
 })
 export class MessageModule {}

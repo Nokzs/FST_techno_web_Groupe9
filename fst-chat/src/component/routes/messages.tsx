@@ -50,21 +50,16 @@ export function Messages() {
   }, []);
 
   const addMessage = async (text: string, files: File[]) => {
-    const newMessage = {
-      content: text,
-      channelId: "1",
-    };
     const messagesFiles: MessageFile[] = [];
     if (files.length > 0) {
       // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
-    await Promise.all(
+      await Promise.all(
         files.map(async (file) => {
           const { signedUrl, path } = await getSignedUrl(
             `file_${uuidv4()}`,
             "messageFile",
             "1",
           );
-
 
           await uploadFile(file, signedUrl);
 
@@ -76,18 +71,21 @@ export function Messages() {
             mimetype: file.type,
           });
         }),
-      );      
+      );
     }
-    
+    const newMessage = {
+      content: text,
+      channelId: "1",
+    };
+
     try {
       const res = await fetch(apiUrl + "/messages", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({...newMessage,files:messagesFiles}),
+        body: JSON.stringify({ ...newMessage, files: messagesFiles }),
       });
-
       const savedMessage = await res.json();
-      console.log(savedMessage);
       setMessages((prev) => [...prev, savedMessage]);
       setTimeout(scrollToBottom, 50);
     } catch (error) {

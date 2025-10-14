@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from '../service/user.service';
 import { UserAuthService } from '../../auth/service/auth.service';
+import { AuthGuard } from 'src/guards/authGuard';
 
+// Mocks des services
 const userServiceMock: Record<string, jest.Mock> = {
   findByEmail: jest.fn(),
   create: jest.fn(),
@@ -17,26 +19,23 @@ const userAuthServiceMock: Record<string, jest.Mock> = {
   getUserId: jest.fn(),
 };
 
-describe('UserAuthController', () => {
+describe('UserController', () => {
   let controller: UserController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
       providers: [
-        {
-          provide: UserService,
-          useValue: userServiceMock,
-        },
-        {
-          provide: UserAuthService,
-          useValue: userAuthServiceMock,
-        },
+        { provide: UserService, useValue: userServiceMock },
+        { provide: UserAuthService, useValue: userAuthServiceMock },
       ],
-    }).compile();
+    })
+    // Mock le guard pour les tests
+    .overrideGuard(AuthGuard)
+    .useValue({ canActivate: jest.fn(() => true) })
+    .compile();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    controller = module.get(UserController);
+    controller = module.get<UserController>(UserController);
   });
 
   it('should be defined', () => {

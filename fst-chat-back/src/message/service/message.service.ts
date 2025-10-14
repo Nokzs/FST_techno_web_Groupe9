@@ -33,6 +33,7 @@ export class MessageService {
       files: files,
       read: false,
     });
+
     Logger.log(`Creating message from ${id} ${newMessage}`);
     return newMessage.save();
   }

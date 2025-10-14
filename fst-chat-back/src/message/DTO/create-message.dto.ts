@@ -2,9 +2,6 @@ import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
 export class CreateMessageDto {
-  @IsString()
-  senderId: string;
-
   @IsOptional()
   @IsString()
   receiverId?: string; // pour messages privés
@@ -13,6 +10,7 @@ export class CreateMessageDto {
   @IsString()
   channelId?: string; // pour messages de salon
 
+  @IsOptional()
   @IsString()
   content: string;
 

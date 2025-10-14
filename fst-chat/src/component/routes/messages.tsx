@@ -5,22 +5,9 @@ import { getSignedUrl } from "../../api/storage/signedUrl";
 import { v4 as uuidv4 } from "uuid";
 import { getMessageFilePublicUrl } from "../../api/message/getMessageFilePublicUrl";
 import { uploadFile } from "../../api/storage/uploadFile";
+import { type MessageFile, type Message } from "./chat/messageFileType";
+import { MessageItem } from "./chat/MessageItem";
 const apiUrl = import.meta.env.VITE_API_URL;
-
-export interface MessageFile {
-  originalName: string; // nom original
-  url?: string; // URL signée ou publique
-  mimetype: string; // image/png, application/pdf, video/mp4...
-}
-
-interface Message {
-  channelId: string;
-  content: string;
-  createdAt: string;
-  senderId: string;
-  updatedAt: string;
-  files: MessageFile[];
-}
 
 export function Messages() {
   // listes des messages
@@ -113,26 +100,8 @@ export function Messages() {
         {messages
           .slice()
           .reverse()
-          .map((msg, index) => (
-            <div
-              key={index}
-              className={`p-2 rounded-xl max-w-xs ${
-                msg.senderId === "1"
-                  ? "self-end bg-green-500"
-                  : "self-start bg-blue-500"
-              } text-white`}
-            >
-              <div>{msg.content}</div>
-              <div className="text-xs flex justify-between mt-1">
-                <span>{msg.senderId}</span>
-                <span>
-                  {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            </div>
+          .map((msg, index: number) => (
+            <MessageItem key={index} message={msg} currentUserId={"1"} />
           ))}
         <div ref={messagesEndRef} />
       </div>

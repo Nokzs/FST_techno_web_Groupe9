@@ -14,7 +14,7 @@ export class Message {
   @Prop({ type: Types.ObjectId, ref: 'Channel', required: false })
   channelId?: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   content: string;
 
   @Prop({ type: [MessageFileSchema], default: [] })

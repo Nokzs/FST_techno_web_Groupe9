@@ -1,4 +1,5 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
+import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
@@ -8,7 +9,9 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
@@ -25,9 +28,15 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
   };
 
   const handleSend = () => {
+    if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
     setMessage("");
     setFiles([]);
+  };
+
+  // Emoji picker
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setMessage((prev) => prev + emojiData.emoji);
   };
 
   // Drag & Drop handlers
@@ -93,7 +102,8 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
       )}
 
       {/* Barre d'entrée du chat */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 relative">
+        {/* Bouton fichiers */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -109,6 +119,34 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           className="hidden"
           onChange={handleFileChange}
         />
+
+        {/* Bouton emoji */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            className="text-xl"
+          >
+            😊
+          </button>
+          {showEmojiPicker && (
+            <div
+              ref={pickerRef}
+              className="absolute bottom-12 left-0 z-50 shadow-lg"
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                lazyLoadEmojis
+                width={300}
+                height={400}
+                searchDisabled={false}
+                previewConfig={{ showPreview: false }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Champ texte */}
         <input
           type="text"
           value={message}
@@ -116,6 +154,8 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           placeholder="Écris un message..."
           className="flex-1 border rounded-lg px-3 py-2 focus:outline-none"
         />
+
+        {/* Envoyer */}
         <button
           onClick={handleSend}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"

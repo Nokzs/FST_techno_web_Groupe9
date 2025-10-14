@@ -15,8 +15,6 @@ import { UpdateMessageDto } from '../DTO/update-message.dto';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
 import { PublicUrlDTO } from 'src/storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';
-import { MessageFile } from '../schema/messageFile.schema';
-import { MessageFileDto } from '../DTO/MessageFileDto';
 import { AuthGuard } from 'src/guards/authGuard';
 @Controller('messages')
 export class MessageController {
@@ -40,6 +38,7 @@ export class MessageController {
   findAll() {
     return this.messageService.findAll();
   }
+
   @Get('filePublicUrl')
   getPublicUrl(
     @Query('fileName') fileName: string,

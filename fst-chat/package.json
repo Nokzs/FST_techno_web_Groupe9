@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "country-flag-icons": "^1.5.21",
     "crypto-browserify": "^3.12.1",
+    "emoji-picker-react": "^4.14.0",
     "framer-motion": "^12.23.22",
     "hamburger-react": "^2.5.2",
     "i18next": "^25.5.2",

@@ -1,15 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
-import { UpdateMessageDto } from '../DTO/update-message.dto';
+import { plainToInstance } from 'class-transformer';
+import { MessageDto } from '../DTO/message.dto';
+import { AuthGuard } from '../../auth/guards/authGuard';
 
 @Controller('messages')
 export class MessageController {
@@ -22,6 +16,17 @@ export class MessageController {
 
   @Get()
   findAll() {
-    return this.messageService.findAll();
+    const messages = this.messageService.findAll();
+    return messages.then((tab) =>
+      tab.map((message) => plainToInstance(MessageDto, message))
+    );
+  }
+
+  @Get('/userId')
+  @UseGuards(AuthGuard)
+  getUserId(@Req() request: Request) {
+    console.log('dans le userId');
+    const userId = request['user'].sub;
+    return { userId };
   }
 }

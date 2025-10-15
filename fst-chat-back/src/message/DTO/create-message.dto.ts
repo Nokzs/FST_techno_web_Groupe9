@@ -1,3 +1,4 @@
+// create-message.dto.ts
 import { IsString, IsOptional } from 'class-validator';
 
 export class CreateMessageDto {
@@ -6,11 +7,10 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsString()
-  receiverId?: string; // pour messages privés
+  receiverId?: string; // pour répondre à quelqu'un dans un channel
 
-  @IsOptional()
   @IsString()
-  channelId?: string; // pour messages de salon
+  channelId: string; // salon
 
   @IsString()
   content: string;

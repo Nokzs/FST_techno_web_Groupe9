@@ -11,14 +11,15 @@ export class Message {
   @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   receiverId?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Channel', required: false })
-  channelId?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Channel', required: true })
+  channelId: Types.ObjectId;
 
   @Prop({ required: true })
   content: string;
 
-  @Prop()
-  read: boolean;
+  // Liste des utilisateurs qui ont lu le message
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  readBy: Types.ObjectId[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

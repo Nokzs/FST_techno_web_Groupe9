@@ -22,6 +22,5 @@ export async function getConnectedUser(): Promise<UserID | null> {
   }
   const userRes = await userReq.json();
   const user = userRes ? { id: userRes.sub } : null;
-  console.log(user);
   return user;
 }

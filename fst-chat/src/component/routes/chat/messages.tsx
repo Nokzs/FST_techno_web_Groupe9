@@ -1,7 +1,7 @@
 // component/routes/MessagesPage.tsx
 import { useState, useRef, useEffect } from "react";
-
-const apiUrl = import.meta.env.VITE_API_URL;
+import { socket } from "../../../socket";
+import { useParams } from "react-router";
 
 interface Message {
   channelId: string;
@@ -12,56 +12,76 @@ interface Message {
 }
 
 export function Messages() {
-  // listes des messages
   const [messages, setMessages] = useState<Message[]>([]);
-
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // useRef pour garder une référence à un élément DOM
+  const { channelId } = useParams<{ channelId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll automatique apres un message
+  // Scroll automatique après chaque nouveau message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // 🔹 Récupération du userId via le cookie dès le chargement
   useEffect(() => {
-    async function fetchMessages() {
+    const fetchUserId = async () => {
       try {
-        const res = await fetch(`${apiUrl}messages`);
+        const res = await fetch("http://localhost:3000/messages/userId", {
+          credentials: "include", // le cookie est envoyé
+        });
         const data = await res.json();
-        setMessages(data);
-      } finally {
-        setLoading(false);
+        if (data.userId) setUserId(data.userId);
+      } catch (err) {
+        console.error("Erreur récupération userId :", err);
       }
-    }
-    fetchMessages();
-  }, []);
-
-  const addMessage = async (text: string, senderId: string) => {
-    const newMessage = {
-      senderId,
-      content: text,
-      channelId: "1",
     };
 
-    try {
-      const res = await fetch(apiUrl + "messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMessage),
-      });
+    fetchUserId();
+  }, []);
 
-      const savedMessage = await res.json();
-      console.log(savedMessage);
-      setMessages((prev) => [...prev, savedMessage]);
-      setTimeout(scrollToBottom, 50);
-    } catch (error) {
-      console.error("Erreur lors de l'ajout du message: ", error);
-    }
+  // 🔹 Connexion socket + récupération des messages
+  useEffect(() => {
+    if (!channelId) return;
+
+    // rejoindre la "room" du channel
+    socket.emit("joinChannelRoom", channelId);
+
+    socket.emit("getMessages", channelId, (messages: Message[]) => {
+      setMessages(messages);
+      setLoading(false);
+      scrollToBottom();
+    });
+
+    socket.on("newMessage", (message: Message) => {
+      if (message.channelId === channelId) {
+        console.log("Nouveau message reçu :", message);
+        setMessages((prev) => [...prev, message]);
+        scrollToBottom();
+      }
+    });
+
+    return () => {
+      socket.emit("leaveRoom", channelId);
+      socket.off("newMessage");
+    };
+  }, [channelId]);
+
+  // 🔹 Envoi d’un message
+  const addMessage = (text: string) => {
+    if (!userId || !channelId) return;
+
+    const newMessage = {
+      senderId: userId,
+      content: text,
+      channelId,
+    };
+
+    socket.emit("sendMessage", newMessage);
+    console.log("Message envoyé :", newMessage);
   };
-  
-  //JSX
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center text-gray-800 dark:text-white">
@@ -85,13 +105,13 @@ export function Messages() {
             <div
               key={index}
               className={`p-2 rounded-xl max-w-xs ${
-                msg.senderId === "1"
+                msg.senderId === userId
                   ? "self-end bg-green-500"
                   : "self-start bg-blue-500"
               } text-white`}
             >
               <div>{msg.content}</div>
-              <div className="text-xs flex justify-between mt-1">
+              <div className="text-xs flex justify-between mt-1 opacity-80">
                 <span>{msg.senderId}</span>
                 <span>
                   {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -105,7 +125,7 @@ export function Messages() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* Zone d’envoi */}
       <div className="mt-2 flex gap-2">
         <input
           type="text"
@@ -120,7 +140,7 @@ export function Messages() {
               "messageInput",
             ) as HTMLInputElement;
             if (input.value.trim()) {
-              addMessage(input.value, "1"); // backend
+              addMessage(input.value);
               input.value = "";
             }
           }}

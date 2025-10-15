@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from '../service/message.service';
 import { getModelToken } from '@nestjs/mongoose';
+import { AuthGuard } from '../../auth/guards/authGuard';
+import { UserAuthService } from '../../auth/service/auth.service';
 
 describe('MessageController', () => {
   let controller: MessageController;
@@ -22,6 +24,14 @@ describe('MessageController', () => {
         {
           provide: getModelToken('Message'),
           useValue: mockMessageModel,
+        },
+        {
+          provide: AuthGuard,
+          useValue: { canActivate: jest.fn(() => true) },
+        },
+        {
+          provide: UserAuthService,
+          useValue: {},
         },
       ],
     }).compile();

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChannelController } from './channel.controller';
 import { ChannelService } from '../service/channel.service';
+import { AuthGuard } from '../../auth/guards/authGuard';
+import { UserAuthService } from '../../auth/service/auth.service';
 
 describe('ChannelController', () => {
   let controller: ChannelController;
@@ -12,10 +14,19 @@ describe('ChannelController', () => {
         {
           provide: ChannelService,
           useValue: {
-            // mock des méthodes utilisées par le controller
             create: jest.fn(),
             findAll: jest.fn(),
           },
+        },
+        {
+          // Mock explicite du guard utilisé dans le controller
+          provide: AuthGuard,
+          useValue: { canActivate: jest.fn(() => true) },
+        },
+        {
+          // Mock du UserAuthService avec la bonne référence de classe
+          provide: UserAuthService,
+          useValue: {},
         },
       ],
     }).compile();

@@ -12,9 +12,9 @@ export function CreateChannelForm({ serverId, onCreated }: CreateChannelFormProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
     try {
-      const res = await fetch(`http://localhost:3000/channels`, {
+      const res = await fetch(`${API_URL}/channels`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

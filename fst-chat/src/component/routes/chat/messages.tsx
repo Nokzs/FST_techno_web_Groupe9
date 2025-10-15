@@ -1,6 +1,6 @@
 // component/routes/MessagesPage.tsx
 import { useState, useRef, useEffect } from "react";
-import { socket } from "../socket";
+import { socket } from "../../../socket";
 import { useParams } from "react-router";
 
 interface Message {
@@ -137,7 +137,7 @@ export function Messages() {
           className="bg-blue-600 text-white px-4 rounded-xl"
           onClick={() => {
             const input = document.getElementById(
-              "messageInput"
+              "messageInput",
             ) as HTMLInputElement;
             if (input.value.trim()) {
               addMessage(input.value);

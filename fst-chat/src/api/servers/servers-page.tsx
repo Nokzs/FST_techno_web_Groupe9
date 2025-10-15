@@ -26,12 +26,13 @@ export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 
   useEffect(() => {
     async function fetchServers() {
       try {
-        const res = await fetch("http://localhost:3000/servers", {
+        const res = await fetch(`${API_URL}/servers`, {
           // le cookie avec le token est inclus dans la requete
           credentials: "include",
         });

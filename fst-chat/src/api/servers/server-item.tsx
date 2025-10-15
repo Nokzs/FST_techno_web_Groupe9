@@ -6,13 +6,13 @@ import { ChannelList } from "../channels/channels-list";
 export function ServerItem({ server }: { server: Server }) {
   const [showChannels, setShowChannels] = useState(false);
   const [channels, setChannels] = useState(server.channels || []);
-  const [loadingChannels, setLoadingChannels] = useState(false);
-
+  const [loadingChannels, setLoadingChannels] = useState(false); 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const toggleChannels = async () => {
     if (!showChannels && channels.length === 0) {
       setLoadingChannels(true);
       try {
-        const res = await fetch(`http://localhost:3000/channels/${server._id}`, {
+        const res = await fetch(`${API_URL}/channels/${server._id}`, {
           credentials: "include",
         });
         const data = await res.json();

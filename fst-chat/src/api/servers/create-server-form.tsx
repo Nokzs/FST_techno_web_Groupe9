@@ -8,11 +8,11 @@ interface CreateServerFormProps {
 export function CreateServerForm({ onCreated }: CreateServerFormProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/servers", {
+      const res = await fetch(`${API_URL}/servers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

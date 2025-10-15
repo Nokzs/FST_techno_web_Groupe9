@@ -12,7 +12,6 @@ import { ProfilLayout } from "./component/routes/profil/layout/ProfilLayout.js";
 import { profilLoader } from "./loaders/profilLoader.js";
 import { ServersPage } from "./api/servers/servers-page.js";
 
-
 import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
 import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
 import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
@@ -25,7 +24,7 @@ const routes = [
   {
     Component: NotConnectedLayout,
     middleware: [notAuthMiddleware],
-  
+
     children: [
       {
         path: "/",
@@ -44,7 +43,6 @@ const routes = [
   {
     Component: ConnectedLayout,
     middleware: [authMiddleware],
-    middleware: [authMiddleware],
     children: [
       {
         loader: profilLoader,
@@ -57,17 +55,17 @@ const routes = [
           {
             path: "/compte",
             Component: Compte,
-          }
+          },
         ],
       },
       {
         path: "/servers",
-        Component: ServersPage
+        Component: ServersPage,
       },
       {
         path: "/messages/:channelId",
-        Component: Messages
-      }
+        Component: Messages,
+      },
     ],
   },
 ];

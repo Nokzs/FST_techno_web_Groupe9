@@ -19,11 +19,7 @@ import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
-<<<<<<< HEAD
 import type { Request } from 'express';
-=======
-
->>>>>>> main
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')
 export class UserController {

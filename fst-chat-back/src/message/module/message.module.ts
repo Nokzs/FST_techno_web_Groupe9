@@ -20,6 +20,6 @@ import { AuthGuard } from '../../guards/authGuard';
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageGateway, AuthGuard],
-  exports: [MessageService,AuthGuard],
+  exports: [MessageService, AuthGuard],
 })
 export class MessageModule {}

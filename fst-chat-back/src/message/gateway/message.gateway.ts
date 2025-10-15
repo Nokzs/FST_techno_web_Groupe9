@@ -12,7 +12,8 @@ import { MessageService } from '../service/message.service';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { CreateMessageDto } from '../DTO/create-message.dto';
-
+import { TokenService } from '../../token/token.service';
+import * as cookie from 'cookie';
 @WebSocketGateway({ cors: true })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -20,14 +21,45 @@ export class MessageGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly tokenService: TokenService
+  ) {}
 
-  handleConnection(client: Socket) {
-    // Optionnel : log, authentification, etc.
+  async handleConnection(client: Socket) {
+    const rawCookie = client.handshake?.headers?.cookie;
+    if (!rawCookie) {
+      client.disconnect();
+      return;
+    }
+    const parseCookie = cookie.parse(rawCookie);
+    const token = parseCookie['fst-chat-token'];
+    if (!token) {
+      client.disconnect();
+      return;
+    }
+    try {
+      const payload = await this.tokenService.verifyToken(token);
+      if (!payload || !payload.sub) {
+        client.disconnect();
+        return;
+      }
+      client.data.id = payload.sub;
+    } catch (e) {
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {
-    // Optionnel : log, cleanup, etc.
+    // On convertit Set en Array pour itérer
+    const rooms = Array.from(client.rooms);
+
+    rooms.forEach((room) => {
+      if (room !== client.id) {
+        // ignore la room privée de la socket
+        client.leave(room);
+      }
+    });
   }
 
   @SubscribeMessage('joinChannelRoom')
@@ -50,7 +82,10 @@ export class MessageGateway
   }
 
   @SubscribeMessage('sendMessage')
-  async handleSendMessage(@MessageBody() data: any) {
+  async handleSendMessage(
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: Socket
+  ) {
     // Transforme et valide le DTO (pas automatique comme le controlleur)
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     const errors = await validate(dto);
@@ -60,9 +95,11 @@ export class MessageGateway
 
     const message = await this.messageService.create(dto);
     // Broadcast
-    this.server.to(dto.channelId).emit('newMessage', message);
-    console.log('Message broadcasted to channel:', dto.channelId);
-    console.log('Message content:', message);
+    if (dto.channelId) {
+      this.server.to(dto.channelId).emit('newMessage', message);
+      console.log('Message broadcasted to channel:', dto.channelId);
+      console.log('Message content:', message);
+    }
     return message;
   }
 

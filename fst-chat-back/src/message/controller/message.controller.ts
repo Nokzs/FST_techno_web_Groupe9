@@ -31,7 +31,7 @@ export class MessageController {
   ) {
     Logger.log('je veux creer un message');
     const id = req['user'].sub;
-    return this.messageService.create(id, createMessageDto);
+    return this.messageService.create(createMessageDto);
   }
 
   @Get()

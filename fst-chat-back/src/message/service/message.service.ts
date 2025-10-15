@@ -17,10 +17,7 @@ export class MessageService {
     private readonly messageFileModel: Model<MessageFile>
   ) {}
 
-  async create(
-    id: string, // sender's ID
-    createMessageDto: CreateMessageDto
-  ): Promise<Message> {
+  async create(createMessageDto: CreateMessageDto): Promise<Message> {
     const files: MessageFile[] = await Promise.all(
       (createMessageDto.files || []).map(async (f: MessageFileDto) => {
         return this.createMessageFile(f); // async handler
@@ -28,7 +25,7 @@ export class MessageService {
     );
 
     const newMessage = new this.messageModel({
-      senderId: id,
+      senderId: createMessageDto.senderId,
       receiverId: createMessageDto.receiverId || undefined,
       channelId: createMessageDto.channelId || undefined,
       content: createMessageDto.content,
@@ -36,7 +33,6 @@ export class MessageService {
       read: false,
     });
 
-    Logger.log(`Creating message from ${id} ${newMessage}`);
     return newMessage.save();
   }
 

@@ -1,7 +1,16 @@
-import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  IsMongoId,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
 export class CreateMessageDto {
+  @IsMongoId()
+  senderId: string;
+
   @IsOptional()
   @IsString()
   receiverId?: string; // pour messages privés

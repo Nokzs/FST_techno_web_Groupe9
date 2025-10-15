@@ -1,0 +1,133 @@
+// component/routes/MessagesPage.tsx
+import { useState, useRef, useEffect } from "react";
+import { ChatInput } from "./ChatInput";
+import { getSignedUrl } from "../../../api/storage/signedUrl";
+import { v4 as uuidv4 } from "uuid";
+import { getMessageFilePublicUrl } from "../../../api/message/getMessageFilePublicUrl";
+import { uploadFile } from "../../../api/storage/uploadFile";
+import { type MessageFile, type Message } from "./messageFileType";
+import { MessageItem } from "./MessageItem";
+import { socket } from "../../../socket";
+import { useParams } from "react-router";
+
+const apiUrl = import.meta.env.VITE_API_URL;
+export function Messages() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string>("1");
+
+  const { channelId } = useParams<{ channelId: string }>();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll automatique après chaque nouveau message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 🔹 Récupération du userId via le cookie dès le chargement
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/messages/userId`, {
+          credentials: "include", // le cookie est envoyé
+        });
+        const data = await res.json();
+        if (data.userId) setUserId(data.userId);
+      } catch (err) {
+        console.error("Erreur récupération userId :", err);
+      }
+    };
+    fetchUserId();
+  }, []);
+
+  // 🔹 Connexion socket + récupération des messages
+  useEffect(() => {
+    if (!channelId) return;
+
+    // rejoindre la "room" du channel
+    socket.emit("joinChannelRoom", channelId);
+
+    socket.emit("getMessages", channelId, (messages: Message[]) => {
+      setMessages(messages);
+      setLoading(false);
+      scrollToBottom();
+    });
+
+    socket.on("newMessage", (message: Message) => {
+      if (message.channelId === channelId) {
+        console.log("Nouveau message reçu :", message);
+        setMessages((prev) => [...prev, message]);
+        scrollToBottom();
+      }
+    });
+
+    return () => {
+      socket.emit("leaveRoom", channelId);
+      socket.off("newMessage");
+    };
+  }, [channelId]);
+
+  // 🔹 Envoi d’un message
+  const addMessage = async (text: string,files:File[]) => {
+    if (!userId || !channelId) return;
+    const messagesFiles: MessageFile[] = [];
+    if (files.length > 0) {
+      // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
+      await Promise.all(
+        files.map(async (file) => {
+          const { signedUrl, path } = await getSignedUrl(
+            `file_${uuidv4()}`,
+            "messageFile",
+            "1",
+          );
+
+          await uploadFile(file, signedUrl);
+
+          const { publicUrl } = await getMessageFilePublicUrl(path, "1");
+
+          messagesFiles.push({
+            originalName: file.name,
+            url: publicUrl,
+            mimetype: file.type,
+          });
+        }),
+      );
+    }
+    const newMessage = {
+      senderId: userId,
+      content: text,
+      channelId,
+    };
+
+    socket.emit("sendMessage", {...newMessage,files:messagesFiles});
+    console.log("Message envoyé :", newMessage);
+  };
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-gray-800 dark:text-white">
+        Chargement des messages...
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 p-4">
+      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+        Salon de discussion
+      </h1>
+
+      {/* Liste des messages */}
+      <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-2">
+        {messages
+          .slice()
+          .reverse()
+          .map((msg, index: number) => (
+              <MessageItem key={index} message={msg} currentUserId={userId} />
+          ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <ChatInput sendMessage={addMessage} />
+    </div>
+  );
+}

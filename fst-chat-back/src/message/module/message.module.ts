@@ -6,18 +6,20 @@ import { Message, MessageSchema } from '../schema/message.schema';
 import { MessageFile, MessageFileSchema } from '../schema/messageFile.schema';
 import { provider } from 'src/config/constante';
 import { StorageModule } from 'src/storage/storage.module';
-import { AuthGuard } from '../../guards/authGuard';
+import { MessageGateway } from '../gateway/message.gateway';
 import { TokenModule } from '../../token/token.module';
+import { AuthGuard } from '../../guards/authGuard';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Message.name, schema: MessageSchema },
       { name: MessageFile.name, schema: MessageFileSchema },
     ]),
-    StorageModule.register(provider),
     TokenModule,
+    StorageModule.register(provider),
   ],
   controllers: [MessageController],
-  providers: [MessageService, AuthGuard],
+  providers: [MessageService, MessageGateway, AuthGuard],
+  exports: [MessageService,AuthGuard],
 })
 export class MessageModule {}

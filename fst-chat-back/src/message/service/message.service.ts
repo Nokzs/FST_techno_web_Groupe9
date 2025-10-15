@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateMessageDto } from '../DTO/create-message.dto';
-import { UpdateMessageDto } from '../DTO/update-message.dto';
+import { MessageFile } from '../schema/messageFile.schema';
+import { MessageFileDto } from '../DTO/MessageFileDto';
+import { MessageDto } from '../DTO/message.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message, MessageDocument } from '../schema/message.schema';
-import { MessageFile } from '../schema/messageFile.schema';
-import { MessageFileDto } from '../DTO/MessageFileDto';
+import { plainToInstance } from 'class-transformer';
+
 @Injectable()
 export class MessageService {
   constructor(
@@ -45,7 +47,7 @@ export class MessageService {
     return newMessage.save();
   }
   async findAll(): Promise<Message[]> {
-    return this.messageModel.find().exec();
+    return this.messageModel.find().lean().exec();
   }
 
   async findByUser(userId: string): Promise<Message[]> {
@@ -57,34 +59,5 @@ export class MessageService {
 
   async findByChannel(channelId: string): Promise<Message[]> {
     return this.messageModel.find({ channelId }).sort({ createdAt: 1 }).exec();
-  }
-
-  async update(
-    id: string,
-    updateMessageDto: UpdateMessageDto
-  ): Promise<Message> {
-    const message = await this.messageModel
-      .findByIdAndUpdate(
-        id,
-        updateMessageDto,
-        { new: true } // renvoie le document après modification
-      )
-      .exec();
-
-    if (!message) {
-      throw new Error('Message with id ' + id + ' not found');
-    }
-
-    return message;
-  }
-
-  async remove(id: string): Promise<Message> {
-    const message = await this.messageModel.findByIdAndDelete(id).exec();
-
-    if (!message) {
-      throw new Error('Message with id ' + id + ' not found');
-    }
-
-    return message;
   }
 }

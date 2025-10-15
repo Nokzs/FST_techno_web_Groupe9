@@ -9,6 +9,9 @@ import { MessageModule } from './message/module/message.module';
 import { StorageModule } from './storage/storage.module';
 import { StorageProviderType } from './storage/storage.module';
 import { provider } from './config/constante';
+import { ServerModule } from './server/module/server.module';
+import { ChannelModule } from './channel/module/channel.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +28,8 @@ import { provider } from './config/constante';
     AuthModule,
     MessageModule,
     StorageModule.register(provider),
+    ServerModule,
+    ChannelModule,
   ],
   controllers: [AppController],
   providers: [AppService],

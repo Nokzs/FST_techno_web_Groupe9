@@ -13,13 +13,17 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
-import { AuthGuard } from 'src/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 import { UserService } from '../service/user.service';
 import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
+<<<<<<< HEAD
 import type { Request } from 'express';
+=======
+
+>>>>>>> main
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')
 export class UserController {

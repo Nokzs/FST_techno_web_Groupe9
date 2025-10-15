@@ -10,8 +10,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
+import { MessageDto } from '../DTO/message.dto';
 import { CreateMessageDto } from '../DTO/create-message.dto';
-import { UpdateMessageDto } from '../DTO/update-message.dto';
 import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
 import { PublicUrlDTO } from 'src/storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChannelController } from './channel.controller';
 import { ChannelService } from '../service/channel.service';
-import { AuthGuard } from '../../auth/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 import { UserAuthService } from '../../auth/service/auth.service';
 
 describe('ChannelController', () => {

@@ -10,7 +10,10 @@ import { TokenService } from './token.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'change-this-secret'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
+          expiresIn: parseInt(
+            configService.get<string>('JWT_EXPIRES_IN') || '3600',
+            10
+          ),
         },
       }),
       inject: [ConfigService],

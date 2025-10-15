@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from '../service/message.service';
 import { getModelToken } from '@nestjs/mongoose';
-import { AuthGuard } from '../../auth/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 import { UserAuthService } from '../../auth/service/auth.service';
 
 describe('MessageController', () => {

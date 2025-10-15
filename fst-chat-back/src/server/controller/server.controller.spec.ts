@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServerController } from './server.controller';
 import { ServerService } from '../service/server.service';
-import { AuthGuard } from '../../auth/guards/authGuard';
-import { UserAuthService } from '../../auth/service/auth.service'; 
+import { AuthGuard } from '../../guards/authGuard';
+import { UserAuthService } from '../../auth/service/auth.service';
 
 describe('ServerController', () => {
   let controller: ServerController;

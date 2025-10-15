@@ -3,7 +3,7 @@ import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { plainToInstance } from 'class-transformer';
 import { MessageDto } from '../DTO/message.dto';
-import { AuthGuard } from '../../auth/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 
 @Controller('messages')
 export class MessageController {

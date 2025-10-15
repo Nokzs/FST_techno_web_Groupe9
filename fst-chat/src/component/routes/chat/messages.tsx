@@ -37,7 +37,6 @@ export function Messages() {
         console.error("Erreur récupération userId :", err);
       }
     };
-
     fetchUserId();
   }, []);
 

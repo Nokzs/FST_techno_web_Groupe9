@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Response } from 'express';
 import { User, UserDocument } from '../../user/schema/user.schema';
-import type { JwtPayload } from '../types/jwtPayload';
 type PlainUser = {
   id?: string;
   _id?: unknown;
@@ -25,16 +24,14 @@ export type SanitizedUser = {
   lastConnectedAt?: Date;
   createdAt?: Date;
 };
+
 @Injectable()
 export class UserAuthService {
   private readonly authCookieName = 'fst_chat_token';
   private readonly cookieMaxAgeMs: number;
   private readonly isSecureCookie: boolean;
 
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const expires =
       this.configService.get<string>('JWT_EXPIRES_IN', '1h') ?? '1h';
     this.cookieMaxAgeMs = this.resolveCookieMaxAge(expires);
@@ -56,14 +53,12 @@ export class UserAuthService {
       createdAt: rest.createdAt,
     };
   }
-  async createAuthToken(user: User | UserDocument): Promise<string> {
-    return this.jwtService.signAsync({ sub: this.getUserId(user) });
-  }
 
   attachAuthCookie(res: Response, token: string): void {
+    console.log('Attaching auth cookie with token:', token);
     res.cookie(this.authCookieName, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: this.isSecureCookie ? 'none' : 'lax',
       secure: this.isSecureCookie,
       maxAge: this.cookieMaxAgeMs,
     });
@@ -145,17 +140,12 @@ export class UserAuthService {
 
     return '';
   }
-  public async verifyToken(token: string): Promise<JwtPayload | null> {
-    try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
-      return payload;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('JWT verification failed:', err.message);
-      }
-      return null;
-    }
+
+  public clearCookie(res: Response): void {
+    res.clearCookie('fst_chat_token', {
+      httpOnly: true,
+      sameSite: this.isSecureCookie ? 'none' : 'lax',
+      secure: this.isSecureCookie,
+    });
   }
 }

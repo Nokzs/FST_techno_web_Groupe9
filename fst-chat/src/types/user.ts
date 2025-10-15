@@ -3,11 +3,15 @@ export type UserID = {
 };
 
 export type User = {
+  id: string;
+
   email: string;
 
   pseudo: string;
 
   createdAt: Date;
+
+  lastConnectedAt: Date;
 
   isAdmin: boolean;
 

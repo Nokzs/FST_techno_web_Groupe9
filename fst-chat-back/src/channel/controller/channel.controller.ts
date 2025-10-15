@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { AuthGuard } from '../../auth/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 import { ChannelDto } from '../DTO/channel.dto';
 import { CreateChannelDto } from '../DTO/create-channel.dto';
 import { ChannelService } from '../service/channel.service';

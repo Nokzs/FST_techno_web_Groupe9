@@ -23,22 +23,26 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
+      if(file?.size > 3000000){
+        //changer pour une modale
+        window.alert("fichier trop volumineux")
+        return
+      }
+      
+      console.log(file)
       if (!file) return;
 
-      // Stocke le fichier dans la ref
       if (ref) {
         if (typeof ref === "function") {
           ref(file); // ref callback
         } else {
           (ref as React.MutableRefObject<File | null>).current = file;
         }
-      }
-
-      // Génère l'aperçu
+      } 
       const reader = new FileReader();
       reader.onload = () => {
         setSrcPicture(reader.result as string);
-        handleModif?.();
+        if(handleModif) handleModif();
       };
       reader.readAsDataURL(file);
     };

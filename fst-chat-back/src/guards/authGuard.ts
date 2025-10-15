@@ -5,23 +5,20 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { UserAuthService } from '../service/auth.service';
-
-const cookieKey = 'fst_chat_token';
+import { TokenService } from '../token/token.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private authService: UserAuthService) {}
+  constructor(private tokenService: TokenService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-
+    const request: Request = context.switchToHttp().getRequest();
     //récupèrer la clé du cookie dans les paramètre de la guard;
-    const token = request.cookies[cookieKey];
+    const token: string = request.cookies['fst_chat_token'];
     if (!token) {
       throw new UnauthorizedException();
     }
     try {
-      const payload = await this.authService.verifyToken(token);
+      const payload = await this.tokenService.verifyToken(token);
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;

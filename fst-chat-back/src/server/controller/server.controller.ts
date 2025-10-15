@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ServerService } from '../service/server.service';
 import { plainToInstance } from 'class-transformer';
 import { ServerDto } from '../DTO/server.dto';
-import { AuthGuard } from '../../auth/guards/authGuard';
+import { AuthGuard } from '../../guards/authGuard';
 import { CreateServerDto } from '../DTO/create-server.dto';
 import { CreateServerRequestDto } from '../DTO/create-server-request-dto';
 

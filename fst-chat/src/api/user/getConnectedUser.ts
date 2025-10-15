@@ -8,19 +8,26 @@ import type { UserID } from "../../types/user";
 
 export async function getConnectedUser(): Promise<UserID | null> {
   const apiUrl = import.meta.env.VITE_API_URL || "";
-  //ToDo : renvoyer l'utilisateur connecté une fois
-  const userReq = await fetch(`${apiUrl}/auth/user`, {
-    credentials: "include",
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!userReq.ok) {
-    console.log("code ", userReq.status, "message : ", userReq.statusText);
+  console.log(apiUrl);
+  try {
+    const userReq = await fetch(`${apiUrl}/auth/user`, {
+      credentials: "include",
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!userReq.ok) {
+      // On ignore l'erreur côté front
+      return null;
+    }
+
+    const userRes = await userReq.json();
+    const user = userRes ? { id: userRes.sub } : null;
+    return user;
+  } catch (err) {
+    console.log(err);
     return null;
   }
-  const userRes = await userReq.json();
-  const user = userRes ? { id: userRes.sub } : null;
-  return user;
 }

@@ -6,6 +6,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/module/user.module';
 import { AuthModule } from './auth/module/auth.module';
 import { MessageModule } from './message/module/message.module';
+import { StorageModule } from './storage/storage.module';
+import { StorageProviderType } from './storage/storage.module';
+import { provider } from './config/constante';
 import { ServerModule } from './server/module/server.module';
 import { ChannelModule } from './channel/module/channel.module';
 
@@ -24,6 +27,7 @@ import { ChannelModule } from './channel/module/channel.module';
     UserModule,
     AuthModule,
     MessageModule,
+    StorageModule.register(provider),
     ServerModule,
     ChannelModule,
   ],

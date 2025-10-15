@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ServerController } from './server.controller';
 import { ServerService } from '../service/server.service';
 import { AuthGuard } from '../../guards/authGuard';
-import { UserAuthService } from '../../auth/service/auth.service';
+
+// Mock du service
+const serverServiceMock: Record<string, jest.Mock> = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+};
 
 describe('ServerController', () => {
   let controller: ServerController;
@@ -13,21 +18,14 @@ describe('ServerController', () => {
       providers: [
         {
           provide: ServerService,
-          useValue: {
-            create: jest.fn(),
-            findAll: jest.fn(),
-          },
-        },
-        {
-          provide: AuthGuard,
-          useValue: { canActivate: jest.fn(() => true) }, // mock du guard
-        },
-        {
-          provide: UserAuthService, // 👈 mock du service utilisé par le guard
-          useValue: {}, // objet vide suffit pour le test unitaire
+          useValue: serverServiceMock,
         },
       ],
-    }).compile();
+    })
+      // 👇 Remplace uniquement le guard AuthGuard dans ce test
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ServerController>(ServerController);
   });

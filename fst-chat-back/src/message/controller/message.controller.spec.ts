@@ -1,45 +1,47 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from '../service/message.service';
-import { getModelToken } from '@nestjs/mongoose';
 import { AuthGuard } from '../../guards/authGuard';
-import { UserAuthService } from '../../auth/service/auth.service';
+import { Request } from 'express';
+
+// Mock du service
+const messageServiceMock: Record<string, jest.Mock> = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+};
 
 describe('MessageController', () => {
   let controller: MessageController;
-
-  const mockMessageModel = {
-    create: jest.fn(),
-    find: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-    exec: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MessageController],
       providers: [
-        MessageService,
         {
-          provide: getModelToken('Message'),
-          useValue: mockMessageModel,
-        },
-        {
-          provide: AuthGuard,
-          useValue: { canActivate: jest.fn(() => true) },
-        },
-        {
-          provide: UserAuthService,
-          useValue: {},
+          provide: MessageService,
+          useValue: messageServiceMock,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard) // 🔐 on mocke le guard ici
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<MessageController>(MessageController);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getUserId', () => {
+    it('should return userId from request.user', () => {
+      const mockRequest = {
+        user: { sub: 'user-id-123' },
+      } as unknown as Request;
+
+      const result = controller.getUserId(mockRequest);
+      expect(result).toEqual({ userId: 'user-id-123' });
+    });
   });
 });

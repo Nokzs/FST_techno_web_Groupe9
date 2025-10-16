@@ -33,6 +33,7 @@ export function Messages() {
         });
         const data = await res.json();
         if (data.userId) setUserId(data.userId);
+        setLoading(false);
       } catch (err) {
         console.error("Erreur récupération userId :", err);
       }
@@ -45,10 +46,12 @@ export function Messages() {
     if (!channelId) return;
 
     // rejoindre la "room" du channel
+    console.log("je rentre dans la room");
     socket.emit("joinChannelRoom", channelId);
 
     socket.emit("getMessages", channelId, (messages: Message[]) => {
       setMessages(messages);
+      console.log("Messages chargés :", messages);
       setLoading(false);
       scrollToBottom();
     });
@@ -62,13 +65,14 @@ export function Messages() {
     });
 
     return () => {
+      console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
       socket.off("newMessage");
     };
   }, [channelId]);
 
   // 🔹 Envoi d’un message
-  const addMessage = async (text: string,files:File[]) => {
+  const addMessage = async (text: string, files: File[]) => {
     if (!userId || !channelId) return;
     const messagesFiles: MessageFile[] = [];
     if (files.length > 0) {
@@ -99,7 +103,7 @@ export function Messages() {
       channelId,
     };
 
-    socket.emit("sendMessage", {...newMessage,files:messagesFiles});
+    socket.emit("sendMessage", { ...newMessage, files: messagesFiles });
     console.log("Message envoyé :", newMessage);
   };
 
@@ -112,7 +116,7 @@ export function Messages() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 p-4">
+    <div className="h-screen flex flex-col  p-4">
       <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
         Salon de discussion
       </h1>
@@ -123,7 +127,7 @@ export function Messages() {
           .slice()
           .reverse()
           .map((msg, index: number) => (
-              <MessageItem key={index} message={msg} currentUserId={userId} />
+            <MessageItem key={index} message={msg} currentUserId={userId} />
           ))}
         <div ref={messagesEndRef} />
       </div>

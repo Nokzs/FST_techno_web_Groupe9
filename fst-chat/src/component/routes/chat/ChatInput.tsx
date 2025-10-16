@@ -1,5 +1,6 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
+import { SkinTones, EmojiStyle } from "emoji-picker-react";
 
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
@@ -36,7 +37,9 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
 
   // Emoji picker
   const handleEmojiClick = (emojiData: EmojiClickData) => {
+    console.log(emojiData);
     setMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
   };
 
   // Drag & Drop handlers
@@ -139,7 +142,8 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
                 lazyLoadEmojis
                 width={300}
                 height={400}
-                searchDisabled={false}
+                skinTonesDisabled={false}
+                defaultSkinTone={SkinTones.MEDIUM_LIGHT}
                 previewConfig={{ showPreview: false }}
               />
             </div>
@@ -152,7 +156,7 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           value={message}
           onChange={handleTextChange}
           placeholder="Écris un message..."
-          className="flex-1 border rounded-lg px-3 py-2 focus:outline-none"
+          className="flex-1 border-2 dark:border-white border-black rounded-lg px-3 py-2 focus:outline-none"
         />
 
         {/* Envoyer */}

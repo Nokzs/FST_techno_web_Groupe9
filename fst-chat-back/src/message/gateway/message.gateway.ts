@@ -7,6 +7,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../service/message.service';
 import { plainToInstance } from 'class-transformer';
@@ -27,25 +28,31 @@ export class MessageGateway
   ) {}
 
   async handleConnection(client: Socket) {
+    Logger.log(`New client connected: ${client.id}`);
     const rawCookie = client.handshake?.headers?.cookie;
     if (!rawCookie) {
       client.disconnect();
+      Logger.log('Client disconnected: No cookies found');
       return;
     }
     const parseCookie = cookie.parse(rawCookie);
-    const token = parseCookie['fst-chat-token'];
+    const token = parseCookie['fst_chat_token'];
     if (!token) {
+      Logger.log('Client disconnected: No auth token found in cookies');
       client.disconnect();
       return;
     }
     try {
       const payload = await this.tokenService.verifyToken(token);
       if (!payload || !payload.sub) {
+        Logger.log('Client disconnected: Invalid auth token');
         client.disconnect();
         return;
       }
       client.data.id = payload.sub;
+      Logger.log(`Client connected: ${client.id} (User ID: ${client.data.id})`);
     } catch (e) {
+      Logger.log('Client disconnected: Error verifying token');
       client.disconnect();
     }
   }
@@ -68,7 +75,7 @@ export class MessageGateway
     @ConnectedSocket() client: Socket
   ) {
     client.join(channelId);
-    console.log(`Client ${client.id} joined channel room ${channelId}`);
+    Logger.log(`Client ${client.id} joined channel room ${channelId}`);
   }
 
   // Quitter une room
@@ -86,8 +93,10 @@ export class MessageGateway
     @MessageBody() data: any,
     @ConnectedSocket() socket: Socket
   ) {
+    Logger.log(`Client ${socket.id} is sending a message`);
     // Transforme et valide le DTO (pas automatique comme le controlleur)
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
+    dto.senderId = socket.data.id;
     const errors = await validate(dto);
     if (errors.length > 0) {
       return { error: 'Validation failed', details: errors };
@@ -95,11 +104,14 @@ export class MessageGateway
 
     const message = await this.messageService.create(dto);
     // Broadcast
-    if (dto.channelId) {
-      this.server.to(dto.channelId).emit('newMessage', message);
-      console.log('Message broadcasted to channel:', dto.channelId);
-      console.log('Message content:', message);
+    if (!dto.channelId) {
+      Logger.log('No channelId provided in message DTO');
+      return;
     }
+
+    this.server.to(dto.channelId).emit('newMessage', message);
+    console.log('Message broadcasted to channel:', dto.channelId);
+    console.log('Message content:', message);
     return message;
   }
 

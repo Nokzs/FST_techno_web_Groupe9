@@ -48,4 +48,11 @@ export class MessageController {
     const url = this.storage.getPublicUrl(fileName, 'messageFile', channelId);
     return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
+  @Get('/userId')
+  @UseGuards(AuthGuard)
+  getUserId(@Req() request: Request) {
+    console.log('dans le userId');
+    const userId = request['user'].sub;
+    return { userId };
+  }
 }

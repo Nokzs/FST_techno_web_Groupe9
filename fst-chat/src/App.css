@@ -32,6 +32,12 @@
   padding-right: calc(--value(integer) * 1px);
 }
 
+/* input,
+textarea .EmojiPickerReact {
+  font-family:
+    "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+} */
+
 @theme {
   --animate-fade-in: fade-in 0.3s ease-in-out forwards;
   --font-home: "nunito", sans-serif;

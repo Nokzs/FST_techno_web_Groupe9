@@ -14,6 +14,7 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const token: string = request.cookies['fst_chat_token'];
+    Logger.log('Token extrait des cookies : ' + token);
     if (!token) {
       throw new UnauthorizedException();
     }

@@ -45,7 +45,7 @@ export function ServersPage() {
     }
 
     fetchServers();
-  }, []);
+  }, [API_URL]);
 
   const handleServerAdded = (newServer: Server) => {
     setServers((prev) => [...prev, newServer]);

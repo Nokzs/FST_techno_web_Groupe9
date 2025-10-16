@@ -1,6 +1,6 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
-import { SkinTones, EmojiStyle } from "emoji-picker-react";
+import { AudioRecorder as VoiceRecorder } from "react-audio-voice-recorder";
 
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
@@ -35,31 +35,35 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
     setFiles([]);
   };
 
-  // Emoji picker
   const handleEmojiClick = (emojiData: EmojiClickData) => {
-    console.log(emojiData);
     setMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
 
-  // Drag & Drop handlers
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
-
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    if (droppedFiles.length > 0) {
-      setFiles((prev) => [...prev, ...droppedFiles]);
+    const dropped = Array.from(e.dataTransfer.files);
+    if (dropped.length > 0) {
+      setFiles((prev) => [...prev, ...dropped]);
     }
+  };
+
+  // Callback quand le composant audio lib retourne un blob
+  const onRecordingComplete = (blob: Blob) => {
+    // Transformer en File
+    const file = new File([blob], `audio_${Date.now()}.webm`, {
+      type: blob.type,
+    });
+    setFiles((prev) => [...prev, file]);
   };
 
   return (
@@ -69,12 +73,10 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Overlay discrète quand on drag */}
       {isDragging && (
         <div className="absolute inset-0 bg-blue-200/30 border-2 border-blue-400 border-dashed rounded-lg pointer-events-none" />
       )}
 
-      {/* Preview des fichiers */}
       {files.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {files.map((file, i) => (
@@ -84,6 +86,12 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
                   src={URL.createObjectURL(file)}
                   alt={file.name}
                   className="w-20 h-20 object-cover rounded-lg shadow"
+                />
+              ) : file.type.startsWith("audio/") ? (
+                <audio
+                  controls
+                  src={URL.createObjectURL(file)}
+                  className="w-20 h-20 rounded-lg shadow"
                 />
               ) : (
                 <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-lg shadow text-xs text-center p-1">
@@ -104,9 +112,7 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
         </div>
       )}
 
-      {/* Barre d'entrée du chat */}
       <div className="flex items-center gap-2 relative">
-        {/* Bouton fichiers */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -123,7 +129,6 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           onChange={handleFileChange}
         />
 
-        {/* Bouton emoji */}
         <div className="relative">
           <button
             type="button"
@@ -142,7 +147,6 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
                 lazyLoadEmojis
                 width={300}
                 height={400}
-                skinTonesDisabled={false}
                 defaultSkinTone={SkinTones.MEDIUM_LIGHT}
                 previewConfig={{ showPreview: false }}
               />
@@ -150,22 +154,31 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           )}
         </div>
 
-        {/* Champ texte */}
         <input
           type="text"
           value={message}
           onChange={handleTextChange}
           placeholder="Écris un message..."
-          className="flex-1 border-2 dark:border-white border-black rounded-lg px-3 py-2 focus:outline-none"
+          className="flex-1 border-2 dark:border-white border-black rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800"
         />
 
-        {/* Envoyer */}
-        <button
-          onClick={handleSend}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-        >
-          Envoyer
-        </button>
+        {message.trim() || files.length > 0 ? (
+          <button
+            onClick={handleSend}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Envoyer
+          </button>
+        ) : (
+          <VoiceRecorder
+            onRecordingComplete={onRecordingComplete}
+            audioTrackConstraints={{
+              noiseSuppression: true,
+              echoCancellation: true,
+            }}
+            downloadOnSavePress={false}
+          />
+        )}
       </div>
     </div>
   );

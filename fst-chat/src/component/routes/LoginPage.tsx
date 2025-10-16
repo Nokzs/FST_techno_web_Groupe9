@@ -1,7 +1,6 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthCard } from "../ui/AuthCard";
-import { socket } from "../../socket";
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
 
 export function LoginPage() {
@@ -46,7 +45,6 @@ export function LoginPage() {
 
       await response.json().catch(() => ({}));
       setSuccess("Connexion reussie. Bienvenue !");
-      socket.connect();
       navigate("/servers", { replace: true });
     } catch (submitError) {
       const message =

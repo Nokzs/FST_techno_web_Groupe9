@@ -10,7 +10,7 @@ Ce dossier contient tous les composants React utilisés dans l'application, y co
 
 ### /src/component/routes
 
-Contient les définitions les fichers nécesssaire aux différentes routes.
+Contient  les fichers nécesssaire aux différentes routes.
 
 ### /src/component/ui
 

@@ -15,7 +15,9 @@ export function Messages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string>("1");
-
+  const [replyMesssage, setReplyMessage] = useState<Message | undefined>(
+    undefined,
+  );
   const { channelId } = useParams<{ channelId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -101,6 +103,7 @@ export function Messages() {
       senderId: userId,
       content: text,
       channelId,
+      replyMesssage: replyMesssage || null,
     };
 
     socket.emit("sendMessage", { ...newMessage, files: messagesFiles });
@@ -116,22 +119,31 @@ export function Messages() {
   }
 
   return (
-    <div className="h-screen flex flex-col  p-4">
+    <div className="h-screen flex flex-col p-10">
       <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
         Salon de discussion
       </h1>
 
       {/* Liste des messages */}
-      <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-2">
+      <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container">
         {messages
           .slice()
           .reverse()
           .map((msg, index: number) => (
-            <MessageItem key={index} message={msg} currentUserId={userId} />
+            <MessageItem
+              key={index}
+              message={msg}
+              currentUserId={userId}
+              onReply={setReplyMessage}
+            />
           ))}
         <div ref={messagesEndRef} />
       </div>
-      <ChatInput sendMessage={addMessage} />
+      <ChatInput
+        sendMessage={addMessage}
+        replyMessage={replyMesssage}
+        onReply={setReplyMessage}
+      />
     </div>
   );
 }

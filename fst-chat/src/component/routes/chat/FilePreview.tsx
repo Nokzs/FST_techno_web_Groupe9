@@ -23,7 +23,13 @@ export function FilePreview({ file }: { file: MessageFile }) {
   }
 
   if (isAudio) {
-    return <audio controls src={file.url} className="w-64" />;
+    return (
+      <audio
+        controls
+        src={file.url}
+        className="w-full max-w-sm rounded-lg shadow"
+      />
+    );
   }
 
   if (isPdf) {

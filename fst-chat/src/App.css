@@ -39,6 +39,7 @@ textarea .EmojiPickerReact {
 } */
 
 @theme {
+  --animate-width: scale-width 1s ease-in-out forwards;
   --animate-fade-in: fade-in 0.3s ease-in-out forwards;
   --font-home: "nunito", sans-serif;
 
@@ -53,6 +54,16 @@ textarea .EmojiPickerReact {
       transform: translateY(0);
     }
   }
+
+  @keyframes scale-width {
+    0% {
+      flex: 1;
+    }
+
+    100% {
+      flex: 0.1;
+    }
+  }
 }
 
 @layer utilities {
@@ -63,4 +74,24 @@ textarea .EmojiPickerReact {
   .dark .bg-main {
     @apply bg-gradient-to-r from-[#010221] via-[#080c3b] to-[#080c3f];
   }
+}
+
+/* index.css */
+.messages-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+  border: 2px solid #f0f0f0;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }

@@ -1,30 +1,43 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
-import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
-import { AudioRecorder as VoiceRecorder } from "react-audio-voice-recorder";
-
+import EmojiPicker, {
+  type EmojiClickData,
+  SkinTones,
+} from "emoji-picker-react";
+import { AudioRecorder } from "./AudioRecorder";
+import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "../../../utils/cn";
+import type { Message } from "./messageFileType";
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
+  replyMessage?: Message;
+  onReply: React.Dispatch<React.SetStateAction<Message | undefined>>;
 };
 
-export function ChatInput({ sendMessage }: ChatInputProps) {
+export function ChatInput({
+  sendMessage,
+  replyMessage,
+  onReply,
+}: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const messageRef = useRef<string>("");
+  const filesLengthRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
-
+  const recordRef = useRef<HTMLDivElement>(null);
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    messageRef.current = e.target.value;
     setMessage(e.target.value);
   };
-
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const newFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...newFiles]);
+    filesLengthRef.current += e.target.files.length;
+    setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
   };
 
   const handleRemoveFile = (index: number) => {
+    filesLengthRef.current -= 1;
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -32,9 +45,15 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
     setMessage("");
+    filesLengthRef.current = 0;
     setFiles([]);
   };
 
+  const onStopRecording = (file: File) => {
+    console.log("je recois le fichier audio");
+    setFiles((prev) => [...prev, file]);
+    filesLengthRef.current += 1;
+  };
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
@@ -52,35 +71,45 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
     e.preventDefault();
     setIsDragging(false);
     const dropped = Array.from(e.dataTransfer.files);
-    if (dropped.length > 0) {
-      setFiles((prev) => [...prev, ...dropped]);
-    }
-  };
-
-  // Callback quand le composant audio lib retourne un blob
-  const onRecordingComplete = (blob: Blob) => {
-    // Transformer en File
-    const file = new File([blob], `audio_${Date.now()}.webm`, {
-      type: blob.type,
-    });
-    setFiles((prev) => [...prev, file]);
+    filesLengthRef.current += dropped.length;
+    if (dropped.length > 0) setFiles((prev) => [...prev, ...dropped]);
   };
 
   return (
     <div
-      className="p-4 border-t flex flex-col gap-2 relative"
+      className="p-7 border-t flex flex-col gap-2 relative "
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {replyMessage && (
+        <div className="p-2 mb-1 rounded bg-gray-200 w-auto dark:bg-gray-700 text-sm flex justify-between items-center">
+          <div className="flex flex-col">
+            <span className="truncate">Répond à:{replyMessage.senderId}</span>
+            <span>
+              {replyMessage.content.length > 50
+                ? replyMessage.content.slice(0, 50) + "..."
+                : replyMessage.content}
+            </span>
+          </div>
+
+          <button
+            onClick={() => onReply(undefined)}
+            className="text-red-500 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       {isDragging && (
         <div className="absolute inset-0 bg-blue-200/30 border-2 border-blue-400 border-dashed rounded-lg pointer-events-none" />
       )}
 
+      {/* Aperçu des fichiers */}
       {files.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {files.map((file, i) => (
-            <div key={i} className="relative w-20 h-20 flex-shrink-0">
+            <div key={i} className="relative h-20 flex-shrink-0">
               {file.type.startsWith("image/") ? (
                 <img
                   src={URL.createObjectURL(file)}
@@ -91,7 +120,7 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
                 <audio
                   controls
                   src={URL.createObjectURL(file)}
-                  className="w-20 h-20 rounded-lg shadow"
+                  className=" rounded-lg shadow"
                 />
               ) : (
                 <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-lg shadow text-xs text-center p-1">
@@ -112,7 +141,8 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
         </div>
       )}
 
-      <div className="flex items-center gap-2 relative">
+      <div className="flex items-center flex-row gap-2 relative ">
+        {/* Bouton fichier */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -129,6 +159,7 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           onChange={handleFileChange}
         />
 
+        {/* Bouton Emoji */}
         <div className="relative">
           <button
             type="button"
@@ -138,10 +169,7 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
             😊
           </button>
           {showEmojiPicker && (
-            <div
-              ref={pickerRef}
-              className="absolute bottom-12 left-0 z-50 shadow-lg"
-            >
+            <div className="absolute bottom-12 left-0 z-50 shadow-lg">
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
                 lazyLoadEmojis
@@ -154,31 +182,66 @@ export function ChatInput({ sendMessage }: ChatInputProps) {
           )}
         </div>
 
+        {/* Champ de texte */}
         <input
           type="text"
           value={message}
           onChange={handleTextChange}
           placeholder="Écris un message..."
-          className="flex-1 border-2 dark:border-white border-black rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800"
+          className="w-full border-2 dark:border-white border-black  rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800 transition-all duration-75"
         />
 
-        {message.trim() || files.length > 0 ? (
-          <button
-            onClick={handleSend}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-          >
-            Envoyer
-          </button>
-        ) : (
-          <VoiceRecorder
-            onRecordingComplete={onRecordingComplete}
-            audioTrackConstraints={{
-              noiseSuppression: true,
-              echoCancellation: true,
-            }}
-            downloadOnSavePress={false}
-          />
-        )}
+        {/* Conteneur pour superposer le bouton et l'enregistreur */}
+        <div
+          ref={recordRef}
+          className={cn(
+            "relative flex justify-center h-12 rounded-lg overflow-hidden",
+          )}
+        >
+          <AnimatePresence mode="wait">
+            {message.trim() || files.length > 0 ? (
+              <motion.div
+                key="send-button"
+                onClick={handleSend}
+                className=" text-white w-[100px] h-full text-center rounded-lg whitespace-nowrap flex justify-center items-center"
+                initial={{ opacity: 0, y: "-100%" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "-100%" }}
+                transition={{ duration: 0.3 }}
+                onAnimationStart={() => {
+                  // background actif dès le début de l'animation
+                  if (recordRef.current)
+                    recordRef.current.classList.add("bg-green-700");
+                }}
+              >
+                Envoyer
+              </motion.div>
+            ) : (
+              <motion.div
+                key="audio-recorder"
+                className=" h-full"
+                initial={{ opacity: 0, y: "100%" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "100%" }}
+                transition={{ duration: 0.3 }}
+                onAnimationStart={() => {
+                  if (recordRef.current)
+                    recordRef.current.classList.add("bg-green-700");
+                }}
+                onAnimationComplete={() => {
+                  console.log(messageRef.current);
+                  // quand le micro est complètement visible, on retire le background
+                  if (recordRef.current && !messageRef.current.trim()) {
+                    console.log("coucou");
+                    recordRef.current.classList.remove("bg-green-700");
+                  }
+                }}
+              >
+                <AudioRecorder onStop={onStopRecording} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

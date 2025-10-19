@@ -10,4 +10,5 @@ export interface Message {
   senderId: string;
   updatedAt: string;
   files: MessageFile[];
+  replyMessage: Message | null;
 }

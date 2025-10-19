@@ -9,69 +9,74 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isCancel, setIsCancel] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
-  const durationRef = useRef<number>(0);
   const intervalRef = useRef<number>(null);
   const audioChunk = useRef<Blob[]>([]);
   useEffect(() => {
+    // 1️⃣ Première initialisation — ne se fait qu’une fois
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      console.log("getUserMedia supported.");
       navigator.mediaDevices
         .getUserMedia({
           audio: {
-            noiseSuppression: true, // active la réduction de bruit
-            echoCancellation: true, // supprime l’écho
-            autoGainControl: true, // ajuste le gain automatiquement
+            noiseSuppression: true,
+            echoCancellation: true,
+            autoGainControl: true,
           },
         })
-
-        // Success callback
         .then((stream) => {
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          mediaRecorder.ondataavailable = (ev) => {
-            if (audioChunk.current) {
-              audioChunk.current.push(ev.data);
-            }
-          };
-          mediaRecorder.onstop = () => {
-            if (duration > 1) {
-              const file = new File(audioChunk.current, `audio_message.webm`, {
-                type: "audio/webm",
-              });
-              console.log(isCancel);
-              if (!isCancel) {
-                onStop(file);
-              }
-            }
-            audioChunk.current = [];
-          };
+          const recorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = recorder;
         })
-        // Error callback
         .catch((err) => {
-          console.error(`The following getUserMedia error occurred: ${err}`);
+          console.error("getUserMedia error:", err);
         });
-    } else {
-      console.log("getUserMedia not supported on your browser!");
     }
-  }, [isCancel, duration]);
+  }, []); // 👈 une seule fois au montage
+
+  useEffect(() => {
+    // 2️⃣ Réattache les handlers quand certaines dépendances changent
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
+
+    recorder.ondataavailable = (ev) => {
+      audioChunk.current.push(ev.data);
+    };
+
+    recorder.onstop = () => {
+      if (duration > 1) {
+        console.log(
+          isCancel ? "Enregistrement annulé" : "Enregistrement terminé",
+        );
+        const file = new File(audioChunk.current, "audio_message.webm", {
+          type: "audio/webm",
+        });
+        if (!isCancel) {
+          onStop(file);
+        }
+      }
+      setIsRecording(false);
+      setIsCancel(false);
+      audioChunk.current = [];
+    };
+  }, [onStop, isCancel, duration]); // 👈 tu peux y mettre ce dont dépendent les handlers
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.button === 0) {
+      console.log("Démarrage de l’enregistrement audio");
       setIsCancel(false); // reset erreur
       setIsRecording(true); // commence à enregistrer
-
+      setDuration(0);
       mediaRecorderRef.current?.start();
       const startTime = Date.now();
       intervalRef.current = window.setInterval(() => {
         const duration = Math.floor((Date.now() - startTime) / 1000);
         setDuration(duration);
-        durationRef.current = duration;
       }, 1000);
       window.addEventListener("mouseup", handleMouseUp);
     }
   };
 
   const handleMouseUp = () => {
+    console.log("Arrêt de l’enregistrement audio");
     window.removeEventListener("mouseup", handleMouseUp);
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
@@ -80,8 +85,6 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
       return;
     }
     mediaRecorderRef.current?.stop();
-    setIsRecording(false); // arrête l’enregistrement
-    setIsCancel(false);
   };
 
   const handleMouseLeave = () => {

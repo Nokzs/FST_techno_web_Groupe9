@@ -125,6 +125,6 @@ export class MessageService {
       })
       .lean()
       .exec();
-    return result
+    return result;
   }
 }

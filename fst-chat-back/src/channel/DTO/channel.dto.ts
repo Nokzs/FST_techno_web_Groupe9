@@ -23,4 +23,3 @@ export class ChannelDto {
   @IsOptional()
   updatedAt?: Date;
 }
-

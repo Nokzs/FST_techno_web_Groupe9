@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
 interface ReactionMenuProps {
   onSelect: (emoji: string) => void;
@@ -14,7 +14,6 @@ export function ReactionMenu({
   setShowMenu,
 }: ReactionMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [showPicker, setShowPicker] = useState(false);
   // ferme le menu si clic à l’extérieur
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

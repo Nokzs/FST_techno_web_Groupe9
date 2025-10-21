@@ -1,10 +1,4 @@
-import {
-  useState,
-  useRef,
-  type ChangeEvent,
-  type DragEvent,
-  useEffect,
-} from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import EmojiPicker, {
   type EmojiClickData,
   SkinTones,

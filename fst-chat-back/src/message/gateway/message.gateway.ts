@@ -142,14 +142,14 @@ export class MessageGateway
     @ConnectedSocket() socket: Socket
   ): Promise<void> {
     const user: string = socket.data.id;
-    
+
     Logger.log(user);
     const message = await this.messageService.addReaction(
       reaction.messageId,
       user,
       reaction.emoji
     );
-    Logger.log("newMessage",message);
+    Logger.log('newMessage', message);
     this.server.to(reaction.channelId).emit('newReactions', message);
   }
 }

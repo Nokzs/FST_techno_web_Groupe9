@@ -29,7 +29,7 @@ export class CreateMessageDto {
   @ValidateNested({ each: true })
   @Type(() => MessageFileDto)
   files?: MessageFileDto[];
- 
+
   @IsOptional()
   @ValidateNested()
   @Type(() => replyMessageDto)

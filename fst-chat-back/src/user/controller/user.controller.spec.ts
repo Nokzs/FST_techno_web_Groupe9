@@ -39,10 +39,10 @@ describe('UserController', () => {
         { provide: 'STORAGE_PROVIDER', useValue: storageProviderMock }, // 🔹 obligatoire
       ],
     })
-    // Mock le guard pour que les tests passent
-    .overrideGuard(AuthGuard)
-    .useValue({ canActivate: jest.fn(() => true) })
-    .compile();
+      // Mock le guard pour que les tests passent
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<UserController>(UserController);
   });

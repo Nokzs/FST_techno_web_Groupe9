@@ -22,25 +22,17 @@ export class SupabaseStorageProvider implements IStorageProvider {
     this.supabaseClient = createClient(supabaseUrl, supabaseKey);
   }
 
-  getBucket(
-    eventType: 'profilePicture' | 'messageFile',
-    salonId?: string
-  ): string {
-    if (eventType === 'messageFile') {
-      if (!salonId)
-        throw new Error('Salon ID requis pour les images de message');
-      console.log('bucket', TYPE_EVENT[eventType].bucket + salonId);
-      return TYPE_EVENT[eventType].bucket + salonId;
-    }
-    return TYPE_EVENT[eventType].bucket;
+  getBucket(eventType: 'profilePicture' | 'messageFile', Id?: string): string {
+    if (!Id) throw new Error('id requis');
+    return TYPE_EVENT[eventType].bucket + Id;
   }
 
   async SendSignUploadUrl(
     fileName: string,
     eventType: 'profilePicture' | 'messageFile',
-    salonId?: string
+    id?: string
   ): Promise<SignedUrlDTO> {
-    const bucket = this.getBucket(eventType, salonId);
+    const bucket = this.getBucket(eventType, id);
     const { data, error } = await this.supabaseClient.storage
       .from(bucket)
       .createSignedUploadUrl(fileName, {
@@ -99,10 +91,18 @@ export class SupabaseStorageProvider implements IStorageProvider {
       .getPublicUrl(path);
     return data.publicUrl;
   }
-  async createRoomBucket(roomId: string) {
-    this.supabaseClient.storage.createBucket(
-      `fstChatMessageFileBucket${roomId}`,
-      { public: true }
-    );
+  createBucket(bucket: string) {
+    this.supabaseClient.storage
+      .createBucket(bucket, { public: true })
+      .catch((error) => {
+        throw error;
+      });
+  }
+  createRoomBucket(roomId: string): void {
+    this.supabaseClient.storage
+      .createBucket(`fstChatMessageFileBucket${roomId}`, { public: true })
+      .catch((error) => {
+        throw error;
+      });
   }
 }

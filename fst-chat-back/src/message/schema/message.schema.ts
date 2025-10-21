@@ -23,6 +23,12 @@ export class Message {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   readBy: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Message' })
+  replyMessage: Types.ObjectId;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Reaction' }], default: [] })
+  reactions: Types.ObjectId[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

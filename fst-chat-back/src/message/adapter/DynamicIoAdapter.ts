@@ -16,7 +16,7 @@ export class DynamicIoAdapter extends IoAdapter {
 
   createIOServer(port: number, options?: ServerOptions) {
     const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
 
     const corsOptions = {
       origin: frontendUrl,

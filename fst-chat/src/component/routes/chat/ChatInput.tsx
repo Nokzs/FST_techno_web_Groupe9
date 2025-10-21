@@ -1,4 +1,10 @@
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
+import {
+  useState,
+  useRef,
+  type ChangeEvent,
+  type DragEvent,
+  useEffect,
+} from "react";
 import EmojiPicker, {
   type EmojiClickData,
   SkinTones,
@@ -7,6 +13,7 @@ import { AudioRecorder } from "./AudioRecorder";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../../utils/cn";
 import type { Message } from "./messageFileType";
+import { useTranslation } from "react-i18next";
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
   replyMessage?: Message;
@@ -18,6 +25,7 @@ export function ChatInput({
   replyMessage,
   onReply,
 }: ChatInputProps) {
+  const { t } = useTranslation();
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -26,6 +34,7 @@ export function ChatInput({
   const filesLengthRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordRef = useRef<HTMLDivElement>(null);
+
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     messageRef.current = e.target.value;
     setMessage(e.target.value);
@@ -45,6 +54,7 @@ export function ChatInput({
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
     setMessage("");
+    onReply?.(undefined);
     filesLengthRef.current = 0;
     setFiles([]);
   };
@@ -85,7 +95,9 @@ export function ChatInput({
       {replyMessage && (
         <div className="p-2 mb-1 rounded bg-gray-200 w-auto dark:bg-gray-700 text-sm flex justify-between items-center">
           <div className="flex flex-col">
-            <span className="truncate">Répond à:{replyMessage.senderId}</span>
+            <span className="truncate">
+              Répond à:{replyMessage.senderId.pseudo}
+            </span>
             <span>
               {replyMessage.content.length > 50
                 ? replyMessage.content.slice(0, 50) + "..."
@@ -214,7 +226,7 @@ export function ChatInput({
                     recordRef.current.classList.add("bg-green-700");
                 }}
               >
-                Envoyer
+                {t("tchat.send")}
               </motion.div>
             ) : (
               <motion.div
@@ -232,7 +244,6 @@ export function ChatInput({
                   console.log(messageRef.current);
                   // quand le micro est complètement visible, on retire le background
                   if (recordRef.current && !messageRef.current.trim()) {
-                    console.log("coucou");
                     recordRef.current.classList.remove("bg-green-700");
                   }
                 }}

@@ -8,14 +8,16 @@ import { uploadFile } from "../../../api/storage/uploadFile";
 import { type MessageFile, type Message } from "./messageFileType";
 import { MessageItem } from "./MessageItem";
 import { socket } from "../../../socket";
-import { useParams } from "react-router";
-
+import { NavLink, useParams } from "react-router";
+import { LanguageSwitcher } from "../../ui/languageSwitcher";
+import { useTranslation } from "react-i18next";
 const apiUrl = import.meta.env.VITE_API_URL;
 export function Messages() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string>("1");
-  const [replyMesssage, setReplyMessage] = useState<Message | undefined>(
+  const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
   const { channelId } = useParams<{ channelId: string }>();
@@ -61,11 +63,21 @@ export function Messages() {
     socket.on("newMessage", (message: Message) => {
       if (message.channelId === channelId) {
         console.log("Nouveau message reçu :", message);
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => [message, ...prev]);
         scrollToBottom();
       }
     });
-
+    socket.on("newReactions", (updatedMessage: Message) => {
+      console.log(
+        "Message mis à jour avec de nouvelles réactions :",
+        updatedMessage,
+      );
+      setMessages((messages) =>
+        messages.map((msg) =>
+          msg._id === updatedMessage._id ? updatedMessage : msg,
+        ),
+      );
+    });
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
@@ -103,7 +115,8 @@ export function Messages() {
       senderId: userId,
       content: text,
       channelId,
-      replyMesssage: replyMesssage || null,
+      receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+      replyMessage: replyMessage || null,
     };
 
     socket.emit("sendMessage", { ...newMessage, files: messagesFiles });
@@ -113,35 +126,35 @@ export function Messages() {
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center text-gray-800 dark:text-white">
-        Chargement des messages...
+        {t("tchat.loadingMessages")}
       </div>
     );
   }
 
   return (
     <div className="h-screen flex flex-col p-10">
+      <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
       <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        Salon de discussion
+        <NavLink to="/servers">{"<-"}</NavLink>
+        {t("tchat.tchatRoom")}
       </h1>
 
       {/* Liste des messages */}
       <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container">
-        {messages
-          .slice()
-          .reverse()
-          .map((msg, index: number) => (
-            <MessageItem
-              key={index}
-              message={msg}
-              currentUserId={userId}
-              onReply={setReplyMessage}
-            />
-          ))}
         <div ref={messagesEndRef} />
+        {messages.slice().map((msg, index: number) => (
+          <MessageItem
+            key={index}
+            message={msg}
+            currentUserId={userId}
+            channelId={channelId!}
+            onReply={setReplyMessage}
+          />
+        ))}
       </div>
       <ChatInput
         sendMessage={addMessage}
-        replyMessage={replyMesssage}
+        replyMessage={replyMessage}
         onReply={setReplyMessage}
       />
     </div>

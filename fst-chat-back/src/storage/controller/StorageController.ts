@@ -24,7 +24,7 @@ export class StorageController {
     const data = await this.storage.SendSignUploadUrl(
       `${id}/${body.fileName}`,
       body.eventType,
-      body.salonId
+      body.salonId || id
     );
     return data;
   }

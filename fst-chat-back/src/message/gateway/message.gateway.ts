@@ -15,6 +15,14 @@ import { validate } from 'class-validator';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
+import { MessageDto } from '../DTO/message.dto';
+
+type reactionType = {
+  emoji: string;
+  messageId: string;
+  channelId: string;
+};
+
 @WebSocketGateway({ cors: true })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -97,12 +105,15 @@ export class MessageGateway
     // Transforme et valide le DTO (pas automatique comme le controlleur)
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     dto.senderId = socket.data.id;
+    Logger.log(dto);
     const errors = await validate(dto);
     if (errors.length > 0) {
+      Logger.log(errors);
       return { error: 'Validation failed', details: errors };
     }
-
+    Logger.log('je vais créer le message');
     const message = await this.messageService.create(dto);
+    Logger.log('new message', message);
     // Broadcast
     if (!dto.channelId) {
       Logger.log('No channelId provided in message DTO');
@@ -118,6 +129,27 @@ export class MessageGateway
   @SubscribeMessage('getMessages')
   async handleGetMessages(@MessageBody() channelId: string) {
     const messages = await this.messageService.findByChannel(channelId);
-    return messages;
+    Logger.log('message', messages);
+
+    return messages.map((msg) => {
+      return plainToInstance(MessageDto, msg);
+    });
+  }
+
+  @SubscribeMessage('newReactions')
+  async handleNewMessageReaction(
+    @MessageBody() reaction: reactionType,
+    @ConnectedSocket() socket: Socket
+  ): Promise<void> {
+    const user: string = socket.data.id;
+    
+    Logger.log(user);
+    const message = await this.messageService.addReaction(
+      reaction.messageId,
+      user,
+      reaction.emoji
+    );
+    Logger.log("newMessage",message);
+    this.server.to(reaction.channelId).emit('newReactions', message);
   }
 }

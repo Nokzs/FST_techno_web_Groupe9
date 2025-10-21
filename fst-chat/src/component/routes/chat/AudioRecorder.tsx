@@ -42,6 +42,7 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
     };
 
     recorder.onstop = () => {
+      console.log(duration);
       if (duration > 1) {
         console.log(
           isCancel ? "Enregistrement annulé" : "Enregistrement terminé",
@@ -60,7 +61,7 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
   }, [onStop, isCancel, duration]); // 👈 tu peux y mettre ce dont dépendent les handlers
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button === 0) {
+    if (e.button === 0 && mediaRecorderRef.current) {
       console.log("Démarrage de l’enregistrement audio");
       setIsCancel(false); // reset erreur
       setIsRecording(true); // commence à enregistrer
@@ -70,7 +71,7 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
       intervalRef.current = window.setInterval(() => {
         const duration = Math.floor((Date.now() - startTime) / 1000);
         setDuration(duration);
-      }, 1000);
+      }, 100);
       window.addEventListener("mouseup", handleMouseUp);
     }
   };

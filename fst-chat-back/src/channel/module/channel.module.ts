@@ -4,15 +4,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChannelService } from '../service/channel.service';
 import { ChannelController } from '../controller/channel.controller';
 import { Channel, ChannelSchema } from '../schema/channel.schema';
-import {AuthGuard} from '../../guards/authGuard'
+import { AuthGuard } from '../../guards/authGuard';
 import { TokenModule } from 'src/token/token.module';
+import { StorageModule } from 'src/storage/storage.module';
+import { provider } from 'src/config/constante';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Channel.name, schema: ChannelSchema }]),
-    TokenModule
+    TokenModule,
+    StorageModule.register(provider),
   ],
   controllers: [ChannelController],
-  providers: [ChannelService,AuthGuard],
+  providers: [ChannelService, AuthGuard],
   exports: [ChannelService], // si tu veux utiliser le service ailleurs
 })
 export class ChannelModule {}

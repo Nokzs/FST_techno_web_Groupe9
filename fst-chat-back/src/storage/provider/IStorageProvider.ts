@@ -17,4 +17,6 @@ export interface IStorageProvider {
   ): string;
   deleteFile(bucket: string, fileName: string): Promise<void>;
   uploadFile(path: string, file: Buffer, bucket: string): Promise<string>;
+  createBucket(bucket: string): void;
+  createRoomBucket(roomId: string): void;
 }

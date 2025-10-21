@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
+import { replyMessageDto } from './replyMessage.dto';
 export class CreateMessageDto {
   @IsMongoId()
   senderId: string;
@@ -28,4 +29,9 @@ export class CreateMessageDto {
   @ValidateNested({ each: true })
   @Type(() => MessageFileDto)
   files?: MessageFileDto[];
+ 
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => replyMessageDto)
+  replyMessage?: replyMessageDto; // ✅ casse la boucle infiniereplyMessage: replyMessageDto;
 }

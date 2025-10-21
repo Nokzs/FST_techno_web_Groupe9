@@ -9,11 +9,13 @@ import { StorageModule } from 'src/storage/storage.module';
 import { MessageGateway } from '../gateway/message.gateway';
 import { TokenModule } from '../../token/token.module';
 import { AuthGuard } from '../../guards/authGuard';
+import { Reaction, ReactionSchema } from '../schema/reaction.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Message.name, schema: MessageSchema },
       { name: MessageFile.name, schema: MessageFileSchema },
+      { name: Reaction.name, schema: ReactionSchema },
     ]),
     TokenModule,
     StorageModule.register(provider),

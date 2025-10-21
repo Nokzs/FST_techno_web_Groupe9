@@ -13,10 +13,10 @@ export class ChannelService {
   async create(dto: CreateChannelDto): Promise<Channel> {
     const newChannel = new this.channelModel(dto);
     const saved = await newChannel.save();
-    return saved.toObject();
+    return saved;
   }
 
   async getChannelsByServer(serverId: string): Promise<Channel[]> {
-    return this.channelModel.find({ serverId }).lean().exec();
+    return this.channelModel.find({ serverId }).exec();
   }
 }

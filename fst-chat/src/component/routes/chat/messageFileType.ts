@@ -1,14 +1,22 @@
+import type { User } from "../../../types/user";
 export interface MessageFile {
-  originalName: string; // nom original
-  url?: string; // URL signée ou publique
-  mimetype: string; // image/png, application/pdf, video/mp4...
+  originalName: string;
+  url?: string;
+  mimetype: string;
 }
+export type reaction = {
+  userId: User;
+  emoji: string;
+};
 export interface Message {
+  _id: string;
   channelId: string;
+  receiverId?: User;
   content: string;
   createdAt: string;
-  senderId: string;
+  senderId: User;
   updatedAt: string;
   files: MessageFile[];
   replyMessage: Message | null;
+  reactions: reaction[];
 }

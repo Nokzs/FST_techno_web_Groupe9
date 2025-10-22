@@ -55,15 +55,12 @@ export class MessageGateway
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     const errors = await validate(dto);
     if (errors.length > 0) {
+      console.log('Validation failed for message DTO:', dto);
       return { error: 'Validation failed', details: errors };
     }
-
-    const message = await this.messageService.create(dto);
-    // Broadcast
-    this.server.to(dto.channelId).emit('newMessage', message);
-    console.log('Message broadcasted to channel:', dto.channelId);
-    console.log('Message content:', message);
-    return message;
+    const dtoWithPseudo = await this.messageService.createAndGetDto(dto);
+    this.server.to(dto.channelId).emit('newMessage', dtoWithPseudo as any);
+    return dtoWithPseudo;
   }
 
   @SubscribeMessage('getMessages')

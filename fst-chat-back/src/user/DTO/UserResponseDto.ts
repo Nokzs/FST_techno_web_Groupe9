@@ -8,6 +8,9 @@ export class UserResponseDto {
 @Exclude()
 export class CompleteUserResponseDto {
   @Expose()
+  id: string;
+
+  @Expose()
   pseudo: string;
 
   @Expose()

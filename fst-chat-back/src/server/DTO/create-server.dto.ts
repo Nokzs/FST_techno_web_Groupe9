@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsNumberString } from 'class-validator';
 
 export class CreateServerDto {
   @IsString()
@@ -13,4 +13,7 @@ export class CreateServerDto {
 
   @IsArray()
   members?: string[];
+
+  @IsNumberString()
+  inviteCode: string;
 }

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from '../service/message.service';
 import { AuthGuard } from '../../guards/authGuard';
-import { Request } from 'express';
 
 // Mock du service
 const messageServiceMock: Record<string, jest.Mock> = {
@@ -38,7 +37,7 @@ describe('MessageController', () => {
     it('should return userId from request.user', () => {
       const mockRequest = {
         user: { sub: 'user-id-123' },
-      } as unknown as Request;
+      } as any;
 
       const result = controller.getUserId(mockRequest);
       expect(result).toEqual({ userId: 'user-id-123' });

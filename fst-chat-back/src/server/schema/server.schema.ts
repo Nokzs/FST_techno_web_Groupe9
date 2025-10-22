@@ -20,6 +20,10 @@ export class Server {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Channel' }] })
   channels: Types.ObjectId[]; // les salons
+
+  // Code d'invitation numérique pour rejoindre le serveur
+  @Prop({ required: true })
+  inviteCode: string;
 }
 
 export const ServerSchema = SchemaFactory.createForClass(Server);

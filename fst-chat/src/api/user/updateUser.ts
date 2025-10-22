@@ -1,3 +1,5 @@
 import type { User } from "../../types/user";
 
-export const updateUser = async (user: User) => {};
+export const updateUser = async (user: User) => {
+    console.log(user)
+};

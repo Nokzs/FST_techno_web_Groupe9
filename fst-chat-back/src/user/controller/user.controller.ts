@@ -9,6 +9,7 @@ import {
   UseGuards,
   Inject,
   Put,
+  Req,
 } from '@nestjs/common';
 import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { AuthGuard } from '../../guards/authGuard';
@@ -25,13 +26,12 @@ export class UserController {
     private readonly userService: UserService,
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
-  @Get('/profile/:id')
+  
+  @Get('/profile/')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async getProfile(
-    @Param('id') userId: string
-  ): Promise<CompleteUserResponseDto> {
-    console.log(userId);
+  async getProfile(@Req() request : Request): Promise<CompleteUserResponseDto> {
+    const userId = request['user'].sub;
     const user: User | null = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException('utilisateur non trouvé');

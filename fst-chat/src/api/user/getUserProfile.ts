@@ -1,13 +1,9 @@
-import type { User, UserID } from "../../types/user";
+import type { User } from "../../types/user";
 
-export async function getUserProfile(
-  userID: UserID | null,
-): Promise<User | null> {
-  if (!userID) {
-    return null;
-  }
+export async function getUserProfile(): Promise<User | null> {
+  
   const API_URL = import.meta.env.VITE_API_URL;
-  const req = await fetch(`${API_URL}/user/profile/${userID.id}`, {
+  const req = await fetch(`${API_URL}/user/profile/`, {
     method: "GET",
     credentials: "include",
     headers: {

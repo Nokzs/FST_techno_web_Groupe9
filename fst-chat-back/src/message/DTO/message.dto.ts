@@ -3,14 +3,19 @@ import { IsString, IsOptional, IsArray } from 'class-validator';
 export class MessageDto {
   @IsOptional()
   @IsString()
-  _id?: string; // gÃ©nÃ©rÃ© automatiquement par MongoDB
+  _id?: string; // généré automatiquement par MongoDB
 
   @IsString()
   senderId: string;
 
+  // Pseudo de l'expéditeur, enrichi via populate (non stocké en base)
   @IsOptional()
   @IsString()
-  receiverId?: string; // si rÃ©ponse Ã  quelquâ€™un
+  senderPseudo?: string;
+
+  @IsOptional()
+  @IsString()
+  receiverId?: string; // si réponse à quelqu'un
 
   @IsString()
   channelId: string;

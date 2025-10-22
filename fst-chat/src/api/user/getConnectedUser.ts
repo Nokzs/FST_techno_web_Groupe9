@@ -1,5 +1,4 @@
-/**
- * @Interroge le serveur afin de récupérer l'utiliisateur connecté.
+/**  * @Interroge le serveur afin de récupérer l'utiliisateur connecté.
  *
  * @returns L'utilisateur connecté ou null si non connecté .
  */
@@ -31,3 +30,4 @@ export async function getConnectedUser(): Promise<UserID | null> {
     return null;
   }
 }
+

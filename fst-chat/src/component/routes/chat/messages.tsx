@@ -2,19 +2,22 @@
 import { useState, useRef, useEffect } from "react";
 import { socket } from "../../../socket";
 import { useParams } from "react-router";
+import type { User } from "../../../types/user";
+import { getUserProfile } from "../../../api/user/getUserProfile";
 
 interface Message {
   channelId: string;
   content: string;
   createdAt: string;
   senderId: string;
+  senderPseudo: string;
   updatedAt: string;
 }
 
 export function Messages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const { channelId } = useParams<{ channelId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -24,20 +27,16 @@ export function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 🔹 Récupération du userId via le cookie dès le chargement
-  useEffect(() => {
-    const fetchUserId = async () => {
+   useEffect(() => {
+    const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:3000/messages/userId", {
-          credentials: "include", // le cookie est envoyé
-        });
-        const data = await res.json();
-        if (data.userId) setUserId(data.userId);
+        const profile = await getUserProfile();
+        setUser(profile);
       } catch (err) {
-        console.error("Erreur récupération userId :", err);
+        console.error("Erreur récupération user :", err);
       }
     };
-    fetchUserId();
+    fetchUser();
   }, []);
 
   // 🔹 Connexion socket + récupération des messages
@@ -48,12 +47,15 @@ export function Messages() {
     socket.emit("joinChannelRoom", channelId);
 
     socket.emit("getMessages", channelId, (messages: Message[]) => {
+      console.log("Récupération des messages pour le channel :", channelId);
+      console.log("Messages reçus :", messages);
       setMessages(messages);
       setLoading(false);
       scrollToBottom();
     });
 
     socket.on("newMessage", (message: Message) => {
+      console.log("Événement newMessage reçu :", message);
       if (message.channelId === channelId) {
         console.log("Nouveau message reçu :", message);
         setMessages((prev) => [...prev, message]);
@@ -62,19 +64,19 @@ export function Messages() {
     });
 
     return () => {
-      socket.emit("leaveRoom", channelId);
+      socket.emit("leaveChannelRoom", channelId);
       socket.off("newMessage");
     };
   }, [channelId]);
 
   // 🔹 Envoi d’un message
   const addMessage = (text: string) => {
-    if (!userId || !channelId) return;
+    if (!user || !channelId) return;
 
     const newMessage = {
-      senderId: userId,
+      senderId: user.id,
+      channelId: channelId,
       content: text,
-      channelId,
     };
 
     socket.emit("sendMessage", newMessage);
@@ -104,14 +106,14 @@ export function Messages() {
             <div
               key={index}
               className={`p-2 rounded-xl max-w-xs ${
-                msg.senderId === userId
+                msg.senderId ===  user?.id
                   ? "self-end bg-green-500"
                   : "self-start bg-blue-500"
               } text-white`}
             >
               <div>{msg.content}</div>
               <div className="text-xs flex justify-between mt-1 opacity-80">
-                <span>{msg.senderId}</span>
+                <span>{msg.senderPseudo}</span>
                 <span>
                   {new Date(msg.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",

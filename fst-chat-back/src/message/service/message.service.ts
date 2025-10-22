@@ -10,6 +10,8 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message, MessageDocument } from '../schema/message.schema';
 import { Reaction } from '../schema/reaction.schema';
+import { plainToInstance } from 'class-transformer';
+
 @Injectable()
 export class MessageService {
   constructor(
@@ -36,8 +38,8 @@ export class MessageService {
     await newMessage.save();
     const result = await this.messageModel
       .findById(newMessage._id)
-      .populate('senderId', 'pseudo _id profilPictureUrl')
-      .populate('receiverId', '_id pseudo')
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
       .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },
@@ -73,8 +75,8 @@ export class MessageService {
     Logger.log(channelId);
     return this.messageModel
       .find({ channelId })
-      .populate('senderId', 'pseudo _id profilPictureUrl')
-      .populate('receiverId', '_id pseudo')
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
       .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },
@@ -117,8 +119,8 @@ export class MessageService {
     }
     const result = await this.messageModel
       .findById(messageId)
-      .populate('senderId', 'pseudo _id profilPictureUrl')
-      .populate('receiverId', '_id pseudo')
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
       .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },

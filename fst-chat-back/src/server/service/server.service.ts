@@ -34,4 +34,15 @@ export class ServerService {
   async addChannel(serverId: string, channelId: string) {
     //TODO
   }
+
+  async joinByInviteCode(userId: string, code: string): Promise<Server | null> {
+    const server = await this.serverModel.findOne({ inviteCode: code }).exec();
+    if (!server) return null;
+    const uid = new Types.ObjectId(userId);
+    if (!server.members.some((m) => new Types.ObjectId(m).equals(uid))) {
+      server.members.push(uid);
+      await server.save();
+    }
+    return server.toObject();
+  }
 }

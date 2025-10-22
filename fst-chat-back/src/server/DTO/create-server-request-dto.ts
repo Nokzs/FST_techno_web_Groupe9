@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNumberString } from 'class-validator';
 
 export class CreateServerRequestDto {
   @IsString()
@@ -7,4 +7,8 @@ export class CreateServerRequestDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  // Code numérique d'invitation pour rejoindre le serveur
+  @IsNumberString()
+  inviteCode: string;
 }

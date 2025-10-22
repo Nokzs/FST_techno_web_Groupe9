@@ -11,12 +11,16 @@ import { socket } from "../../../socket";
 import { NavLink, useParams } from "react-router";
 import { LanguageSwitcher } from "../../ui/languageSwitcher";
 import { useTranslation } from "react-i18next";
-const apiUrl = import.meta.env.VITE_API_URL;
+import type { User } from "../../../types/user";
+import { getUserProfile } from "../../../api/user/getUserProfile";
+
+
 export function Messages() {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string>("1");
+  const [user, setUser] = useState<User | null>(null);
+
   const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
@@ -28,21 +32,16 @@ export function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 🔹 Récupération du userId via le cookie dès le chargement
-  useEffect(() => {
-    const fetchUserId = async () => {
+   useEffect(() => {
+    const fetchUser = async () => {
       try {
-        const res = await fetch(`${apiUrl}/messages/userId`, {
-          credentials: "include", // le cookie est envoyé
-        });
-        const data = await res.json();
-        if (data.userId) setUserId(data.userId);
-        setLoading(false);
+        const profile = await getUserProfile();
+        setUser(profile);
       } catch (err) {
-        console.error("Erreur récupération userId :", err);
+        console.error("Erreur récupération user :", err);
       }
     };
-    fetchUserId();
+    fetchUser();
   }, []);
 
   // 🔹 Connexion socket + récupération des messages
@@ -54,6 +53,8 @@ export function Messages() {
     socket.emit("joinChannelRoom", channelId);
 
     socket.emit("getMessages", channelId, (messages: Message[]) => {
+      console.log("Récupération des messages pour le channel :", channelId);
+      console.log("Messages reçus :", messages);
       setMessages(messages);
       console.log("Messages chargés :", messages);
       setLoading(false);
@@ -61,6 +62,7 @@ export function Messages() {
     });
 
     socket.on("newMessage", (message: Message) => {
+      console.log("Événement newMessage reçu :", message);
       if (message.channelId === channelId) {
         console.log("Nouveau message reçu :", message);
         setMessages((prev) => [message, ...prev]);
@@ -87,7 +89,7 @@ export function Messages() {
 
   // 🔹 Envoi d’un message
   const addMessage = async (text: string, files: File[]) => {
-    if (!userId || !channelId) return;
+    if (!user.id || !channelId) return;
     const messagesFiles: MessageFile[] = [];
     if (files.length > 0) {
       // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
@@ -112,9 +114,9 @@ export function Messages() {
       );
     }
     const newMessage = {
-      senderId: userId,
+      senderId: user.id,
+      channelId: channelId,
       content: text,
-      channelId,
       receiverId: replyMessage ? replyMessage.senderId._id : undefined,
       replyMessage: replyMessage || null,
     };
@@ -146,7 +148,7 @@ export function Messages() {
           <MessageItem
             key={index}
             message={msg}
-            currentUserId={userId}
+            currentUserId={user.id}
             channelId={channelId!}
             onReply={setReplyMessage}
           />

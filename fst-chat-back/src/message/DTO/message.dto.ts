@@ -1,10 +1,11 @@
 import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
-import { CompleteUserResponseDto } from 'src/user/DTO/UserResponseDto';
+import { UserLiteDto } from 'src/user/DTO/UserLiteDto';
 import { replyMessageDto } from './replyMessage.dto';
 import { Exclude, Expose } from 'class-transformer';
 import { ReactionDto } from './reactionDto';
+import { CompleteUserResponseDto } from '../../user/DTO/UserResponseDto';
 
 @Exclude()
 export class MessageDto {
@@ -14,13 +15,14 @@ export class MessageDto {
   _id?: string; // généré automatiquement par MongoDB
 
   @Expose()
-  @IsString()
-  senderId: string;
+  @ValidateNested()
+  @Type(() => UserLiteDto)
+  senderId: UserLiteDto;
 
-  @Expose()
   @IsOptional()
-  @IsString()
-  receiverId?: string; // si réponse à quelqu’un
+  @ValidateNested()
+  @Type(() => UserLiteDto)
+  receiverId?: UserLiteDto; // si réponse à quelqu'un
 
   @Expose()
   @IsString()

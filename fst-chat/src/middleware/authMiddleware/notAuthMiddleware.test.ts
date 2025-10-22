@@ -15,7 +15,7 @@ describe("notAuthMiddleware", () => {
     (getConnectedUser as Mock).mockResolvedValueOnce(fakeUser);
 
     // act + assert
-    await expect(notAuthMiddleware()).rejects.toEqual(redirect("/messages"));
+    await expect(notAuthMiddleware()).rejects.toEqual(redirect("/servers"));
   });
 
   it("ne redirige pas si aucun utilisateur n'est connecté", async () => {

@@ -1,4 +1,6 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import { UserLiteDto } from 'src/user/DTO/UserLiteDto';
 
 @Exclude()
 export class ReactionDto {
@@ -6,5 +8,7 @@ export class ReactionDto {
   emoji: string;
 
   @Expose()
-  userId: string;
+  @ValidateNested()
+  @Type(() => UserLiteDto)
+  userId: UserLiteDto;
 }

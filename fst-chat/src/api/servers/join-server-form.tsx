@@ -9,6 +9,7 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     async function handleJoin(e: React.FormEvent) {
         e.preventDefault();
@@ -16,7 +17,7 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
         setError(null);
 
         try {
-            const res = await fetch("http://localhost:3000/servers/join", {
+            const res = await fetch(`${API_URL}/servers/join`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -32,7 +33,7 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
                 setError(data.message || "Erreur inconnue");
             }
         } catch (err) {
-            setError("Erreur rÃ©seau");
+            setError("Erreur réseau");
             console.error("Erreur rejoindre serveur :", err);
         } finally {
             setLoading(false);
@@ -47,10 +48,12 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
       <h2 className="text-lg font-semibold">Rejoindre un serveur</h2>
 
       <input
-        type="text"
+        type="number"
+        inputMode="numeric"
+        pattern="[0-9]*"
         placeholder="Code d'invitation du serveur"
         value={code}
-        onChange={(e) => setCode(e.target.value)}
+        onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
         className="border p-2 rounded"
         required
       />

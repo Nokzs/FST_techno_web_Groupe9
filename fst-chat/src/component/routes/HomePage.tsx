@@ -38,7 +38,7 @@ export function HomePage() {
               secondScreenRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            En apprendre plus
+            {t("homePage.heroMessage.learn")}
           </button>
         </div>
       </div>

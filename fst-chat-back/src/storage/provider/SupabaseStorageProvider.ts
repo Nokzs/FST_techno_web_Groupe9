@@ -1,6 +1,6 @@
 import { IStorageProvider } from './IStorageProvider';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TYPE_EVENT } from '../typeEvent';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
@@ -22,12 +22,19 @@ export class SupabaseStorageProvider implements IStorageProvider {
     this.supabaseClient = createClient(supabaseUrl, supabaseKey);
   }
 
+  getBucket(eventType: 'profilePicture' | 'messageFile', Id?: string): string {
+    if (!Id) throw new Error('id requis');
+    return TYPE_EVENT[eventType].bucket + Id;
+  }
+
   async SendSignUploadUrl(
     fileName: string,
-    eventType: 'profilePicture'
+    eventType: 'profilePicture' | 'messageFile',
+    id?: string
   ): Promise<SignedUrlDTO> {
+    const bucket = this.getBucket(eventType, id);
     const { data, error } = await this.supabaseClient.storage
-      .from(TYPE_EVENT[eventType].bucket)
+      .from(bucket)
       .createSignedUploadUrl(fileName, {
         upsert: true,
       });
@@ -44,8 +51,14 @@ export class SupabaseStorageProvider implements IStorageProvider {
 
     return data;
   }
-  getPublicUrl(fileName: string, eventType: string): string {
-    const bucket = TYPE_EVENT[eventType]?.bucket;
+  getPublicUrl(
+    fileName: string,
+    eventType: 'profilePicture' | 'messageFile',
+    salonId?: string
+  ): string {
+    const bucket: string = this.getBucket(eventType, salonId);
+    Logger.log(`Getting public URL from bucket: ${bucket}`);
+    Logger.log(`File name: ${fileName}`);
     const { data } = this.supabaseClient.storage
       .from(bucket)
       .getPublicUrl(fileName);
@@ -77,5 +90,19 @@ export class SupabaseStorageProvider implements IStorageProvider {
       .from(bucket)
       .getPublicUrl(path);
     return data.publicUrl;
+  }
+  createBucket(bucket: string) {
+    this.supabaseClient.storage
+      .createBucket(bucket, { public: true })
+      .catch((error) => {
+        throw error;
+      });
+  }
+  createRoomBucket(roomId: string): void {
+    this.supabaseClient.storage
+      .createBucket(`fstChatMessageFileBucket${roomId}`, { public: true })
+      .catch((error) => {
+        throw error;
+      });
   }
 }

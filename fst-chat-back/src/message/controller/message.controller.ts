@@ -1,27 +1,51 @@
-import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Inject,
+  UseGuards,
+  Req,
+  Logger,
+} from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import { CreateMessageDto } from '../DTO/create-message.dto';
+import type { IStorageProvider } from '../../storage/provider/IStorageProvider';
+import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';
-import { MessageDto } from '../DTO/message.dto';
 import { AuthGuard } from '../../guards/authGuard';
-
 @Controller('messages')
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
+  ) {}
 
   @Post()
-  create(@Body() createMessageDto: CreateMessageDto) {
+  @UseGuards(AuthGuard)
+  async create(
+    @Body() createMessageDto: CreateMessageDto,
+    @Req() req: Request
+  ) {
+    const id = req['user'].sub;
     return this.messageService.create(createMessageDto);
   }
 
   @Get()
   findAll() {
-    const messages = this.messageService.findAll();
-    return messages.then((tab) =>
-      tab.map((message) => plainToInstance(MessageDto, message))
-    );
+    return this.messageService.findAll();
   }
 
+  @Get('filePublicUrl')
+  getPublicUrl(
+    @Query('fileName') fileName: string,
+    @Query('channelId') channelId: string
+  ): PublicUrlDTO {
+    console.log(channelId);
+    const url = this.storage.getPublicUrl(fileName, 'messageFile', channelId);
+    return plainToInstance(PublicUrlDTO, { publicUrl: url });
+  }
   @Get('/userId')
   @UseGuards(AuthGuard)
   getUserId(@Req() request: Request) {

@@ -2,11 +2,17 @@
     "homePage": {
         "heroMessage": {
             "part1": "Talk with your friends ",
-            "part2": "Meet new people that share the same hobbies as you"
+            "part2": "Meet new people that share the same hobbies as you",
+            "learn": "Learn more"
         },
         "translate": "Don't be scared by the language barrier, our app takes it for you"
     },
     "profile": {
         "config": "settings"
+    },
+    "tchat": {
+        "send": "Send",
+        "loadingMessages": "Loading messages...",
+        "tchatRoom": "Chat Room"
     }
 }

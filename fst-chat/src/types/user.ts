@@ -5,19 +5,21 @@ export type UserID = {
 export type User = {
   id: string;
 
-  email: string;
+  email?: string;
 
-  pseudo: string;
+  pseudo?: string;
 
-  createdAt: Date;
+  createdAt?: Date;
 
-  lastConnectedAt: Date;
+  lastConnectedAt?: Date;
 
-  isAdmin: boolean;
+  isAdmin?: boolean;
 
-  language: string;
+  language?: string;
 
-  bio: string;
+  bio?: string;
 
-  urlPicture: string;
+  password?: string;
+
+  urlPicture?: string;
 };

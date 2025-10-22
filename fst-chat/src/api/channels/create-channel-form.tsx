@@ -7,7 +7,10 @@ interface CreateChannelFormProps {
   onCreated: (newChannel: Channel) => void;
 }
 
-export function CreateChannelForm({ serverId, onCreated }: CreateChannelFormProps) {
+export function CreateChannelForm({
+  serverId,
+  onCreated,
+}: CreateChannelFormProps) {
   const [name, setName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,6 +26,7 @@ export function CreateChannelForm({ serverId, onCreated }: CreateChannelFormProp
 
       const data = await res.json();
       if (res.ok) {
+        console.log(data);
         onCreated(data);
         setName("");
       } else {

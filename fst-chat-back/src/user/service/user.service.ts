@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -42,13 +43,17 @@ export class UserService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async updateUser(updateUserDTO: UpdateUserDTO): Promise<User | null> {
-    const { id, password, ...userUpdate } = updateUserDTO;
+  async updateUser(
+    id: string,
+    updateUserDTO: UpdateUserDTO
+  ): Promise<User | null> {
+    const { password, ...userUpdate } = { ...updateUserDTO };
     const updatePayload: Partial<User> = { ...userUpdate };
 
     if (password) {
       updatePayload.password = await bcrypt.hash(password, SALT_ROUNDS);
     }
+    Logger.log('user updated');
 
     return this.userModel
       .findByIdAndUpdate(id, updatePayload, { new: true })

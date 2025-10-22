@@ -6,6 +6,7 @@ type ProfilePictureProps = {
   overlayPicture?: string;
   className?: string;
   handleModif?: () => void;
+  imgRef?: React.Ref<HTMLImageElement>;
 };
 
 export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
@@ -16,6 +17,7 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
       overlayPicture,
       className,
       handleModif,
+      imgRef
     }: ProfilePictureProps,
     ref,
   ) => {
@@ -49,15 +51,16 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
 
     return (
       <div className={cn("relative group rounded-full", className)}>
-        <label className="cursor-pointer relative">
+        <label className="cursor-pointer relative flex w-full h-full">
           <img
             src={srcPicture}
+            ref={imgRef}
             className="object-contain w-full h-full rounded-full"
           />
           <input
             type="file"
             accept="*.png, *.jpg, *.jpeg"
-            className="absolute inset-0 opacity-0 z-50 cursor-pointer"
+            className="absolute inset-0 opacity-0 z-50 cursor-pointer w-full h-full"
             onChange={handleFileChange}
           />
         </label>

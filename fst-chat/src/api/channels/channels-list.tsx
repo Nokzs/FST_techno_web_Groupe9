@@ -10,9 +10,14 @@ interface ChannelListProps {
   onChannelAdded: (newChannel: Channel) => void;
 }
 
-export function ChannelList({ serverId, channels, onChannelAdded }: ChannelListProps) {
+export function ChannelList({
+  serverId,
+  channels,
+  onChannelAdded,
+}: ChannelListProps) {
   const [showForm, setShowForm] = useState(false);
 
+  console.log(channels);
   return (
     <div className="mb-4 border rounded p-2 bg-gray-100">
       <div className="flex justify-between items-center mb-2">
@@ -33,7 +38,11 @@ export function ChannelList({ serverId, channels, onChannelAdded }: ChannelListP
 
       <ul className="space-y-1">
         {channels.map((channel) => (
-          <ChannelItem key={channel._id} _id={channel._id} name={channel.name} />
+          <ChannelItem
+            key={channel._id}
+            _id={channel._id}
+            name={channel.name}
+          />
         ))}
       </ul>
     </div>

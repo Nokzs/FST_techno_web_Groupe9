@@ -28,7 +28,6 @@ export function ServersPage() {
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-
   useEffect(() => {
     async function fetchServers() {
       try {
@@ -46,7 +45,7 @@ export function ServersPage() {
     }
 
     fetchServers();
-  }, []);
+  }, [API_URL]);
 
   const handleServerAdded = (newServer: Server) => {
     setServers((prev) => [...prev, newServer]);
@@ -59,7 +58,9 @@ export function ServersPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Liste des serveurs</h1>
+      <h1 className="text-2xl font-bold mb-4 dark:text-white text-black ">
+        Liste des serveurs
+      </h1>
 
       <div className="flex gap-2 mb-4">
         <button

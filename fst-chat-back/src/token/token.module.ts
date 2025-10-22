@@ -8,7 +8,10 @@ function toSeconds(v?: string, fallback = 604800): number {
   if (!v) return fallback;
   const n = Number(v);
   if (!Number.isNaN(n)) return n;
-  const m = v.trim().toLowerCase().match(/^(\d+)([smhd])$/);
+  const m = v
+    .trim()
+    .toLowerCase()
+    .match(/^(\d+)([smhd])$/);
   if (!m) return fallback;
   const value = Number(m[1]);
   const unit = m[2];
@@ -21,7 +24,10 @@ function toSeconds(v?: string, fallback = 604800): number {
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService): JwtModuleOptions => {
-        const secret = configService.get<string>('JWT_SECRET', 'change-this-secret');
+        const secret = configService.get<string>(
+          'JWT_SECRET',
+          'change-this-secret'
+        );
         const raw = configService.get<string>('JWT_EXPIRES_IN') ?? '7d';
         const expiresIn = toSeconds(raw, 604800);
         return {

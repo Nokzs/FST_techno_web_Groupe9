@@ -27,11 +27,11 @@ export class UserController {
     private readonly userService: UserService,
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
-  
+
   @Get('/profile/')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async getProfile(@Req() request : Request): Promise<CompleteUserResponseDto> {
+  async getProfile(@Req() request: Request): Promise<CompleteUserResponseDto> {
     const userId = request['user'].sub;
     const user: User | null = await this.userService.findById(userId);
     if (!user) {

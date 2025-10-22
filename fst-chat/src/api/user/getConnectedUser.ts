@@ -30,4 +30,3 @@ export async function getConnectedUser(): Promise<UserID | null> {
     return null;
   }
 }
-

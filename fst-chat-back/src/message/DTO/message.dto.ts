@@ -65,6 +65,3 @@ export class MessageDto {
   @Type(() => ReactionDto)
   reactions?: ReactionDto[];
 }
-
-
-

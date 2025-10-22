@@ -1,11 +1,20 @@
 import { useTranslation } from "react-i18next";
-export function LanguageSwitcher() {
+import { cn } from "../../utils/cn";
+type LanguageSwitcherProps = {
+  className?: string;
+};
+export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const { i18n } = useTranslation();
   //langue disponible, ne peut pas être génèré de manière automatique
   const languages = ["fr", "en"];
 
   return (
-    <div className="flex flex-col justify-center align-center group relative uppercase px-5">
+    <div
+      className={cn(
+        "flex flex-col justify-center align-center group relative uppercase px-5",
+        className,
+      )}
+    >
       <p className="cursor-pointer text-center  dark:text-white  text-black">
         {i18n.resolvedLanguage}
       </p>

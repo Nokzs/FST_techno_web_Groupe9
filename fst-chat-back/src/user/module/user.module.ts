@@ -3,10 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from '../service/user.service';
 import { UserController } from '../controller/user.controller';
 import { User, UserSchema } from '../schema/user.schema';
-import { StorageModule } from 'src/storage/storage.module';
-import { AuthGuard } from 'src/guards/authGuard';
-import { TokenModule } from 'src/token/token.module';
-import { provider } from 'src/config/constante';
+import { StorageModule } from '../../storage/storage.module';
+import { AuthGuard } from '../../guards/authGuard';
+import { TokenModule } from '../../token/token.module';
+import { provider } from '../../config/constante';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

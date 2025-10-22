@@ -4,6 +4,7 @@ import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
 import { JwtPayload } from '../../token/types/jwtPayload';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
+import { switchAll } from 'rxjs';
 type eventType = 'profilePicture';
 @Controller('/storage')
 export class StorageController {
@@ -14,7 +15,7 @@ export class StorageController {
   @UseGuards(AuthGuard)
   @Post('/signedUrl')
   async getSignedUrl(
-    @Body() body: { fileName: string; eventType: eventType },
+    @Body() body: { fileName: string; eventType: eventType; salonId?: string },
     @Req() req: Request
   ): Promise<SignedUrlDTO> {
     console.log('body', body);
@@ -22,7 +23,8 @@ export class StorageController {
     const id = payload.sub;
     const data = await this.storage.SendSignUploadUrl(
       `${id}/${body.fileName}`,
-      body.eventType
+      body.eventType,
+      body.salonId || id
     );
     return data;
   }

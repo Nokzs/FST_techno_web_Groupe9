@@ -40,7 +40,7 @@ export function LangList({
       {lang && (
         <>
           {" "}
-          <label>Choisir une langue :</label>
+          <label className="dark:text-white text-dark">Choisir une langue :</label>
           <select
             onChange={() => handleModif && handleModif()}
             defaultValue={user.language}

@@ -1,35 +1,70 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { MessageFileDto } from './MessageFileDto';
+import { UserLiteDto } from 'src/user/DTO/UserLiteDto';
+import { replyMessageDto } from './replyMessage.dto';
+import { Exclude, Expose } from 'class-transformer';
+import { ReactionDto } from './reactionDto';
+import { CompleteUserResponseDto } from '../../user/DTO/UserResponseDto';
 
+@Exclude()
 export class MessageDto {
+  @Expose()
   @IsOptional()
   @IsString()
-  _id?: string; // généré automatiquement par MongoDB
+  _id?: string; // gÃ©nÃ©rÃ© automatiquement par MongoDB
 
-  @IsString()
-  senderId: string;
-
-  // Pseudo de l'expéditeur, enrichi via populate (non stocké en base)
-  @IsOptional()
-  @IsString()
-  senderPseudo?: string;
+  @Expose()
+  @ValidateNested()
+  @Type(() => UserLiteDto)
+  senderId: UserLiteDto;
 
   @IsOptional()
-  @IsString()
-  receiverId?: string; // si réponse à quelqu'un
+  @ValidateNested()
+  @Type(() => UserLiteDto)
+  receiverId?: UserLiteDto; // si rÃ©ponse Ã  quelqu'un
 
+  @Expose()
   @IsString()
   channelId: string;
 
+  @Expose()
   @IsString()
   content: string;
 
+  @Expose()
   @IsOptional()
   @IsArray()
-  readBy?: string[]; // liste des utilisateurs ayant lu le message
+  readBy?: CompleteUserResponseDto[];
 
+  @Expose()
   @IsOptional()
   createdAt?: Date;
 
+  @Expose()
   @IsOptional()
   updatedAt?: Date;
+
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MessageFileDto)
+  files?: MessageFileDto[];
+
+  @Expose()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => replyMessageDto)
+  replyMessage?: replyMessageDto;
+
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReactionDto)
+  reactions?: ReactionDto[];
 }
+
+
+

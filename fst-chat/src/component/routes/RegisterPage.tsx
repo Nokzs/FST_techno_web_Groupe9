@@ -1,7 +1,7 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthCard } from "../ui/AuthCard";
-
+import { socket } from "../../socket";
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
 
 export function RegisterPage() {
@@ -57,7 +57,8 @@ export function RegisterPage() {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      navigate("/profil", { replace: true });
+      socket.connect();
+      navigate("/servers", { replace: true });
     } catch (submitError) {
       const message =
         submitError instanceof Error

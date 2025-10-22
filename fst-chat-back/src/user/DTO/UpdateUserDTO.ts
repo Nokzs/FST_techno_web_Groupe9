@@ -1,14 +1,11 @@
 import { OmitType } from '@nestjs/swagger';
-import { IsMongoId,MinLength } from 'class-validator';
-import { Optional } from '@nestjs/common';
+import { IsOptional, MinLength } from 'class-validator';
 import { CompleteUserResponseDto } from './UserResponseDto';
 
-export class UpdateUserDTO extends OmitType(CompleteUserResponseDto, ['email'] as const) {
-  @IsMongoId()
-  id: string;
-
-  
+export class UpdateUserDTO extends OmitType(CompleteUserResponseDto, [
+  'email',
+] as const) {
+  @IsOptional()
   @MinLength(6)
-  @Optional()
   password?: string;
 }

@@ -2,11 +2,17 @@
     "homePage": {
         "heroMessage": {
             "part1": "Discuter avec vos amis",
-            "part2": "Découvre de nouvelles personnes qui partagent vos passions"
+            "part2": "Découvre de nouvelles personnes qui partagent vos passions",
+            "learn": "En savoir plus"
         },
         "translate": "N'ayez plus peur de la barrière de la langue, notre application la franchit pour vous"
     },
     "profile": {
         "config": "Configuration"
+    },
+    "tchat": {
+        "send": "Envoyer",
+        "loadingMessages": "Chargement des messages...",
+        "tchatRoom": "Salle de discussion"
     }
 }

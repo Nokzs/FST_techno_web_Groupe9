@@ -9,6 +9,7 @@
   Req,
   Res,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { UserService } from '../../user/service/user.service';
@@ -16,12 +17,14 @@ import { UserAuthService } from '../service/auth.service';
 import { RegisterUserDto } from '../DTO/register-user.dto';
 import { LoginUserDto } from '../DTO/login-user.dto';
 import { TokenService } from '../../token/token.service';
+import type { IStorageProvider } from '../../storage/provider/IStorageProvider';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: UserAuthService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
   @Post('register')
   async register(
@@ -39,7 +42,7 @@ export class AuthController {
     await this.userService.setLastConnection(userId);
     const token = await this.tokenService.generateToken({ sub: userId });
     this.authService.attachAuthCookie(res, token);
-
+    this.storage.createBucket(`fstChatProfilPictureBucket${userId}`);
     return {
       user: this.authService.sanitizeUser(user),
       message: 'Compte cree avec succes.',

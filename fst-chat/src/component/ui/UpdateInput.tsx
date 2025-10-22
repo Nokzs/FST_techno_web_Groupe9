@@ -5,10 +5,12 @@ type updateInputProps = {
   value: string;
   name: string;
   className?: string;
-  type?: "input" | "textarea";
+  type?: "input" | "textarea" | "password";
   updatable?: boolean;
   ref?: React.Ref<HTMLInputElement> | React.Ref<HTMLTextAreaElement>;
   handleModif?: () => void;
+  error?: boolean;
+  showError?: boolean;
 };
 /**
  *
@@ -26,17 +28,32 @@ export const UpdateInput = forwardRef<
   updateInputProps
 >(
   (
-    { value, name, className, type = "input", updatable = true, handleModif },
+    {
+      value,
+      name,
+      className,
+      type = "input",
+      updatable = true,
+      handleModif,
+      error,
+      showError = false,
+    },
     ref,
   ) => {
     const [update, setUpdate] = useState(false);
     const [inputValue, setInputValue] = useState(value);
     const inputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    console.log(
+      showError ? (error ? "border-red-500" : "border-green-700") : "",
+    );
     //permet d'associer le ref passé en props au ref interne du composant
     useImperativeHandle(
       ref,
-      () => (type === "input" ? inputRef.current! : textareaRef.current!),
+      () =>
+        type === "input" || type === "password"
+          ? inputRef.current!
+          : textareaRef.current!,
       [type],
     );
 
@@ -52,11 +69,18 @@ export const UpdateInput = forwardRef<
         </p>
 
         <div className="flex flex-row items-center justify-center h-auto w-full">
-          {type === "input" ? (
+          {type === "input" || type === "password" ? (
             <input
               ref={inputRef}
-              type="text"
-              className="border-b-2  border-black dark:text-white dark:border-white p-2 mr-2 w-full max-w-lg dark:bg-blue-950 bg-gray-100 rounded-xl pl-5 focus:outline-red-800"
+              type={type}
+              className={cn(
+                "border-b-2  border-black dark:text-white dark:border-white p-2 mr-2 w-full max-w-lg dark:bg-blue-950 bg-gray-100 rounded-xl pl-5 focus:outline-red-800",
+                showError
+                  ? error
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-green-700 dark:border-green-700 focus:border-green-700"
+                  : "",
+              )}
               value={inputValue}
               disabled={!update}
               onBlur={() => setUpdate(updatable && false)}

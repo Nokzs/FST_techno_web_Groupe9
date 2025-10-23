@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from '../service/message.service';
 import { AuthGuard } from '../../guards/authGuard';
+import { getModelToken } from '@nestjs/mongoose';
 
 // Mock du service
 const messageServiceMock: Record<string, jest.Mock> = {
@@ -20,6 +21,11 @@ describe('MessageController', () => {
           provide: MessageService,
           useValue: messageServiceMock,
         },
+        // Mocks des dépendances optionnelles du contrôleur (injection de storage et modèles)
+        { provide: 'STORAGE_PROVIDER', useValue: {} },
+        { provide: getModelToken('Message'), useValue: {} },
+        { provide: getModelToken('MessageFile'), useValue: {} },
+        { provide: getModelToken('Reaction'), useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard) // 🔐 on mocke le guard ici

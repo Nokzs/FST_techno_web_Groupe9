@@ -16,7 +16,10 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
-import { setTimeout as setNodeTimeout, clearTimeout as clearNodeTimeout } from 'timers';
+import {
+  setTimeout as setNodeTimeout,
+  clearTimeout as clearNodeTimeout,
+} from 'timers';
 import { UserService } from '../../user/service/user.service';
 
 type reactionType = {

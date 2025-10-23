@@ -13,6 +13,10 @@
     "tchat": {
         "send": "Send",
         "loadingMessages": "Loading messages...",
-        "tchatRoom": "Chat Room"
+        "tchatRoom": "Chat Room",
+        "navigationMenu": {
+            "title": "Servers",
+            "noServer": "Any server available. Please add one server to start chatting!"
+        }
     }
 }

@@ -5,7 +5,7 @@ import { ReactionMenu } from "../../ui/reactionsPicker";
 import { socket } from "../../../socket";
 import type { User } from "../../../types/user";
 interface MessageProps {
-  currentUserId: string;
+  currentUserId: string | undefined;
   message: Message;
   onReply?: (message: Message) => void;
   channelId?: string;
@@ -51,6 +51,8 @@ export function MessageItem({
   const addReaction = (emoji: string) => {
     socket.emit("newReactions", { messageId: message._id, emoji, channelId });
   };
+  if (!currentUserId) return null;
+
   return (
     <div
       className={`flex flex-col group gap-1 my-2 max-w-[75%] relative ${

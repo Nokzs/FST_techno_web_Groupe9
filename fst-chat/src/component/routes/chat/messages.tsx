@@ -1,5 +1,5 @@
 // component/routes/MessagesPage.tsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatInput } from "./ChatInput";
 import { getSignedUrl } from "../../../api/storage/signedUrl";
 import { v4 as uuidv4 } from "uuid";
@@ -34,7 +34,7 @@ export function Messages({ channelId }: MessagesProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const paginateMessages = () => {
+  const paginateMessages = useCallback(() => {
     socket.emit(
       "getMessages",
       { channelId, date: messages[messages.length - 1]?.createdAt },
@@ -43,7 +43,7 @@ export function Messages({ channelId }: MessagesProps) {
         hasMoreRef.current = hasMore;
       },
     );
-  };
+  }, [channelId, messages]);
   // Observer pour détecter le haut de la liste
   useEffect(() => {
     let debounceTimeout: NodeJS.Timeout;
@@ -71,7 +71,7 @@ export function Messages({ channelId }: MessagesProps) {
     return () => {
       if (current) observer.unobserve(current);
     };
-  }, [topRef, paginateMessages]);
+  }, [topRef, paginateMessages, loading]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -159,7 +159,7 @@ export function Messages({ channelId }: MessagesProps) {
       );
     }
     const newMessage = {
-      senderId: user.id,
+      senderId: user?.id,
       channelId: channelId,
       content: text,
       receiverId: replyMessage ? replyMessage.senderId._id : undefined,
@@ -199,7 +199,7 @@ export function Messages({ channelId }: MessagesProps) {
             <MessageItem
               key={index}
               message={msg}
-              currentUserId={user.id}
+              currentUserId={user?.id}
               channelId={channelId!}
               onReply={setReplyMessage}
             />

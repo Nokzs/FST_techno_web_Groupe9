@@ -13,6 +13,10 @@
     "tchat": {
         "send": "Envoyer",
         "loadingMessages": "Chargement des messages...",
-        "tchatRoom": "Salle de discussion"
+        "tchatRoom": "Salle de discussion",
+        "navigationMenu": {
+            "title": "Serveurs",
+            "noServer": "Aucun serveur disponible. Veuillez ajouter un serveur pour commencer à discuter !"
+        }
     }
 }

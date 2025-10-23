@@ -4,7 +4,7 @@ import { cn } from "../../../utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink, useLoaderData } from "react-router";
 import { socket } from "../../../socket";
-
+import { useTranslation } from "react-i18next";
 type NavigationMessageMenuProps = {
   channelId?: string;
   onSelectChannel?: (channelId: string) => void;
@@ -13,6 +13,7 @@ type NavigationMessageMenuProps = {
 export function NavigationMessageMenu({
   channelId,
 }: NavigationMessageMenuProps) {
+  const { t } = useTranslation();
   const apiUrl = import.meta.env.VITE_API_URL;
   const { serversData, activeServerData, channelData } = useLoaderData();
   console.log("Loader data dans NavigationMessageMenu :", {
@@ -20,17 +21,14 @@ export function NavigationMessageMenu({
     activeServerData,
     channelData,
   });
-  const [servers, setServers] = useState<Server[]>(serversData);
+  const servers: Server[] = serversData;
   const [channels, setChannels] = useState<Channel[]>(channelData);
   const [activeServer, setActiveServer] = useState<Server | null>(
     activeServerData,
   );
-  const [activeChannel, setActiveChannel] = useState<string | null>(
-    channelId || null,
-  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [direction, setDirection] = useState(0); // 1 = vers channels, -1 = vers serveurs
-
+  const activeChannel = channelId;
   const refetchChannels = async () => {
     const channel = await fetch(`${apiUrl}/channels/${activeServer?._id}`, {
       credentials: "include",
@@ -82,10 +80,6 @@ export function NavigationMessageMenu({
     setActiveServer(null);
   };
 
-  const handleSelectChannel = (id: string) => {
-    setActiveChannel(id);
-  };
-
   return (
     <div className="flex flex-row items-stretch relative">
       {/* ===== MENU ===== */}
@@ -110,14 +104,16 @@ export function NavigationMessageMenu({
                 >
                   {/* TITRE */}
                   <div className="flex items-center px-4 py-3 border-b border-neutral-800">
-                    <h2 className="text-lg font-semibold truncate">Serveurs</h2>
+                    <h2 className="text-lg font-semibold truncate">
+                      {t("tchat.navigationMenu.title")}
+                    </h2>
                   </div>
 
                   {/* LISTE DES SERVEURS */}
                   <div className="flex-1 overflow-y-auto">
                     {servers.length === 0 ? (
                       <p className="text-neutral-500 text-center mt-5">
-                        Aucun serveur disponible
+                        {t("tchat.navigationMenu.noServer")}
                       </p>
                     ) : (
                       <ul className="space-y-1 mt-2">
@@ -178,7 +174,6 @@ export function NavigationMessageMenu({
                               className="truncate"
                             >
                               <button
-                                onClick={() => handleSelectChannel(channel._id)}
                                 className={cn(
                                   "flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-800 transition",
                                   activeChannel === channel._id &&
@@ -201,13 +196,16 @@ export function NavigationMessageMenu({
       </motion.div>
 
       {/* ===== BOUTON TOGGLE TOUJOURS VISIBLE ===== */}
-      <div className="flex items-center">
+      <div className="flex items-start mt-2">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-r-md transition"
+          className={cn(
+            "p-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-r-md transition dark:text-white duration-500 text:black",
+            menuOpen ? "rotate-z-180" : "",
+          )}
           title={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >
-          {menuOpen ? "<<" : ">>"}
+          {">>"}
         </button>
       </div>
     </div>

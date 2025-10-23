@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import "./i18n/i18n.js";
-import { Messages } from "./component/routes/chat/messages";
 import { messageLoader } from "./loaders/messageLoader";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";

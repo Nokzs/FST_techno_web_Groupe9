@@ -4,7 +4,6 @@ import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
 import { JwtPayload } from '../../token/types/jwtPayload';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
-import { switchAll } from 'rxjs';
 type eventType = 'profilePicture';
 @Controller('/storage')
 export class StorageController {

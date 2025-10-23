@@ -154,7 +154,7 @@ export function NavigationMessageMenu({
                     >
                       {"<<"}
                     </button>
-                    <div className=" whitespace-nowrap">
+                    <div className="whitespace-nowrap">
                       {activeServer.name.toString()}
                     </div>
                   </div>

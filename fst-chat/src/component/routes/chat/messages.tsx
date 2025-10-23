@@ -143,12 +143,12 @@ export function Messages({ channelId }: MessagesProps) {
           const { signedUrl, path } = await getSignedUrl(
             `file_${uuidv4()}`,
             "messageFile",
-            "1",
+            channelId,
           );
 
           await uploadFile(file, signedUrl);
 
-          const { publicUrl } = await getMessageFilePublicUrl(path, "1");
+          const { publicUrl } = await getMessageFilePublicUrl(path, channelId);
 
           messagesFiles.push({
             originalName: file.name,

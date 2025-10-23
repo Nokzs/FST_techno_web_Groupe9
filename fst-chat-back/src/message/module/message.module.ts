@@ -10,6 +10,7 @@ import { MessageGateway } from '../gateway/message.gateway';
 import { TokenModule } from '../../token/token.module';
 import { AuthGuard } from '../../guards/authGuard';
 import { Reaction, ReactionSchema } from '../schema/reaction.schema';
+import { UserModule } from '../../user/module/user.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -18,6 +19,7 @@ import { Reaction, ReactionSchema } from '../schema/reaction.schema';
       { name: Reaction.name, schema: ReactionSchema },
     ]),
     TokenModule,
+    UserModule,
     StorageModule.register(provider),
   ],
   controllers: [MessageController],

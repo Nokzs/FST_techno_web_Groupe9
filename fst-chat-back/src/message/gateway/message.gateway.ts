@@ -16,6 +16,8 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
+import { setTimeout as setNodeTimeout, clearTimeout as clearNodeTimeout } from 'timers';
+import { UserService } from '../../user/service/user.service';
 
 type reactionType = {
   emoji: string;
@@ -30,10 +32,26 @@ export class MessageGateway
   @WebSocketServer()
   server: Server;
 
+  // channelId -> (userId -> timeout) : timout de secours en cas de deconnexions, ...
+  private typingUsers: Map<string, Map<string, NodeJS.Timeout>> = new Map();
+
   constructor(
     private readonly messageService: MessageService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly userService: UserService
   ) {}
+
+  private userPseudoCache = new Map<string, string>();
+
+  private async getUserPseudo(userId: string): Promise<string> {
+    const cached = this.userPseudoCache.get(userId);
+    if (cached) return cached;
+    const user = await this.userService.findById(userId);
+
+    const pseudo = user ? (user as any).pseudo : userId;
+    this.userPseudoCache.set(userId, pseudo);
+    return pseudo;
+  }
 
   async handleConnection(client: Socket) {
     Logger.log(`New client connected: ${client.id}`);
@@ -151,5 +169,81 @@ export class MessageGateway
     );
     Logger.log('newMessage', message);
     this.server.to(reaction.channelId).emit('newReactions', message);
+  }
+
+  private async emitTypingUpdate(channelId: string) {
+    const channelMap = this.typingUsers.get(channelId);
+    const ids = channelMap ? Array.from(channelMap.keys()) : [];
+    const users = await Promise.all(
+      ids.map(async (id) => ({ id, pseudo: await this.getUserPseudo(id) }))
+    );
+    this.server.to(channelId).emit('typingUpdate', { channelId, users });
+  }
+
+  @SubscribeMessage('typing')
+  handleTyping(
+    @MessageBody() data: { channelId: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const channelId = data?.channelId;
+    const userId = client.data.id as string | undefined;
+    if (!channelId || !userId) return;
+
+    if (!this.typingUsers.has(channelId)) {
+      this.typingUsers.set(channelId, new Map());
+    }
+    const channelMap = this.typingUsers.get(channelId)!;
+
+    const existing = channelMap.get(userId);
+    if (existing) clearNodeTimeout(existing);
+
+    const timeout = setNodeTimeout(() => {
+      const current = this.typingUsers.get(channelId);
+      if (!current) return;
+      current.delete(userId);
+      void this.emitTypingUpdate(channelId);
+    }, 3000);
+    channelMap.set(userId, timeout);
+    void this.emitTypingUpdate(channelId);
+  }
+
+  @SubscribeMessage('stopTyping')
+  handleStopTyping(
+    @MessageBody() data: { channelId: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const channelId = data?.channelId;
+    const userId = client.data.id as string | undefined;
+    if (!channelId || !userId) return;
+
+    const channelMap = this.typingUsers.get(channelId);
+    if (!channelMap) return;
+    const to = channelMap.get(userId);
+    //on annule le timeout automatique
+    if (to) clearNodeTimeout(to);
+    if (channelMap.delete(userId)) {
+      void this.emitTypingUpdate(channelId);
+    }
+  }
+
+  // Alias pour compat frontend émettant 'leaveRoom'
+  @SubscribeMessage('leaveRoom')
+  handleLeaveRoomAlias(
+    @MessageBody() channelId: string,
+    @ConnectedSocket() client: Socket
+  ) {
+    // S'assurer de nettoyer l'état typing
+    const userId = client.data.id as string | undefined;
+    if (userId) {
+      const channelMap = this.typingUsers.get(channelId);
+      if (channelMap) {
+        const to = channelMap.get(userId);
+        if (to) clearNodeTimeout(to);
+        channelMap.delete(userId);
+        void this.emitTypingUpdate(channelId);
+      }
+    }
+    client.leave(channelId);
+    Logger.log(`Client ${client.id} left channel room ${channelId} (alias)`);
   }
 }

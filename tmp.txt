@@ -78,24 +78,12 @@ export function Messages() {
         ),
       );
     });
-    socket.on(
-      "typingUpdate",
-      ({ channelId: chId, users }: { channelId: string; users: { id: string; pseudo: string }[] }) => {
-        if (chId !== channelId) return;
-        const currentId = user?.id;
-        const names = users
-          .filter((u) => u.id !== currentId)
-          .map((u) => u.pseudo || u.id);
-        setTypingUsers(names);
-      },
-    );
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
       socket.off("newMessage");
-      socket.off("typingUpdate");
     };
-  }, [channelId, user?.id]);
+  }, [channelId]);
 
   // 🔹 Envoi d’un message
   const addMessage = async (text: string, files: File[]) => {
@@ -164,19 +152,6 @@ export function Messages() {
           />
         ))}
       </div>
-      {typingUsers.length > 0 && (
-        <div className="px-2 pb-2 text-sm text-gray-600 dark:text-gray-300">
-          {typingUsers.length === 1
-            ? t("tchat.typing.one", { name: typingUsers[0] })
-            : typingUsers.length === 2
-            ? t("tchat.typing.two", { name1: typingUsers[0], name2: typingUsers[1] })
-            : t("tchat.typing.many", {
-                name1: typingUsers[0],
-                name2: typingUsers[1],
-                count: typingUsers.length - 2,
-              })}
-        </div>
-      )}
       <ChatInput
         sendMessage={addMessage}
         replyMessage={replyMessage}

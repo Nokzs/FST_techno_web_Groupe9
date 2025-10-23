@@ -9,14 +9,15 @@ export type reaction = {
   emoji: string;
 };
 export interface Message {
-  _id: string;
+  _id: string; // généré par MongoDB dès la création de la version optimistique
   channelId: string;
   receiverId?: User;
   content: string;
   createdAt: string;
-  senderId: User;
   updatedAt: string;
+  senderId: User;
   files: MessageFile[];
   replyMessage: Message | null;
   reactions: reaction[];
+  sending: boolean; // true tant que le message n'est pas finalisé (upload ou autres)
 }

@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  IsBooleanString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
 import { UserLiteDto } from 'src/user/DTO/UserLiteDto';
@@ -64,4 +70,8 @@ export class MessageDto {
   @ValidateNested({ each: true })
   @Type(() => ReactionDto)
   reactions?: ReactionDto[];
+
+  @Expose()
+  @IsBooleanString()
+  sending: boolean; // indique si le message est encore en cours de validation / upload
 }

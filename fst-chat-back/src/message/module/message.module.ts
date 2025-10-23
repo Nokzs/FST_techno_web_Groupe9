@@ -10,6 +10,9 @@ import { MessageGateway } from '../gateway/message.gateway';
 import { TokenModule } from '../../token/token.module';
 import { AuthGuard } from '../../guards/authGuard';
 import { Reaction, ReactionSchema } from '../schema/reaction.schema';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { IaModule } from '../../IA/ia.module';
+import { iaProvider } from 'src/config/constante';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -19,9 +22,11 @@ import { Reaction, ReactionSchema } from '../schema/reaction.schema';
     ]),
     TokenModule,
     StorageModule.register(provider),
+    ConfigModule,
+    IaModule.register(iaProvider),
   ],
   controllers: [MessageController],
-  providers: [MessageService, MessageGateway, AuthGuard],
+  providers: [MessageService, MessageGateway, AuthGuard, ConfigService],
   exports: [MessageService, AuthGuard],
 })
 export class MessageModule {}

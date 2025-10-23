@@ -29,6 +29,7 @@ export const messageLoader: LoaderFunction = async (data) => {
       credentials: "include",
     },
   ).then((r) => r.json());
+
   return {
     serversData: servers,
     activeServerData: activeServer.serverId,

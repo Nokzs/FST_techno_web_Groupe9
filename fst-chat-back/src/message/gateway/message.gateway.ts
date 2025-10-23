@@ -16,7 +16,7 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
-
+import { MessageFileDto } from '../DTO/MessageFileDto';
 type reactionType = {
   emoji: string;
   messageId: string;
@@ -119,8 +119,11 @@ export class MessageGateway
       Logger.log('No channelId provided in message DTO');
       return;
     }
-
-    this.server.to(dto.channelId).emit('newMessage', message);
+    if (message) {
+      this.server.to(dto.channelId).emit('newMessage', message);
+      this.messageService.embedMessage(message._id.toString());
+    }
+    Logger.log(message?._id.toString());
     console.log('Message broadcasted to channel:', dto.channelId);
     console.log('Message content:', message);
     return message;
@@ -159,5 +162,14 @@ export class MessageGateway
     );
     Logger.log('newMessage', message);
     this.server.to(reaction.channelId).emit('newReactions', message);
+  }
+  @SubscribeMessage('updateMessageFiles')
+  async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
+    const updatedMessage = await this.messageService.updateMessageWithTmp(data);
+    if (updatedMessage) {
+      this.server
+        .to(updatedMessage.channelId.toString())
+        .emit('messageUpdated', updatedMessage);
+    }
   }
 }

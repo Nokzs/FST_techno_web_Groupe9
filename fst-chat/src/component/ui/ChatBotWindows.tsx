@@ -4,7 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 export function ChatBotWindow() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Salut 👋 Comment puis-je t’aider aujourd’hui ?" },
+    {
+      from: "bot",
+      text: "Salut 👋, si tu veux je peux te résumer ta conversation, pour cela dis moi depuis quelle date tu as besoin que je te la résume",
+    },
   ]);
   const [input, setInput] = useState("");
 
@@ -14,14 +17,6 @@ export function ChatBotWindow() {
     const userMessage = { from: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
-    // Mock bot response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: "C’est une bonne question !" },
-      ]);
-    }, 800);
   };
 
   return (

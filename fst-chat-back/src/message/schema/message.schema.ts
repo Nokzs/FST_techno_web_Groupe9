@@ -5,6 +5,15 @@ export type MessageDocument = HydratedDocument<Message>;
 
 @Schema({ timestamps: true })
 export class Message {
+  _id: Types.ObjectId;
+
+  // Indique si le message est encore en cours d'envoi/upload côté client
+  @Prop({ type: Boolean, default: false })
+  sending: boolean;
+
+  @Prop({ type: [Number], default: [] })
+  embedding: number[];
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   senderId: Types.ObjectId;
 
@@ -17,10 +26,11 @@ export class Message {
   @Prop({ required: false })
   content: string;
 
-  // Liste des utilisateurs qui ont lu le message
+  // Liste des fichiers attachés
   @Prop({ type: [MessageFileSchema], default: [] })
   files: MessageFile[];
 
+  // Liste des utilisateurs qui ont lu le message
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   readBy: Types.ObjectId[];
 

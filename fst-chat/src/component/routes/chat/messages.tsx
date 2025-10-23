@@ -97,11 +97,17 @@ export function Messages({ channelId }: MessagesProps) {
       { channelId, date: null },
       ({ messages, hasMore }: { messages: Message[]; hasMore: boolean }) => {
         console.log("Récupération des messages pour le channel :", channelId);
+
         console.log("Messages reçus :", messages);
+
         setMessages(messages);
+
         console.log("Messages chargés :", messages);
+
         hasMoreRef.current = hasMore;
+
         scrollToBottom();
+
         setLoading(false);
       },
     );
@@ -125,6 +131,18 @@ export function Messages({ channelId }: MessagesProps) {
         ),
       );
     });
+    // Gestion de la mise à jour du message avec fichiers
+    socket.on("updateMessageFiles", (updatedMessage: Message) => {
+      console.log("Message mis à jour avec des fichiers :", updatedMessage);
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === updatedMessage._id
+            ? { ...updatedMessage, sending: false } // met sending à false pour la version finale
+            : msg,
+        ),
+      );
+    });
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
@@ -132,12 +150,27 @@ export function Messages({ channelId }: MessagesProps) {
     };
   }, [channelId]);
 
-  // 🔹 Envoi d’un message
   const addMessage = async (text: string, files: File[]) => {
     if (!user.id || !channelId) return;
+
     const messagesFiles: MessageFile[] = [];
+
+    // Cas avec fichiers
     if (files.length > 0) {
-      // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
+      const optimisticMessage = {
+        senderId: user.id,
+        channelId,
+        content: text,
+        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+        replyMessage: replyMessage || null,
+        files: [] as MessageFile[],
+        sending: true,
+      };
+
+      // Envoi de la version optimistique
+      socket.emit("sendMessage", optimisticMessage);
+
+      // Upload des fichiers
       await Promise.all(
         files.map(async (file) => {
           const { signedUrl, path } = await getSignedUrl(
@@ -149,7 +182,6 @@ export function Messages({ channelId }: MessagesProps) {
           await uploadFile(file, signedUrl);
 
           const { publicUrl } = await getMessageFilePublicUrl(path, channelId);
-
           messagesFiles.push({
             originalName: file.name,
             url: publicUrl,
@@ -157,17 +189,33 @@ export function Messages({ channelId }: MessagesProps) {
           });
         }),
       );
-    }
-    const newMessage = {
-      senderId: user?.id,
-      channelId: channelId,
-      content: text,
-      receiverId: replyMessage ? replyMessage.senderId._id : undefined,
-      replyMessage: replyMessage || null,
-    };
 
-    socket.emit("sendMessage", { ...newMessage, files: messagesFiles });
-    console.log("Message envoyé :", newMessage);
+      // Envoi de la version finale avec fichiers
+      const finalMessage = {
+        senderId: user.id,
+        channelId,
+        content: text,
+        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+        replyMessage: replyMessage || null,
+        files: messagesFiles,
+        sending: false,
+      };
+      socket.emit(" updateMessageFiles", finalMessage);
+    } else {
+      // Cas sans fichiers : envoi direct
+      const message = {
+        senderId: user.id,
+        channelId,
+        content: text,
+        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+        replyMessage: replyMessage || null,
+        files: [],
+        sending: false,
+      };
+      socket.emit("sendMessage", message);
+    }
+
+    console.log("Message envoyé :", text);
   };
 
   if (loading) {

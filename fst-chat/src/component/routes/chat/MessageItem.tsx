@@ -86,6 +86,15 @@ export function MessageItem({
             ))}
           </div>
         )}
+
+        {/* Loader si sending et pas encore de fichiers */}
+        {message.sending && message.files?.length === 0 && (
+          <div className="flex items-center gap-2 mt-1">
+            <div className="w-4 h-4 rounded-full bg-white animate-pulse" />
+            <span className="text-xs text-white/80">Envoi...</span>
+          </div>
+        )}
+
         {/* Nom + heure */}
         <div
           className={`text-xs mt-2 opacity-80 ${
@@ -95,8 +104,8 @@ export function MessageItem({
           <span className="font-medium">{message.senderId.pseudo}</span> —{" "}
           <span>{formattedDate}</span>
         </div>
-        {/* Bouton menu */}
 
+        {/* Bouton menu */}
         {!isOwnMessage && (
           <>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-1 right-1 flex flex-row">
@@ -123,7 +132,6 @@ export function MessageItem({
                       <li
                         className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
                         onClick={() => {
-                          console.log(message);
                           onReply?.({
                             ...message,
                             receiverId: message.senderId._id,
@@ -147,6 +155,8 @@ export function MessageItem({
                 )}
               </div>
             </div>
+
+            {/* Réactions */}
             {Object.keys(grouped).length > 0 && (
               <div className="flex gap-2 mt-2 absolute bottom-0 left-0 translate-y-full mb-5">
                 {Object.entries(grouped).map(([emoji, users]) => {

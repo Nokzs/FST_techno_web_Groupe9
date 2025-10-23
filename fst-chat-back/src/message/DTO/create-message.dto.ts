@@ -4,10 +4,12 @@ import {
   IsArray,
   ValidateNested,
   IsMongoId,
+  IsBooleanString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
 import { replyMessageDto } from './replyMessage.dto';
+
 export class CreateMessageDto {
   @IsMongoId()
   senderId: string;
@@ -22,7 +24,7 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
 
   @IsOptional()
   @IsArray()
@@ -33,5 +35,10 @@ export class CreateMessageDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => replyMessageDto)
-  replyMessage?: replyMessageDto; // ✅ casse la boucle infiniereplyMessage: replyMessageDto;
+  replyMessage?: replyMessageDto; // pour les réponses
+
+  // Indique si le message est en cours d'envoi/upload côté client
+  @IsOptional()
+  @IsBooleanString()
+  sending?: boolean;
 }

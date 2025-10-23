@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Server, ServerDocument } from '../schema/server.schema';
 import { CreateServerDto } from '../DTO/create-server.dto';
-import { S } from 'node_modules/react-router/dist/development/routeModules-DnUHijGz';
 @Injectable()
 export class ServerService {
   constructor(
@@ -44,5 +43,9 @@ export class ServerService {
       await server.save();
     }
     return server.toObject();
+  }
+  async getFromChannelId(channelId: string): Promise<Server | null> {
+    Logger.log('channelId', channelId);
+    return this.serverModel.findOne({ channels: channelId }).lean().exec();
   }
 }

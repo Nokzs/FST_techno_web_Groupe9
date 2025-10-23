@@ -127,13 +127,22 @@ export class MessageGateway
   }
 
   @SubscribeMessage('getMessages')
-  async handleGetMessages(@MessageBody() channelId: string) {
-    const messages = await this.messageService.findByChannel(channelId);
+  async handleGetMessages(
+    @MessageBody() messagesData: { channelId: string; date: string }
+  ) {
+    Logger.log('date gateway', messagesData.date);
+    const { messages, hasMore } = await this.messageService.findByChannel(
+      messagesData.channelId,
+      messagesData.date
+    );
     Logger.log('message', messages);
 
-    return messages.map((msg) => {
-      return plainToInstance(MessageDto, msg);
-    });
+    return {
+      messages: messages.map((msg) => {
+        return plainToInstance(MessageDto, msg);
+      }),
+      hasMore,
+    };
   }
 
   @SubscribeMessage('newReactions')
@@ -142,7 +151,6 @@ export class MessageGateway
     @ConnectedSocket() socket: Socket
   ): Promise<void> {
     const user: string = socket.data.id;
-
     Logger.log(user);
     const message = await this.messageService.addReaction(
       reaction.messageId,

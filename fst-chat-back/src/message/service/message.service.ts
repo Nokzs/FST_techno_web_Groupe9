@@ -71,10 +71,19 @@ export class MessageService {
       .exec();
   }
 
-  findByChannel(channelId: string): Promise<Message[]> {
+  async findByChannel(
+    channelId: string,
+    date: string
+  ): Promise<{ messages: Message[]; hasMore: boolean }> {
     Logger.log(channelId);
-    return this.messageModel
-      .find({ channelId })
+    Logger.log('date', date);
+    const findObj = date
+      ? { channelId, createdAt: { $lt: date } }
+      : { channelId };
+
+    const messages = await this.messageModel
+      .find(findObj)
+      .limit(51)
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
@@ -84,6 +93,12 @@ export class MessageService {
       .lean()
       .sort({ createdAt: -1 })
       .exec();
+    const hasMore = messages.length > 50;
+    const slicedMessages = hasMore ? messages.slice(0, 50) : messages;
+    return {
+      messages: slicedMessages,
+      hasMore: hasMore,
+    };
   }
 
   async addReaction(

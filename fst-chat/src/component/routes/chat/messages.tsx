@@ -8,23 +8,25 @@ import { uploadFile } from "../../../api/storage/uploadFile";
 import { type MessageFile, type Message } from "./messageFileType";
 import { MessageItem } from "./MessageItem";
 import { socket } from "../../../socket";
-import { NavLink, useParams } from "react-router";
+import { NavLink } from "react-router";
 import { LanguageSwitcher } from "../../ui/languageSwitcher";
 import { useTranslation } from "react-i18next";
 import type { User } from "../../../types/user";
 import { getUserProfile } from "../../../api/user/getUserProfile";
-
-
-export function Messages() {
+import { ChatBotWindow } from "../../ui/ChatBotWindows";
+type MessagesProps = {
+  channelId: string | undefined;
+};
+export function Messages({ channelId }: MessagesProps) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-
+  const topRef = useRef<HTMLDivElement | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
-  const { channelId } = useParams<{ channelId: string }>();
+  const hasMoreRef = useRef<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll automatique après chaque nouveau message
@@ -32,7 +34,46 @@ export function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-   useEffect(() => {
+  const paginateMessages = () => {
+    socket.emit(
+      "getMessages",
+      { channelId, date: messages[messages.length - 1]?.createdAt },
+      ({ messages, hasMore }) => {
+        setMessages((oldMessages) => [...oldMessages, ...messages]);
+        hasMoreRef.current = hasMore;
+      },
+    );
+  };
+  // Observer pour détecter le haut de la liste
+  useEffect(() => {
+    let debounceTimeout: NodeJS.Timeout;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && !loading && hasMoreRef.current) {
+          // Petit délai de debounce
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(async () => {
+            paginateMessages();
+          }, 400); // 400ms de délai entre deux appels
+        }
+      },
+      {
+        root: null, // le conteneur scrollable (null = viewport)
+        rootMargin: "0px",
+        threshold: 0.1,
+      },
+    );
+
+    const current = topRef.current;
+    if (current) observer.observe(current);
+    return () => {
+      if (current) observer.unobserve(current);
+    };
+  }, [topRef, paginateMessages]);
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const profile = await getUserProfile();
@@ -51,15 +92,19 @@ export function Messages() {
     // rejoindre la "room" du channel
     console.log("je rentre dans la room");
     socket.emit("joinChannelRoom", channelId);
-
-    socket.emit("getMessages", channelId, (messages: Message[]) => {
-      console.log("Récupération des messages pour le channel :", channelId);
-      console.log("Messages reçus :", messages);
-      setMessages(messages);
-      console.log("Messages chargés :", messages);
-      setLoading(false);
-      scrollToBottom();
-    });
+    socket.emit(
+      "getMessages",
+      { channelId, date: null },
+      ({ messages, hasMore }: { messages: Message[]; hasMore: boolean }) => {
+        console.log("Récupération des messages pour le channel :", channelId);
+        console.log("Messages reçus :", messages);
+        setMessages(messages);
+        console.log("Messages chargés :", messages);
+        hasMoreRef.current = hasMore;
+        scrollToBottom();
+        setLoading(false);
+      },
+    );
 
     socket.on("newMessage", (message: Message) => {
       console.log("Événement newMessage reçu :", message);
@@ -133,32 +178,40 @@ export function Messages() {
     );
   }
 
-  return (
-    <div className="h-screen flex flex-col p-10">
-      <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
-      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        <NavLink to="/servers">{"<-"}</NavLink>
-        {t("tchat.tchatRoom")}
-      </h1>
+  if (!channelId) {
+    return <></>;
+  }
 
-      {/* Liste des messages */}
-      <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container">
-        <div ref={messagesEndRef} />
-        {messages.slice().map((msg, index: number) => (
-          <MessageItem
-            key={index}
-            message={msg}
-            currentUserId={user.id}
-            channelId={channelId!}
-            onReply={setReplyMessage}
-          />
-        ))}
+  return (
+    <>
+      <ChatBotWindow />
+      <div className="h-screen flex flex-col p-10 w-full">
+        <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          <NavLink to="/servers">{"<-"}</NavLink>
+          {t("tchat.tchatRoom")}
+        </h1>
+
+        {/* Liste des messages */}
+        <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container">
+          <div ref={messagesEndRef} />
+          {messages.slice().map((msg, index: number) => (
+            <MessageItem
+              key={index}
+              message={msg}
+              currentUserId={user.id}
+              channelId={channelId!}
+              onReply={setReplyMessage}
+            />
+          ))}
+          {messages.length > 0 && <div ref={topRef}></div>}
+        </div>
+        <ChatInput
+          sendMessage={addMessage}
+          replyMessage={replyMessage}
+          onReply={setReplyMessage}
+        />
       </div>
-      <ChatInput
-        sendMessage={addMessage}
-        replyMessage={replyMessage}
-        onReply={setReplyMessage}
-      />
-    </div>
+    </>
   );
 }

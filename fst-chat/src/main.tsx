@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import "./i18n/i18n.js";
 import { Messages } from "./component/routes/chat/messages";
+import { messageLoader } from "./loaders/messageLoader";
 import { NotConnectedLayout } from "./component/NotConnectedLayout";
 import { DarkModeProvider } from "./component/contextProvider/DarkModeContextProvider";
 import { ConnectedLayout } from "./component/ConnectedLayout.js";
@@ -11,6 +12,7 @@ import { ProfilLayout } from "./component/routes/profil/layout/ProfilLayout.js";
 
 import { profilLoader } from "./loaders/profilLoader.js";
 import { ServersPage } from "./api/servers/servers-page.js";
+import { Chat } from "./component/routes/chat/chat.js";
 
 import { authMiddleware } from "./middleware/authMiddleware/authMiddleware.js";
 import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware.js";
@@ -67,8 +69,9 @@ const routes = [
         Component: ServersPage,
       },
       {
+        loader: messageLoader,
         path: "/messages/:channelId",
-        Component: Messages,
+        Component: Chat,
       },
     ],
   },

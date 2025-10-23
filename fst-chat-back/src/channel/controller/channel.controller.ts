@@ -38,4 +38,10 @@ export class ChannelController {
     const channels = await this.channelService.getChannelsByServer(serverId);
     return channels.map((channel) => plainToInstance(ChannelDto, channel));
   }
+  @Get('channel/:id')
+  @UseGuards(AuthGuard)
+  async getChannel(@Param('id') channelId: string): Promise<ChannelDto | null> {
+    const channel = await this.channelService.getPopulateChannel(channelId);
+    return channel ? plainToInstance(ChannelDto, channel) : null;
+  }
 }

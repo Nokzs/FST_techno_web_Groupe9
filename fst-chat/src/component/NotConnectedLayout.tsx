@@ -7,7 +7,7 @@ import { NavBar } from "./NavBar";
 
 export function NotConnectedLayout() {
   return (
-    <div className="overflow-x-hidden">
+    <div className="bg-main min-h-screen overflow-x-hidden">
       <NavBar />
       <Outlet />
     </div>

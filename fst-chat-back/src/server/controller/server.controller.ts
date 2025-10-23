@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Req, UseGuards, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  NotFoundException,
+  Param,
+  Logger,
+} from '@nestjs/common';
 import { ServerService } from '../service/server.service';
 import { plainToInstance } from 'class-transformer';
 import { ServerDto } from '../DTO/server.dto';
@@ -47,5 +57,15 @@ export class ServerController {
       throw new NotFoundException("Code d'invitation invalide");
     }
     return plainToInstance(ServerDto, server);
+  }
+
+  @Get('/channel/:channelId')
+  @UseGuards(AuthGuard)
+  async getServersFromChannel(
+    @Param('channelId') channelId: string
+  ): Promise<ServerDto | null> {
+    const server = await this.serverService.getFromChannelId(channelId);
+    const dto = plainToInstance(ServerDto, server);
+    return dto;
   }
 }

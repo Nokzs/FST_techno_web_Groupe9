@@ -20,31 +20,34 @@ export function ChatBotWindow() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
-      {/* Bouton flottant */}
-      {!open && (
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
-          aria-label="Ouvrir le chat"
-        >
-          {/* Icône bulle de chat en SVG */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-6 h-6"
+    <AnimatePresence mode="popLayout">
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+        {/* Bouton flottant */}
+        {!open && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ ease: "easeInOut", type: "tween", duration: 0.05 }}
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
+            aria-label="Ouvrir le chat"
           >
-            <path d="M20 2H4C2.9 2 2 2.9 2 4v14l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-          </svg>
-        </motion.button>
-      )}
+            {/* Icône bulle de chat en SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-6 h-6"
+            >
+              <path d="M20 2H4C2.9 2 2 2.9 2 4v14l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+            </svg>
+          </motion.button>
+        )}
 
-      {/* Fenêtre du chat */}
-      <AnimatePresence>
+        {/* Fenêtre du chat */}
         {open && (
           <motion.div
             key="chat-window"
@@ -106,16 +109,19 @@ export function ChatBotWindow() {
                 placeholder="Écris un message..."
                 className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button
+
+              <motion.button
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                whileTap={{ scale: 0.5 }}
                 onClick={handleSend}
                 className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
               >
                 Envoyer
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
-    </div>
+      </div>
+    </AnimatePresence>
   );
 }

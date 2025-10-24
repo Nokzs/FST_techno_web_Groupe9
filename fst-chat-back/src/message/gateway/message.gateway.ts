@@ -165,7 +165,7 @@ export class MessageGateway
   }
   @SubscribeMessage('updateMessageFiles')
   async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
-    const updatedMessage = await this.messageService.updateMessageWithTmp(data);
+    const updatedMessage = await this.messageService.updateMessageFiles(data);
     if (updatedMessage) {
       this.server
         .to(updatedMessage.channelId.toString())

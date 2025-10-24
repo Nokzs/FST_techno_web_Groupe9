@@ -27,8 +27,7 @@ export function ChatInput({
   const messageRef = useRef<string>("");
   const filesLengthRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recordRef = useRef<HTMLDivElement>(null);
-
+  const recordRef = useRef<HTMLDivElement>(null); 
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     messageRef.current = e.target.value;
     setMessage(e.target.value);
@@ -45,6 +44,7 @@ export function ChatInput({
   };
 
   const handleSend = () => {
+    console.log("envoi du message :", message);
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
     setMessage("");
@@ -52,6 +52,11 @@ export function ChatInput({
     filesLengthRef.current = 0;
     setFiles([]);
   };
+  const handleInputEnter = (e: KeyboardEvent) => {
+    if (e.key === "Enter") {
+      if (messageRef.current.trim()) {
+        handleSend();
+      }
 
   const onStopRecording = (file: File) => {
     console.log("je recois le fichier audio");
@@ -191,6 +196,14 @@ export function ChatInput({
         {/* Champ de texte */}
         <input
           type="text"
+          onBlur={()=>{
+            console.log("j'enlève le listener");
+            window.removeEventListener("keydown" handleInputEnter}}
+          onFocus={() => {
+            
+            console.log("je met le listener");
+            setShowEmojiPicker(false);
+            window.addEventListener("keydown", handleInputEnter)}
           value={message}
           onChange={handleTextChange}
           placeholder="Écris un message..."
@@ -213,7 +226,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "-100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "-100%" }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.05, ease: "easeInOut" }}
                 onAnimationStart={() => {
                   // background actif dès le début de l'animation
                   if (recordRef.current)
@@ -229,7 +242,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "100%" }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.05, ease: "easeInOut" }}
                 onAnimationStart={() => {
                   if (recordRef.current)
                     recordRef.current.classList.add("bg-green-700");

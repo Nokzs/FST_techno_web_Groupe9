@@ -4,7 +4,7 @@ import {
   IsArray,
   ValidateNested,
   IsMongoId,
-  IsBooleanString,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
@@ -39,6 +39,6 @@ export class CreateMessageDto {
 
   // Indique si le message est en cours d'envoi/upload côté client
   @IsOptional()
-  @IsBooleanString()
+  @IsBoolean()
   sending?: boolean;
 }

@@ -86,7 +86,7 @@ export function NavigationMessageMenu({
       <motion.div
         animate={{ width: menuOpen ? 256 : 0 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex flex-col bg-neutral-900 text-white border-r border-neutral-800 overflow-hidden"
+        className="flex flex-col bg-white-900 text-white border-r dark:border-2 border-neutral-800 overflow-hidden"
       >
         <div className="relative flex-1 overflow-hidden">
           <Suspense fallback={<div>Chargement...</div>}>
@@ -103,8 +103,8 @@ export function NavigationMessageMenu({
                   className="absolute inset-0 flex flex-col"
                 >
                   {/* TITRE */}
-                  <div className="flex items-center px-4 py-3 border-b border-neutral-800">
-                    <h2 className="text-lg font-semibold truncate">
+                  <div className="flex items-center px-4 py-3 border-b  border-neutral-800">
+                    <h2 className="text-black text-lg font-semibold truncate text-center  dark:text-white">
                       {t("tchat.navigationMenu.title")}
                     </h2>
                   </div>
@@ -112,7 +112,7 @@ export function NavigationMessageMenu({
                   {/* LISTE DES SERVEURS */}
                   <div className="flex-1 overflow-y-auto">
                     {servers.length === 0 ? (
-                      <p className="text-neutral-500 text-center mt-5">
+                      <p className="text-neutral-500 dark:text-dark text-center mt-5">
                         {t("tchat.navigationMenu.noServer")}
                       </p>
                     ) : (
@@ -123,7 +123,7 @@ export function NavigationMessageMenu({
                               onClick={() => handleSelectServer(server)}
                               className="flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-800 transition"
                             >
-                              <span className="truncate whitespace-nowrap">
+                              <span className="truncate whitespace-nowrap text-black dark:text-white">
                                 {server.name}
                               </span>
                             </button>
@@ -149,13 +149,13 @@ export function NavigationMessageMenu({
                   <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
                     <button
                       onClick={handleBackToServers}
-                      className="hover:bg-neutral-800 p-1 rounded transition"
+                      className="hover:bg-neutral-800 p-1 text-black dark:text-white rounded transition"
                       title="Revenir aux serveurs"
                     >
                       {"<<"}
                     </button>
-                    <div className="whitespace-nowrap">
-                      {activeServer.name.toString()}
+                    <div className="whitespace-nowrap text-black text-center w-full dark:text-white">
+                      {activeServer.name.toString().toUpperCase()}
                     </div>
                   </div>
 
@@ -175,9 +175,9 @@ export function NavigationMessageMenu({
                             >
                               <button
                                 className={cn(
-                                  "flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-800 transition",
+                                  "flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-500 dark:hover:bg-neutral-500 text-black dark:text-white transition",
                                   activeChannel === channel._id &&
-                                    "bg-neutral-800",
+                                    "bg-neutral-500 ",
                                 )}
                               >
                                 {channel.name}
@@ -200,8 +200,8 @@ export function NavigationMessageMenu({
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className={cn(
-            "p-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-r-md transition dark:text-white duration-500 text:black",
-            menuOpen ? "rotate-z-180" : "",
+            "p-1 bg-neutral-900 text-white dark:text-black hover:bg-neutral-800 border border-neutral-700 rounded-r-md transition dark:text-white duration-500 text:black",
+            menuOpen ? "rotate-z-180 -translate-x-[100%]" : "",
           )}
           title={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >

@@ -38,6 +38,7 @@ export class MessageService {
       ...createMessageDto,
       files: files,
     });
+
     await newMessage.save();
     const result = await this.messageModel
       .findById(newMessage._id)
@@ -154,10 +155,16 @@ export class MessageService {
       throw new Error('Message not found');
     }
     const embedding = await this.iaProvider.embed(message.content);
+    if (!embedding) {
+      return 'Failed to generate embedding';
+    }
+    const embeddingNorm = Math.sqrt(
+      embedding.reduce((sum, val) => sum + val * val, 0)
+    );
     await this.messageModel
       .findByIdAndUpdate(
         messageId,
-        { embedding },
+        { embedding, embeddingNorm },
         { new: true } // retourne le document mis à jour
       )
       .exec();

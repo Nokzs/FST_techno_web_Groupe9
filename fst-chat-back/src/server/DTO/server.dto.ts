@@ -1,4 +1,3 @@
-// src/server/dto/server.dto.ts
 import { IsString, IsOptional, IsArray } from 'class-validator';
 
 export class ServerDto {

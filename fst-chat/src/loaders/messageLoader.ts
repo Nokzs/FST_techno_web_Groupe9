@@ -33,7 +33,7 @@ export const messageLoader: LoaderFunction = async (
     },
   ).then((r) => r.json());
 
-  const localMessages = localStorage.getItem("botMessages");
+  const localMessages = localStorage.getItem("botMessages" + channelId);
   const tchatBotData = localMessages
     ? JSON.parse(localMessages)
     : [

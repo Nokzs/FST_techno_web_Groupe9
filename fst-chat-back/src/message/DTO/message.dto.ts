@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
-import { UserLiteDto } from 'src/user/DTO/UserLiteDto';
+import { UserLiteDto } from '../../user/DTO/UserLiteDto';
 import { replyMessageDto } from './replyMessage.dto';
 import { Exclude, Expose } from 'class-transformer';
 import { ReactionDto } from './reactionDto';

@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
-import { IsUserAlreadyExist } from 'src/CustomValidators/IsAlreadyExistedUserValidation';
-import { IsInList } from 'src/CustomValidators/IsInListValidator';
+import { IsUserAlreadyExist } from '../../CustomValidators/IsAlreadyExistedUserValidation';
+import { IsInList } from '../../CustomValidators/IsInListValidator';
 export class CreateUserDTO {
   @IsNotEmpty()
   pseudo: string;

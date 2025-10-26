@@ -33,17 +33,35 @@ export function ServerItem({ server }: { server: Server }) {
   };
 
   return (
-    <li className="p-4 rounded-2xl shadow-md bg-gray-100 text-gray-900 border border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform duration-200">
+    <li
+      className="
+      w-[98%]
+      max-w-full
+      p-4 sm:p-4 md:p-5
+      rounded-2xl
+      shadow-md
+      bg-gray-100
+      text-gray-900
+      border border-gray-200
+      transition-transform duration-200
+      transform
+      hover:shadow-lg
+      hover:scale-[1.02]
+      origin-center
+    "
+    >
       <div
         className="flex justify-between items-center cursor-pointer"
         onClick={toggleChannels}
       >
         <div>
-          <div className="font-semibold text-lg">{server.name}</div>
-          <div className="text-sm text-gray-600 mt-1">
+          <div className="font-semibold text-lg sm:text-lg md:text-xl">
+            {server.name}
+          </div>
+          <div className="text-sm sm:text-sm md:text-base text-gray-600 mt-1">
             {server.description || "Pas de description"}
           </div>
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs sm:text-xs md:text-sm text-gray-500 mt-2">
             Membres : {server.members?.length || 0}
           </div>
         </div>

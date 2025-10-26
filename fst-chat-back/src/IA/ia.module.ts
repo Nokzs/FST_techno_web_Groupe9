@@ -1,6 +1,12 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CohereIaProvider } from './IaProvider/CohereIaProvider';
+import { chatBotController } from './chatBotController';
+import { Message, MessageSchema } from '../message/schema/message.schema';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AuthGuard } from '../guards/authGuard';
+import { TokenModule } from '../token/token.module';
+import { CustomCacheModule } from 'src/cache/module/Cache.module';
 export enum IaProviderType {
   cohere = 'cohere',
 }
@@ -19,9 +25,17 @@ export class IaModule {
         break;
     }
     return {
-      imports: [ConfigModule],
+      controllers: [chatBotController],
+      imports: [
+        CustomCacheModule,
+        ConfigModule,
+        TokenModule,
+        MongooseModule.forFeature([
+          { name: Message.name, schema: MessageSchema },
+        ]),
+      ],
       module: IaModule,
-      providers: [provider],
+      providers: [provider, AuthGuard],
       exports: [provider],
     };
   }

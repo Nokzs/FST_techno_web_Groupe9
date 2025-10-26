@@ -13,7 +13,7 @@ import { AuthGuard } from '../../guards/authGuard';
 import { ChannelDto } from '../DTO/channel.dto';
 import { CreateChannelDto } from '../DTO/create-channel.dto';
 import { ChannelService } from '../service/channel.service';
-import { type IStorageProvider } from 'src/storage/provider/IStorageProvider';
+import { type IStorageProvider } from '../../storage/provider/IStorageProvider';
 @Controller('channels')
 export class ChannelController {
   constructor(

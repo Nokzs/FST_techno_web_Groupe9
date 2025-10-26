@@ -14,6 +14,10 @@ export class Message {
   @Prop({ type: [Number], default: [] })
   embedding: number[];
 
+  //permet d'optimiser la fonctionnalité de question/réponse du chatbot
+  @Prop({ type: Number, default: 0 })
+  embeddingNorm: number;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   senderId: Types.ObjectId;
 

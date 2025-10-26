@@ -2,9 +2,8 @@ import { Module, DynamicModule } from '@nestjs/common';
 import { SupabaseStorageProvider } from './provider/SupabaseStorageProvider';
 import { ConfigModule } from '@nestjs/config';
 import { StorageController } from './controller/StorageController';
-import { GuardModule } from 'src/guards/guards.module';
-import { TokenModule } from 'src/token/token.module';
-import { AuthGuard } from 'src/guards/authGuard';
+import { TokenModule } from '../token/token.module';
+import { AuthGuard } from '../guards/authGuard';
 export enum StorageProviderType {
   supabase = 'supabase',
 }

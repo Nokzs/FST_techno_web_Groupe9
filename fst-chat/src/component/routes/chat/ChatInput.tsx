@@ -53,14 +53,6 @@ export function ChatInput({
     setFiles([]);
     console.log(files);
   };
-  const handleInputEnter = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      if (messageRef.current.trim() || filesLengthRef.current > 0) {
-        handleSend();
-      }
-    }
-  };
-
   const onStopRecording = (file: File) => {
     console.log("je recois le fichier audio");
     setFiles((prev) => [...prev, file]);
@@ -199,16 +191,8 @@ export function ChatInput({
         {/* Champ de texte */}
         <input
           type="text"
-          onBlur={() => {
-            console.log("j'enlève le listener");
-            window.removeEventListener("keydown", handleInputEnter);
-          }}
-          onFocus={() => {
-            console.log("je met le listener");
-            setShowEmojiPicker(false);
-            window.addEventListener("keydown", handleInputEnter);
-          }}
           value={message}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
           onChange={handleTextChange}
           placeholder="Écris un message..."
           className="w-full border-2 dark:border-white border-black  rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800 transition-all duration-75"

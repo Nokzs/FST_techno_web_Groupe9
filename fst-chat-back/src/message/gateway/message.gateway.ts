@@ -165,6 +165,7 @@ export class MessageGateway
   }
   @SubscribeMessage('updateMessageFiles')
   async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
+    Logger.log('Updating message files for message ID:', data);
     const updatedMessage = await this.messageService.updateMessageFiles(data);
     if (updatedMessage) {
       this.server

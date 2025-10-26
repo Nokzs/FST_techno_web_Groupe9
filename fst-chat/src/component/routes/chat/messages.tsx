@@ -44,7 +44,9 @@ export function Messages({ channelId }: MessagesProps) {
       },
     );
   }, [channelId, messages]);
-  // Observer pour détecter le haut de la liste
+
+  /*Résumé du UseEffect : installer un IntersectionObserver 
+  pour charger plus de messages lorsque l'utilisateur fait défiler vers le haut.*/
   useEffect(() => {
     let debounceTimeout: NodeJS.Timeout;
 
@@ -73,6 +75,7 @@ export function Messages({ channelId }: MessagesProps) {
     };
   }, [topRef, paginateMessages, loading]);
 
+  /*Résumé du UseEffect : récupération du profil utilisateur au montage du composant.*/
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -90,6 +93,7 @@ export function Messages({ channelId }: MessagesProps) {
     if (!channelId) return;
 
     // rejoindre la "room" du channel
+    // vérifie également si le dernier message à été chargé
     console.log("je rentre dans la room");
     socket.emit("joinChannelRoom", channelId);
     socket.emit(
@@ -132,7 +136,7 @@ export function Messages({ channelId }: MessagesProps) {
       );
     });
     // Gestion de la mise à jour du message avec fichiers
-    socket.on("updateMessageFiles", (updatedMessage: Message) => {
+    socket.on("messageUpdated", (updatedMessage: Message) => {
       console.log("Message mis à jour avec des fichiers :", updatedMessage);
 
       setMessages((prevMessages) =>
@@ -167,9 +171,22 @@ export function Messages({ channelId }: MessagesProps) {
         sending: true,
       };
 
+      // Envoi de la version finale avec fichiers
+      const finalMessage = {
+        senderId: user.id,
+        channelId,
+        content: text,
+        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+        replyMessage: replyMessage || null,
+        files: messagesFiles,
+        sending: false,
+      };
       // Envoi de la version optimistique
-      socket.emit("sendMessage", optimisticMessage);
+      socket.emit("sendMessage", optimisticMessage, (message) => {
+        finalMessage._id = message._id;
+      });
 
+      console.log(finalMessage);
       // Upload des fichiers
       await Promise.all(
         files.map(async (file) => {
@@ -190,17 +207,8 @@ export function Messages({ channelId }: MessagesProps) {
         }),
       );
 
-      // Envoi de la version finale avec fichiers
-      const finalMessage = {
-        senderId: user.id,
-        channelId,
-        content: text,
-        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
-        replyMessage: replyMessage || null,
-        files: messagesFiles,
-        sending: false,
-      };
-      socket.emit(" updateMessageFiles", finalMessage);
+      console.log("Envoi du message final avec fichiers :", finalMessage);
+      socket.emit("updateMessageFiles", finalMessage);
     } else {
       // Cas sans fichiers : envoi direct
       const message = {

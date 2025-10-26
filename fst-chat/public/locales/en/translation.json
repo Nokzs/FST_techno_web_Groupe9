@@ -17,6 +17,13 @@
         "navigationMenu": {
             "title": "Servers",
             "noServer": "Any server available. Please add one server to start chatting!"
+        },
+        "chatBot": {
+            "welcomeMessage": "Hi 👋, here the command you can use \n -/question followed by your question about the discussion of this channel",
+            "input": {
+                "placeholder": "Écrire un message...",
+                "send": "Envoyer"
+            }
         }
     }
 }

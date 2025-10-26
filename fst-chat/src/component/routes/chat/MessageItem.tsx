@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { ReactionMenu } from "../../ui/reactionsPicker";
 import { socket } from "../../../socket";
 import type { User } from "../../../types/user";
+import { cn } from "../../../utils/cn";
+import { AnimatePresence, motion } from "framer-motion";
 interface MessageProps {
   currentUserId: string;
   message: Message;
@@ -155,30 +157,44 @@ export function MessageItem({
                 )}
               </div>
             </div>
-
-            {/* Réactions */}
-            {Object.keys(grouped).length > 0 && (
-              <div className="flex gap-2 mt-2 absolute bottom-0 left-0 translate-y-full mb-5">
-                {Object.entries(grouped).map(([emoji, users]) => {
-                  const reacted = users.some(
-                    (user) => user._id === currentUserId,
-                  );
-                  return (
-                    <button
-                      key={emoji}
-                      onClick={() => addReaction(emoji)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition 
-                  ${reacted ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600"}`}
-                    >
-                      <span>{emoji}</span>
-                      <span>{users.length}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
           </>
         )}
+
+        {/* Réactions */}
+        <AnimatePresence mode="sync">
+          {Object.keys(grouped).length > 0 && (
+            <motion.div
+              key={Object.keys(grouped).join("-")}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className={cn(
+                "flex gap-2 mt-2 absolute bottom-0 translate-y-full mb-5",
+                isOwnMessage
+                  ? "justify-end right-0 flex-row-reverse"
+                  : "justify-start left-0 flex-row",
+              )}
+            >
+              {Object.entries(grouped).map(([emoji, users]) => {
+                const reacted = users.some(
+                  (user) => user._id === currentUserId,
+                );
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => addReaction(emoji)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition 
+                  ${reacted ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600"}`}
+                  >
+                    <span>{emoji}</span>
+                    <span>{users.length}</span>
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

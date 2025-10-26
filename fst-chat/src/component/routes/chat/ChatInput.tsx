@@ -27,7 +27,7 @@ export function ChatInput({
   const messageRef = useRef<string>("");
   const filesLengthRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recordRef = useRef<HTMLDivElement>(null); 
+  const recordRef = useRef<HTMLDivElement>(null);
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     messageRef.current = e.target.value;
     setMessage(e.target.value);
@@ -47,16 +47,19 @@ export function ChatInput({
     console.log("envoi du message :", message);
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
-    setMessage("");
+    setMessage(() => "");
     onReply?.(undefined);
     filesLengthRef.current = 0;
     setFiles([]);
+    console.log(files);
   };
   const handleInputEnter = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
-      if (messageRef.current.trim()) {
+      if (messageRef.current.trim() || filesLengthRef.current > 0) {
         handleSend();
       }
+    }
+  };
 
   const onStopRecording = (file: File) => {
     console.log("je recois le fichier audio");
@@ -196,14 +199,15 @@ export function ChatInput({
         {/* Champ de texte */}
         <input
           type="text"
-          onBlur={()=>{
+          onBlur={() => {
             console.log("j'enlève le listener");
-            window.removeEventListener("keydown" handleInputEnter}}
+            window.removeEventListener("keydown", handleInputEnter);
+          }}
           onFocus={() => {
-            
             console.log("je met le listener");
             setShowEmojiPicker(false);
-            window.addEventListener("keydown", handleInputEnter)}
+            window.addEventListener("keydown", handleInputEnter);
+          }}
           value={message}
           onChange={handleTextChange}
           placeholder="Écris un message..."

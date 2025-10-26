@@ -57,7 +57,6 @@ export class SupabaseStorageProvider implements IStorageProvider {
     salonId?: string
   ): string {
     const bucket: string = this.getBucket(eventType, salonId);
-    Logger.log(`Getting public URL from bucket: ${bucket}`);
     Logger.log(`File name: ${fileName}`);
     const { data } = this.supabaseClient.storage
       .from(bucket)

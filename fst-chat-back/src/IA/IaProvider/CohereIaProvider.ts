@@ -54,14 +54,24 @@ export class CohereIaProvider implements IIaProvider {
     return answerLLM.message.content[0].text;
   }
   async embed(text: string): Promise<number[] | null> {
+    const prompt = `
+Instructions :
+1. Réponds uniquement par le texte corrigé et traduit en anglais.
+2. Vérifie les fautes d’orthographe.
+3. Reformule pour que ce soit clair et naturel en anglais.
+4. Ne change pas le sens.
+
+---
+
+Texte à traduire :
+${text}
+`;
     const response = await this.cohere.v2.chat({
       model: 'command-a-03-2025',
       messages: [
         {
           role: 'user',
-          content:
-            "Corrige les fautes d'orthographe et reformule le texte pour qu'il soit clair en anglais, sans changer le sens \n" +
-            text,
+          content: prompt,
         },
       ],
     });
@@ -207,35 +217,43 @@ export class CohereIaProvider implements IIaProvider {
       })
       .join('\n');
 
-    // 6️⃣ Construire le prompt pour le LLM
     const prompt = `
-      Contexte (messages pertinents) :
-      ${contextText}
+Contexte (messages pertinents) :
+${contextText}
 
-      Question : ${question}
+Question :
+${question}
 
-      considère que ${userId}, c'est moi'
-      Réponds de manière concise en langue: ${useUserLanguage ? lang : detectedLanguage} en répondant simplement uniquement en te basant sur le contexte ci-dessus. 
-      Si tu n'as pas assez d'informations dans le contexte, réponds que tu n'as pas assez d'informations pour répondre à la question toujours dans la même langue.
-      réponds sous la forme suivante :
-      sous la forme strict d'un JSON avec :
-        "answer": la réponse à la question',
-        "translateAnswer":  la réponse en anglais (même si la question est en anglais)
-      `;
+Considère que l'utilisateur avec ID ${userId} est moi.
+Réponds de manière concise dans la langue : ${useUserLanguage ? lang : detectedLanguage}, en te basant uniquement sur le contexte ci-dessus.
+Si le contexte est insuffisant pour répondre, indique clairement que tu n'as pas assez d'informations, toujours dans la même langue.
 
+Réponds strictement sous la forme d'un JSON avec les clés suivantes :
+{
+  "answer": "la réponse à la question",
+  "translateAnswer": "la réponse en anglais"
+}
+`;
     // 7️⃣ Appeler le LLM
     const answerLLM = await this.prompt(prompt);
     if (!answerLLM) {
       throw new Error("Le modèle de langage n'a pas pu générer de réponse.");
     }
 
+    const parsedAnswer = JSON.parse(
+      answerLLM
+        .replace(/^```json\s*/i, '')
+        .replace(/```$/i, '')
+        .trim()
+    ) as { answer: string; translateAnswer: string };
+
     // 8️⃣ Mettre en cache la réponse en cas de question similaire
     this.cacheService
-      .cacheAnswer(channelId, answerLLM, questionEmbedding)
+      .cacheAnswer(channelId, parsedAnswer.translateAnswer, questionEmbedding)
       .catch((err) => {
         console.error('Erreur lors de la mise en cache de la réponse :', err);
       });
-    return answerLLM;
+    return parsedAnswer.answer;
   }
 
   private async getDatefromString(

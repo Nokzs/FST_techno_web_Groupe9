@@ -25,6 +25,9 @@ export function MessageItem({
   const menuRef = useRef<HTMLDivElement>(null);
   const date = new Date(message.createdAt);
   const formattedDate = date.toLocaleTimeString([], {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -60,7 +63,7 @@ export function MessageItem({
       }`}
     >
       <div
-        className={`p-10 rounded-2xl shadow-sm flex flex-col relative ${
+        className={`py-8 px-5 rounded-2xl shadow-sm flex flex-col relative ${
           isOwnMessage
             ? "bg-green-500 text-white rounded-bl-none"
             : "bg-blue-500 text-white rounded-br-none"

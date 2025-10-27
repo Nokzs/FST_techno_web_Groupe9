@@ -240,7 +240,7 @@ export function Messages({ channelId }: MessagesProps) {
 
   return (
     <>
-      <ChatBotWindow channelId={channelId} userId={user?.id} />
+      <ChatBotWindow channelId={channelId} userId={user} />
       <div className="h-screen flex flex-col p-10 w-full">
         <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
         <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">

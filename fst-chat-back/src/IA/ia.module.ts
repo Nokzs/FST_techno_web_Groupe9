@@ -1,7 +1,7 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CohereIaProvider } from './IaProvider/CohereIaProvider';
-import { chatBotController } from './chatBotController';
+import { ChatBotController } from './chatBotController';
 import { Message, MessageSchema } from '../message/schema/message.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthGuard } from '../guards/authGuard';
@@ -25,7 +25,7 @@ export class IaModule {
         break;
     }
     return {
-      controllers: [chatBotController],
+      controllers: [ChatBotController],
       imports: [
         CustomCacheModule,
         ConfigModule,

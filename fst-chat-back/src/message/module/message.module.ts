@@ -13,6 +13,7 @@ import { Reaction, ReactionSchema } from '../schema/reaction.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { IaModule } from '../../IA/ia.module';
 import { iaProvider } from '../../config/constante';
+import { UserModule } from 'src/user/module/user.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,6 +21,7 @@ import { iaProvider } from '../../config/constante';
       { name: MessageFile.name, schema: MessageFileSchema },
       { name: Reaction.name, schema: ReactionSchema },
     ]),
+    UserModule,
     TokenModule,
     StorageModule.register(provider),
     ConfigModule,

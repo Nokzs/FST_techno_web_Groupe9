@@ -16,7 +16,6 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
-import { MessageFileDto } from '../DTO/MessageFileDto';
 type reactionType = {
   emoji: string;
   messageId: string;

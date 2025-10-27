@@ -5,19 +5,24 @@
  * @param channelId L'ID du canal de chat.
  * @returns La réponse du chatbot.
  */
-export const sendQuestion = async (
+export const sendCommand = async (
   channelId: string,
-  userId?: string,
+  command: string,
+  userId: string,
+  lang: string,
+  useUserLanguage = true,
 ): Promise<string> => {
-  console.log(
-    "Sending question to chatbot:",
-    question,
-    "Channel ID:",
+  const body = JSON.stringify({
     channelId,
-  );
-  const body = JSON.stringify({ channelId, userId });
+    command,
+    userId,
+    language: lang,
+    useUserLanguage,
+  });
+
+  console.log("Sending command to chatbot:", body);
   const answerData = await fetch(
-    `${import.meta.env.VITE_API_URL}/chatBot/ask`,
+    `${import.meta.env.VITE_API_URL}/chatBot/command`,
     {
       method: "POST",
       headers: {

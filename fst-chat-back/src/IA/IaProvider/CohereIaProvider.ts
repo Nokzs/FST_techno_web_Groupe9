@@ -1,7 +1,7 @@
 import { IIaProvider } from './IiaProvider';
 import { ConfigService } from '@nestjs/config';
 import { CohereClient, CohereClientV2 } from 'cohere-ai';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Message, MessageDocument } from '../../message/schema/message.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -121,7 +121,10 @@ export class CohereIaProvider implements IIaProvider {
   async ask(
     question: string,
     channelId: string,
-    userId: string
+    userId: string,
+    lang: string,
+    useUserLanguage = true,
+    detectedLanguage?: string
   ): Promise<string> {
     if (!channelId) throw new Error('channelId is required');
 
@@ -133,28 +136,21 @@ export class CohereIaProvider implements IIaProvider {
     // On vérifie qu'il n'y a pas une réponse en cache pour cette question
     // pour cela on calcule la similarité cosine entre l'embedding de la question et les embeddings des question en cache
     const cachedAnswers = await this.cacheService.getCachedAnswers(channelId);
-    cachedAnswers.forEach((answer: QuestionCache) => {
-      if (
-        this.cosineSimilarity(
-          questionEmbedding,
-          answer.embedding,
-          answer.norm
-        ) > this.similarityThreshold
-      )
+    for (const answer of cachedAnswers) {
+      const similarity = this.cosineSimilarity(
+        questionEmbedding,
+        answer.embedding,
+        answer.norm
+      );
+      if (similarity > this.similarityThreshold) {
         return answer.answer;
-    });
-    if (cachedAnswers.length > 0) {
-      return cachedAnswers[0].answer;
-    }
-    // 1️⃣ Récupérer tous les messages du channel
+      }
+    } // 1️⃣ Récupérer tous les messages du channel
     const messages = await this.messageModel
       .find({ channelId })
       .populate('senderId', 'pseudo _id')
       .exec();
 
-    if (!messages.length) return 'Aucun message trouvé dans ce channel.';
-
-    // 2️⃣ Calculer l'embedding de la question
     // 3️⃣ Calculer la similarité cosine entre question et chaque message
     const messagesWithScore = messages.map((msg) => {
       const score = this.cosineSimilarity(
@@ -210,6 +206,7 @@ export class CohereIaProvider implements IIaProvider {
         return `${i + 1}. [${m.user.pseudo}] ${content}`;
       })
       .join('\n');
+
     // 6️⃣ Construire le prompt pour le LLM
     const prompt = `
       Contexte (messages pertinents) :
@@ -218,22 +215,39 @@ export class CohereIaProvider implements IIaProvider {
       Question : ${question}
 
       considère que ${userId}, c'est moi'
-      Réponds de manière concise dans la langue de la question en répondant simplement uniquement en te basant sur le contexte ci-dessus. 
-      Si tu n'as pas assez d'informations dans le contexte, réponds que tu n'as pas assez d'informations pour répondre à la question.
+      Réponds de manière concise en langue: ${useUserLanguage ? lang : detectedLanguage} en répondant simplement uniquement en te basant sur le contexte ci-dessus. 
+      Si tu n'as pas assez d'informations dans le contexte, réponds que tu n'as pas assez d'informations pour répondre à la question toujours dans la même langue.
+      réponds sous la forme suivante :
+      sous la forme strict d'un JSON avec :
+        "answer": la réponse à la question',
+        "translateAnswer":  la réponse en anglais (même si la question est en anglais)
       `;
 
     // 7️⃣ Appeler le LLM
     const answerLLM = await this.prompt(prompt);
-    return !answerLLM
-      ? "Désolé, je n'ai pas pu générer de réponse."
-      : answerLLM;
+    if (!answerLLM) {
+      throw new Error("Le modèle de langage n'a pas pu générer de réponse.");
+    }
+
+    // 8️⃣ Mettre en cache la réponse en cas de question similaire
+    this.cacheService
+      .cacheAnswer(channelId, answerLLM, questionEmbedding)
+      .catch((err) => {
+        console.error('Erreur lors de la mise en cache de la réponse :', err);
+      });
+    return answerLLM;
   }
 
-  private async getDatefromString(dateString: string): Promise<Date | null> {
+  private async getDatefromString(
+    dateString: string,
+    lang: string,
+    detectedLanguage: string,
+    useUserLanguage: boolean
+  ): Promise<Date | string> {
     const prompt = `
 Tu es un assistant qui convertit une expression de date humaine en format ISO 8601.
-Si la phrase ne contient pas de date, réponds "null".
-Ne réponds qu'avec la date ISO, sans texte supplémentaire.
+Si la phrase ne contient pas de date, réponds que tu ne peux pas determiner de date dans la langue : ${useUserLanguage ? lang : detectedLanguage} .
+sinon réponds qu'avec la date ISO, sans texte supplémentaire.
 
 Exemples :
 - "hier" -> "2025-10-25"
@@ -245,27 +259,40 @@ Exemples :
 Texte : ${dateString}
 `;
     const text = await this.prompt(prompt);
-    if (!text) return null;
+    if (!text) {
+      throw new Error('Impossible de générer la date.');
+    }
     // On valide le format ISO 8601
     const match = text.match(/^\d{4}-\d{2}-\d{2}/);
-    if (!match) return null;
+    if (!match) return text;
 
     const parsedDate = new Date(match[0]);
-    return isNaN(parsedDate.getTime()) ? null : parsedDate;
+    return isNaN(parsedDate.getTime()) ? text : parsedDate;
   }
 
-  async makeSummarize(dateString: string): Promise<string> {
-    const date: Date | null = await this.getDatefromString(dateString);
+  async makeSummary(
+    content: string,
+    channelId: string,
+    userId: string,
+    lang: string,
+    detectedLanguage?: string,
+    useUserLanguage = true
+  ): Promise<string> {
+    const date: Date | string = await this.getDatefromString(
+      content,
+      lang,
+      detectedLanguage || lang, //si la langue n'a pas été détectée, on utilise la langue de l'utilisateur
+      useUserLanguage
+    );
     if (!date) {
       return "Désolé, je n'ai pas pu comprendre la date fournie.";
     }
     // 2️⃣ Récupération des messages principaux (depuis la date)
     const messagesAfter = await this.messageModel
-      .find({ createdAt: { $gte: date } })
+      .find({ createdAt: { $gte: date }, channelId })
       .populate('senderId', 'pseudo _id')
       .exec();
 
-    // 3️⃣ Récupération des messages avant la date pour contexte
     const messagesBefore = await this.messageModel
       .find({ createdAt: { $lt: date } })
       .sort({ createdAt: -1 }) // derniers messages avant la date
@@ -300,14 +327,61 @@ Texte : ${dateString}
       return 'Aucun contenu à résumer.';
     }
     const prompt = `
+considère que ${userId}, c'est moi.
 Voici quelques messages de contexte suivis des messages à résumer :
 ${textToSummarize}
 
 Résume-les de manière concise et claire.
+Réponds en langue: ${useUserLanguage ? lang : detectedLanguage}.
 `;
     const sumarize = await this.prompt(prompt);
     if (!sumarize) {
-      return "Désolé, je n'ai pas pu générer de résumé.";
+      throw new Error("Désolé, je n'ai pas pu générer de résumé.");
     }
+    return sumarize;
+  }
+  async parseCommand(command: string, language: string): Promise<string> {
+    console.log('Parsing command:', command, 'for language:', language);
+    const promptLLm = `
+        Tu es un assistant qui extrait la commande principale d'une phrase utilisateur.
+        Les patterns sont les suivants :
+
+        1. Si la commande commence par /question :
+          - Renvoie un objet JSON strict sous la forme :
+            {
+              "type": "question",
+              "content": "le reste de la phrase après /question",
+              "lang": "la langue de la question (fr, en, es...)"
+            } 
+          - si le reste de la phrase est vide, mets "content" la traduction en ${language} de "Veuillez poser une question après la commande /question"
+        2. Si la commande commence par /summarize :
+          - Renvoie un objet JSON strict sous la forme :
+            {
+              "type": "summarize",
+              "content": "le reste de la phrase après /summarize"
+              "lang": "la langue detecté" si tu arrives à détecter la langue remplace par null
+            }
+
+        3. Si aucun pattern n'est reconnu :
+          - Renvoie un objet JSON strict sous la forme :
+            {
+              "type": "unknown",
+              "content": "La commande n'a pas été reconnue"
+            }
+          - Traduits **automatiquement** le texte de "content" dans la langue de l'utilisateur, qui est : ${language}.
+
+        Phrase utilisateur : "${command}"
+        Répond uniquement par l'objet JSON correspondant.
+`;
+
+    const answer = await this.prompt(promptLLm);
+    Logger.log('Parsed command answer: ', answer);
+    if (!answer) {
+      throw new Error('Impossible de parser la commande.');
+    }
+    return answer
+      .replace(/^```json\s*/i, '')
+      .replace(/```$/i, '')
+      .trim();
   }
 }

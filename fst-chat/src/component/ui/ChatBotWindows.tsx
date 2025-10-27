@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendQuestion } from "../../api/message/chatBot/sendQuestion";
+import { sendCommand } from "../../api/message/chatBot/sendCommand";
 import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
+import type { User } from "../../types/user";
 type ChatBotWindowType = {
   channelId: string;
-  userId: string | undefined;
+  userId: User | null;
 };
 export type messageBotType = {
   from: "user" | "bot";
@@ -34,6 +35,9 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
   const [messages, setMessages] = useState<messageBotType[]>(tchatBotData);
   const [input, setInput] = useState("");
 
+  const [useUserLanguage, setUseUserLanguage] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+
   useEffect(() => {
     const localMessages = localStorage.getItem("botMessages" + channelId);
     const tchatBotData = localMessages
@@ -41,19 +45,23 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
       : [
           {
             from: "bot",
-            text: "Salut 👋, voici les commandes que tu peux utiliser \n -/question suivi de ta question sur la discussion de ce channel",
+            text: "Salut 👋, voici les commandes que tu peux utiliser \n - /question suivi de ta question sur la discussion de ce channel",
           },
         ];
     setMessages(tchatBotData);
   }, [channelId]);
 
   if (!channelId || !userId) return null;
+
   const parseInput = async (text: string): Promise<string> => {
-    if (text.startsWith("/question ")) {
-      const question = text.replace("/question ", "").trim();
-      return await sendQuestion(question, channelId, userId);
-    }
-    return "Aucune commande reconnue. Utilisez /question <votre question>.";
+    return await sendCommand(
+      channelId,
+      text,
+      userId._id,
+      userId.language,
+      useUserLanguage,
+    );
+    return "";
   };
 
   const updateMessagesInStorage = (
@@ -86,24 +94,23 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
           <motion.div
             key="chat-window"
             layout
-            initial={{ opacity: 0, y: 50, scale: 0.2 }} // départ invisible + décalage
-            animate={{ opacity: 1, y: 0, scale: 1 }} // état visible
+            initial={{ opacity: 0, y: 50, scale: 0.2 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{
               opacity: 0,
               y: 50,
               scale: 0.2,
               transition: { duration: 0.2 },
-            }} // sortie inverse
+            }}
             transition={{ duration: 0.1, ease: "easeInOut" }}
             className="w-[90vw] sm:w-80 md:w-96 lg:w-90 h-96 bg-white border border-gray-200 shadow-2xl rounded-2xl flex flex-col overflow-hidden box-border"
           >
-            {" "}
             {/* En-tête */}
             <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
               <span className="font-semibold">ChatBot</span>
               <button
                 onClick={() => setOpen(false)}
-                className="hover:text-gray-200 transition"
+                className="hover:text-gray-200 transition ml-2"
                 aria-label="Fermer le chat"
               >
                 <svg
@@ -116,6 +123,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                 </svg>
               </button>
             </div>
+
             {/* Zone de messages */}
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 flex flex-col-reverse bg-gray-50">
               {messages.map((msg, i) => (
@@ -135,8 +143,9 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                 </div>
               ))}
             </div>
+
             {/* Champ de saisie */}
-            <div className="p-3 border-t border-gray-200 flex items-center gap-2 min-w-0">
+            <div className="p-3 border-t border-gray-200 flex items-center gap-2 min-w-0 relative">
               <input
                 type="text"
                 value={input}
@@ -145,6 +154,31 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                 placeholder={t("Écris un message...")}
                 className="flex-1 min-w-0 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 break-words"
               />
+
+              {/* Bouton de réglages ⚙ */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="bg-gray-200 text-gray-800 px-2 py-1 rounded hover:bg-gray-300 transition text-sm"
+                  aria-label="Paramètres de langue"
+                >
+                  ⚙
+                </button>
+                {showSettings && (
+                  <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border rounded shadow-lg z-50 p-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={useUserLanguage}
+                        onChange={(e) => setUseUserLanguage(e.target.checked)}
+                        className="accent-blue-600"
+                      />
+                      Répondre dans la langue de l'utilisateur
+                    </label>
+                  </div>
+                )}
+              </div>
+
               <motion.button
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 whileTap={{ scale: 0.9 }}
@@ -162,10 +196,10 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
             animate={{ scale: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{
-              default: { duration: 0.3, ease: "easeInOut" }, // entrée et animate
-              opacity: { duration: 0 }, // exit pour l’opacité seulement
-              y: { duration: 0.5 }, // exit pour le glissement
-              scale: { duration: 0.04 }, // exit pour le scale
+              default: { duration: 0.3, ease: "easeInOut" },
+              opacity: { duration: 0 },
+              y: { duration: 0.5 },
+              scale: { duration: 0.04 },
             }}
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.1 }}

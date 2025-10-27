@@ -3,7 +3,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import * as crypto from 'crypto';
 import type { Cache } from 'cache-manager';
 export type QuestionCache = {
-  question: string;
   answer: string;
   embedding: number[];
   norm: number;
@@ -18,16 +17,15 @@ export class CacheService {
   }
   async cacheAnswer(
     channelId: string,
-    question: string,
     answer: string,
-    embedding: number[],
-    norm: number
+    embedding: number[]
   ): Promise<void> {
     const key = this.getCacheKey(channelId);
 
     const existing = (await this.cacheManager.get<QuestionCache[]>(key)) || [];
 
-    existing.push({ question, answer, embedding, norm });
+    const norm = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
+    existing.push({ answer, embedding, norm });
 
     await this.cacheManager.set(key, existing);
   }

@@ -38,17 +38,16 @@ export function Profil() {
 
       await uploadFile(pictureRef.current, signedUrl);
       const { publicUrl } = await getProfilUrl();
-      console.log(publicUrl);
-      const pseudo = pseudoRef.current?.value;
-      const bio = bioRef.current?.value;
-      const lang = langsRef.current?.value;
-      user.pseudo = pseudo || user.pseudo;
-      user.bio = bio || user.bio;
-      user.language = lang || user.language;
       user.urlPicture = publicUrl || user.urlPicture;
-      await updateUser(user);
-      setModif(false);
     }
+    const pseudo = pseudoRef.current?.value;
+    const bio = bioRef.current?.value;
+    const lang = langsRef.current?.value;
+    user.pseudo = pseudo || user.pseudo;
+    user.bio = bio || user.bio;
+    user.language = lang || user.language;
+    await updateUser(user);
+    setModif(false);
   };
 
   return (

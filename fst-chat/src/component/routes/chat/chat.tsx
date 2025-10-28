@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Messages } from "./messages";
 import { NavigationMessageMenu } from "./NavigationMessageMenu";
 import { useFetcher, useParams } from "react-router-dom";

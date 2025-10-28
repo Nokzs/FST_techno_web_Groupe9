@@ -1,5 +1,5 @@
 // component/routes/MessagesPage.tsx
-import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatInput } from "./ChatInput";
 import { getSignedUrl } from "../../../api/storage/signedUrl";
 import { v4 as uuidv4 } from "uuid";

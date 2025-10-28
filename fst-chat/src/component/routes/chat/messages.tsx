@@ -264,6 +264,7 @@ takePrefetchData ? prefetchData.hasMore : hasMore
 
         {/* Liste des messages */}
         <div
+          key={channelId}
           ref={messagesRef}
           className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container"
         >

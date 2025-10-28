@@ -6,8 +6,10 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
+
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../service/message.service';
 import { plainToInstance } from 'class-transformer';
@@ -16,6 +18,7 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
+import { Message } from '../schema/message.schema';
 type reactionType = {
   emoji: string;
   messageId: string;
@@ -24,7 +27,7 @@ type reactionType = {
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
   server: Server;
@@ -33,6 +36,11 @@ export class MessageGateway
     private readonly messageService: MessageService,
     private readonly tokenService: TokenService
   ) {}
+  afterInit(server: Server) {
+    server.on('embedding', (message: Message) => {
+      this.messageService.embedMessage(message._id.toString());
+    });
+  }
 
   async handleConnection(client: Socket) {
     Logger.log(`New client connected: ${client.id}`);
@@ -120,7 +128,8 @@ export class MessageGateway
     }
     if (message) {
       this.server.to(dto.channelId).emit('newMessage', message);
-      this.messageService.embedMessage(message._id.toString());
+      //comme l'opération prends on le délégue comme un autre evenement de vite renvoyez le message
+      this.server.emit('embedding', message);
     }
     Logger.log(message?._id.toString());
     console.log('Message broadcasted to channel:', dto.channelId);
@@ -164,12 +173,14 @@ export class MessageGateway
   }
   @SubscribeMessage('updateMessageFiles')
   async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
-    Logger.log('Updating message files for message ID:', data);
+    Logger.log('PUTAIN LANCE LE !');
     const updatedMessage = await this.messageService.updateMessageFiles(data);
-    if (updatedMessage) {
-      this.server
-        .to(updatedMessage.channelId.toString())
-        .emit('messageUpdated', updatedMessage);
+    Logger.log('PUTAIN LANCE LE !');
+    this.server
+      .to(updatedMessage.channelId.toString())
+      .emit('updateMessageFiles', updatedMessage);
+    if (updatedMessage != null) {
+      Logger.log('sending updatedMessage');
     }
   }
 }

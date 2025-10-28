@@ -371,7 +371,7 @@ Réponds en langue: ${useUserLanguage ? lang : detectedLanguage}.
               "content": "le reste de la phrase après /question",
               "lang": "la langue de la question (fr, en, es...)"
             } 
-          - si le reste de la phrase est vide, mets "content" la traduction en ${language} de "Veuillez poser une question après la commande /question"
+          - si le reste de la phrase est vide, mets "content" la traduction en ${language} de "Veuillez poser une question après la commande /question" et met "type" à "unknown".
         2. Si la commande commence par /summarize :
           - Renvoie un objet JSON strict sous la forme :
             {

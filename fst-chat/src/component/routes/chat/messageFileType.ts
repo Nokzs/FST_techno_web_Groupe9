@@ -1,15 +1,17 @@
 import type { User } from "../../../types/user";
 export interface MessageFile {
+  _id: string;
   originalName: string;
-  url?: string;
+  url: string;
   mimetype: string;
+  originalMymeType: string;
 }
 export type reaction = {
   userId: User;
   emoji: string;
 };
 export interface Message {
-  _id: string; // généré par MongoDB dès la création de la version optimistique
+  _id: string;
   channelId: string;
   receiverId?: User;
   content: string;
@@ -19,5 +21,5 @@ export interface Message {
   files: MessageFile[];
   replyMessage: Message | null;
   reactions: reaction[];
-  sending: boolean; // true tant que le message n'est pas finalisé (upload ou autres)
+  sending: boolean;
 }

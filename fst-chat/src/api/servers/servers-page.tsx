@@ -12,8 +12,9 @@ export interface Server {
   channels?: Channel[];
   createdAt?: string;
   updatedAt?: string;
+  tags: string[];           // obligatoire
+  isPublic: boolean;        // indique si le serveur est ouvert au public
 }
-
 export interface Channel {
   _id: string;
   name: string;

@@ -5,6 +5,7 @@ import { authRouterContext } from "../context/authRouterContext";
 
 export const profilLoader: LoaderFunction = async (data): Promise<User> => {
   const userID: UserID | null = data.context.get(authRouterContext);
+
   const user: User | null = await getUserProfile();
   if (!user) {
     console.log("utilisateur non trouvé");

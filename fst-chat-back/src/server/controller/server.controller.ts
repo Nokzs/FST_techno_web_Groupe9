@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Logger,
+  Put,
 } from '@nestjs/common';
 import { ServerService } from '../service/server.service';
 import { plainToInstance } from 'class-transformer';
@@ -58,7 +59,22 @@ export class ServerController {
     }
     return plainToInstance(ServerDto, server);
   }
+  @Post('openJoin')
+  @UseGuards(AuthGuard)
+  async openJoin(@Req() req: Request): ServerDto {}
 
+  @Put('open')
+  @UseGuards(AuthGuard)
+  async open(
+    @Req() req: Request,
+    @Body() body: { serverId: string; tags: string[] }
+  ) {
+    const userId = request['user'].sub;
+    const server = await this.serverService.openServer(
+      body.serverId,
+      body.tags
+    );
+  }
   @Get('/channel/:channelId')
   @UseGuards(AuthGuard)
   async getServersFromChannel(

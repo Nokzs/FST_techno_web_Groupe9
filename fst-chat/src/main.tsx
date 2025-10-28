@@ -44,9 +44,9 @@ const routes = [
   {
     Component: ConnectedLayout,
     middleware: [authMiddleware],
+    loader: profilLoader,
     children: [
       {
-        loader: profilLoader,
         Component: ProfilLayout,
         children: [
           {
@@ -71,6 +71,7 @@ const routes = [
         loader: messageLoader,
         path: "/messages/:channelId",
         Component: Chat,
+        key: ({ params }) => params.channelId,
       },
     ],
   },

@@ -2,25 +2,27 @@ import { Suspense, useEffect, useState } from "react";
 import type { Channel, Server } from "../../../api/servers/servers-page";
 import { cn } from "../../../utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
-import { NavLink, useLoaderData } from "react-router";
+import {
+  NavLink,
+  useLoaderData,
+  type FetcherWithComponents,
+} from "react-router";
 import { socket } from "../../../socket";
 import { useTranslation } from "react-i18next";
+import type { MessageLoaderData } from "../../../loaders/messageLoader";
 type NavigationMessageMenuProps = {
   channelId?: string;
   onSelectChannel?: (channelId: string) => void;
+  fetcher: FetcherWithComponents<MessageLoaderData>;
 };
 
 export function NavigationMessageMenu({
   channelId,
+  fetcher,
 }: NavigationMessageMenuProps) {
   const { t } = useTranslation();
   const apiUrl = import.meta.env.VITE_API_URL;
   const { serversData, activeServerData, channelData } = useLoaderData();
-  console.log("Loader data dans NavigationMessageMenu :", {
-    serversData,
-    activeServerData,
-    channelData,
-  });
   const servers: Server[] = serversData;
   const [channels, setChannels] = useState<Channel[]>(channelData);
   const [activeServer, setActiveServer] = useState<Server | null>(
@@ -29,8 +31,9 @@ export function NavigationMessageMenu({
   const [menuOpen, setMenuOpen] = useState(false);
   const [direction, setDirection] = useState(0); // 1 = vers channels, -1 = vers serveurs
   const activeChannel = channelId;
-  const refetchChannels = async () => {
+  const refetchChannels = async (signal: AbortSignal) => {
     const channel = await fetch(`${apiUrl}/channels/${activeServer?._id}`, {
+      signal,
       credentials: "include",
     }).then((r) => r.json());
     setChannels(channel);
@@ -58,17 +61,24 @@ export function NavigationMessageMenu({
       setChannels([]);
       return;
     }
-
-    fetch(`${apiUrl}/channels/${activeServer._id}`, { credentials: "include" })
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    fetch(`${apiUrl}/channels/${activeServer._id}`, {
+      credentials: "include",
+      signal,
+    })
       .then((r) => r.json())
       .then(setChannels);
     socket.emit("joinServer", activeServer._id);
     socket.on("updateServer", (updatedServer: string) => {
       if (updatedServer === activeServer._id) {
-        refetchChannels();
+        refetchChannels(signal);
       }
     });
-  }, [activeServer]);
+    return () => {
+      //abortController.abort();
+    };
+  }, [activeServer, apiUrl]);
 
   const handleSelectServer = (server: Server) => {
     setDirection(1);
@@ -170,8 +180,10 @@ export function NavigationMessageMenu({
                           <li key={channel._id}>
                             <NavLink
                               to={`/messages/${channel._id}`}
-                              replace
                               className="truncate"
+                              onMouseEnter={() => {
+                                return fetcher.load(`/messages/${channel._id}`);
+                              }}
                             >
                               <button
                                 className={cn(

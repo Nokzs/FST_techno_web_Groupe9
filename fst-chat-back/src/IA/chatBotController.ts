@@ -37,10 +37,9 @@ export class ChatBotController {
       content: string;
       lang?: string;
     };
-
     // 2️⃣ Définir les stratégies de traitement par type de commande
     const commandStrategies: Record<string, CommandHandler> = {
-      question: async (content: string) =>
+      question: async (content: string): Promise<string> =>
         this.iaService.ask(
           content,
           channelId,
@@ -50,7 +49,7 @@ export class ChatBotController {
           jsonCommand.lang
         ),
 
-      summary: async (content: string) =>
+      summary: async (content: string): Promise<string> =>
         this.iaService.makeSummary(
           content,
           channelId,
@@ -60,14 +59,17 @@ export class ChatBotController {
           useUserLanguage
         ),
 
-      unknown: async (content: string) => content, // retourne directement le texte
+      unknown: async (content: string): Promise<string> => content, // retourne directement le texte
     };
 
     const handler =
       commandStrategies[jsonCommand.type] ?? commandStrategies['unknown'];
-
-    const answer = await handler(jsonCommand.content);
-
-    return answer;
+    try {
+      const answer = await handler(jsonCommand.content);
+      return answer;
+    } catch (error) {
+      Logger.error('Erreur lors du traitement de la commande:', error);
+      return '';
+    }
   }
 }

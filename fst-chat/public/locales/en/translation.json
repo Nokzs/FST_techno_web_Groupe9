@@ -25,5 +25,13 @@
                 "send": "Envoyer"
             }
         }
+    },
+    "profil": {
+        "link": {
+            "home": "Home",
+            "profile": "Profile",
+            "account": "security",
+            "theme": "theme"
+        }
     }
 }

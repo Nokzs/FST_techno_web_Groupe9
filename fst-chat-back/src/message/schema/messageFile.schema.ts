@@ -11,6 +11,9 @@ export class MessageFile extends Document {
 
   @Prop({ required: true })
   mimetype: string;
+
+  @Prop({ required: true })
+  originalMymeType: string;
 }
 
 export const MessageFileSchema = SchemaFactory.createForClass(MessageFile);

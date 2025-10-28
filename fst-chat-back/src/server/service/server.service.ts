@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger,NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Server, ServerDocument } from '../schema/server.schema';
@@ -47,5 +47,17 @@ export class ServerService {
   async getFromChannelId(channelId: string): Promise<Server | null> {
     Logger.log('channelId', channelId);
     return this.serverModel.findOne({ channels: channelId }).lean().exec();
+  }
+  async getServerFromId(serverId: string): Promise<Server | null> {
+    return await this.serverModel.findById(serverId);
+  }
+  async openServer(serverId: string, tags: string[]): Promise<Server | null> {
+    const server = await this.serverModel
+      .findByIdAndUpdate(serverId, { isPublic: true, tags }, { new: true })
+      .exec();
+
+    if (!server) {
+      throw new NotFoundException('Serveur introuvable');
+    }
   }
 }

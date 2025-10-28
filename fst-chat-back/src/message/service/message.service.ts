@@ -170,6 +170,7 @@ export class MessageService {
       .exec();
   }
   public async updateMessageFiles(messageDto: MessageDto) {
+    Logger.log('le message update', messageDto);
     if (!messageDto._id) {
       throw new BadRequestException(
         'Message ID is required to update the message'

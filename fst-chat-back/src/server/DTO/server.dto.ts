@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsBoolean } from 'class-validator';
 
 export class ServerDto {
   @IsString()
@@ -26,4 +26,10 @@ export class ServerDto {
 
   @IsOptional()
   updatedAt?: Date;
+
+  @IsArray()
+  tags: string[];
+
+  @IsBoolean()
+  isPublic: boolean;
 }

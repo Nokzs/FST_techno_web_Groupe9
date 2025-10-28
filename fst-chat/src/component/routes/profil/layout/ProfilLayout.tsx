@@ -1,10 +1,10 @@
-import { Outlet, useLoaderData } from "react-router";
+import { Outlet, useOutletContext } from "react-router";
 import { ProfilTabSwitcher } from "../ProfilTabSwitcher";
 import { SvgTextFit } from "../../../ui/SvgTextFit";
 import { useTranslation } from "react-i18next";
 
 export function ProfilLayout() {
-  const user = useLoaderData();
+  const user = useOutletContext();
   const { t } = useTranslation();
   return (
     <div className="w-full h-full flex flex-col">

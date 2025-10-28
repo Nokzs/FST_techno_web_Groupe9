@@ -24,6 +24,12 @@ export class Server {
   // Code d'invitation numérique pour rejoindre le serveur
   @Prop({ required: true })
   inviteCode: string;
+
+  @Prop({ type: Boolean, default: false })
+  isPublic: boolean;
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
 }
 
 export const ServerSchema = SchemaFactory.createForClass(Server);

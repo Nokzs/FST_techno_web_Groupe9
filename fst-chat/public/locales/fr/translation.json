@@ -23,6 +23,12 @@
             "input": {
                 "placeholder": "Écrire un message...",
                 "send": "Envoyer"
+            },
+            "link": {
+                "home": "Home",
+                "profile": "Profile",
+                "account": "security",
+                "theme": "theme"
             }
         }
     }

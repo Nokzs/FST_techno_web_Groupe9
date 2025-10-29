@@ -18,6 +18,7 @@ import { notAuthMiddleware } from "./middleware/authMiddleware/notAuthMiddleware
 import { Profil } from "./component/routes/profil/subRoutes/Profil.js";
 import { Compte } from "./component/routes/profil/subRoutes/Compte.js";
 import { Theme } from "./component/routes/profil/subRoutes/Theme.js";
+import { FindServer } from "./component/routes/servers/FindServer.js";
 /* Objets concernant les routes utilisé par les application toutes les routes en dessous la route authmiddleware sont protégé alors
 celles en dessous de notauthmiddleware sont accessible uniquement si l'utilisateur n'est pas connecté */
 
@@ -66,6 +67,10 @@ const routes = [
       {
         path: "/servers",
         Component: ServersPage,
+      },
+      {
+        path: "/servers/find",
+        Component: FindServer,
       },
       {
         loader: messageLoader,

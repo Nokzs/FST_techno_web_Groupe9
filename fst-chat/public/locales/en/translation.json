@@ -33,5 +33,32 @@
             "account": "security",
             "theme": "theme"
         }
+    },
+    "room": {
+        "loadingMessages": "Loading messages...",
+        "updateClose": "Update / Close server",
+        "update": "Update server",
+        "open": "Open server",
+        "openPublic": "Open to public",
+        "tags": "tags split by commas",
+        "tagsPlaceholder": "ex:play,chill,french",
+        "cancel": "cancel",
+        "close": "close",
+        "confirm": "confirm"
+    },
+    "server": {
+        "loading": "Server loading...",
+        "list": "List of servers",
+        "create": "Create a server",
+        "join": "Join a server",
+        "nodescription": "Any description",
+        "noServer": "Any server available. Please add one server to start chatting!",
+        "member": "Members",
+        "link": "Server invite link",
+        "connection": "Connection...",
+        "joinForm": "Join",
+        "name": "Server name",
+        "description": "Server description (optional)",
+        "find": "Find a server"
     }
 }

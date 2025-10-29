@@ -9,6 +9,7 @@ import {
   Param,
   Logger,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ServerService } from '../service/server.service';
 import { plainToInstance } from 'class-transformer';
@@ -16,6 +17,8 @@ import { ServerDto } from '../DTO/server.dto';
 import { AuthGuard } from '../../guards/authGuard';
 import { CreateServerDto } from '../DTO/create-server.dto';
 import { CreateServerRequestDto } from '../DTO/create-server-request-dto';
+import { isAdminGuard } from 'src/guards/isAdminGuard';
+import type { Request } from 'express';
 
 @Controller('servers')
 export class ServerController {
@@ -59,22 +62,51 @@ export class ServerController {
     }
     return plainToInstance(ServerDto, server);
   }
-  @Post('openJoin')
+  @Post('/openJoin')
   @UseGuards(AuthGuard)
-  async openJoin(@Req() req: Request): ServerDto {}
+  async openJoinServer(
+    @Body() body: { serverId: string },
+    @Req() request: Request
+  ): Promise<void> {
+    Logger.log('Requête openJoin reçue pour le serveur:', body.serverId);
+    const serverId = body.serverId;
+    const userId = request['user'].sub;
+    await this.serverService.joinOpen(serverId, userId);
+    return;
+  }
 
   @Put('open')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, isAdminGuard)
   async open(
-    @Req() req: Request,
+    @Req() request: Request,
     @Body() body: { serverId: string; tags: string[] }
-  ) {
+  ): Promise<ServerDto> {
     const userId = request['user'].sub;
     const server = await this.serverService.openServer(
       body.serverId,
-      body.tags
+      body.tags,
+      userId
     );
+    if (!server) {
+      throw new NotFoundException('Serveur introuvable');
+    }
+    return plainToInstance(ServerDto, server);
   }
+
+  @Put('close')
+  @UseGuards(AuthGuard, isAdminGuard)
+  async close(
+    @Req() request: Request,
+    @Body() body: { serverId: string; tags: string[] }
+  ): Promise<ServerDto> {
+    const userId = request['user'].sub;
+    const server = await this.serverService.closeServer(body.serverId, userId);
+    if (!server) {
+      throw new NotFoundException('Serveur introuvable');
+    }
+    return plainToInstance(ServerDto, server);
+  }
+
   @Get('/channel/:channelId')
   @UseGuards(AuthGuard)
   async getServersFromChannel(
@@ -83,5 +115,24 @@ export class ServerController {
     const server = await this.serverService.getFromChannelId(channelId);
     const dto = plainToInstance(ServerDto, server);
     return dto;
+  }
+  @Get('/find')
+  @UseGuards(AuthGuard)
+  async findServersByNameTags(
+    @Req() request: Request,
+    @Query('last_id') lastId?: string,
+    @Query('SearchName') searchName?: string,
+    @Query('SearchTag') searchTags?: string
+  ): Promise<ServerDto[]> {
+    const userId: string = request['user'].sub as string;
+    const servers = await this.serverService.searchServersWithCursor(
+      searchName ?? '',
+      searchTags ?? '',
+      userId,
+      20,
+      lastId ?? ''
+    );
+    Logger.log('Servers trouvés:', servers);
+    return servers.map((s) => plainToInstance(ServerDto, s));
   }
 }

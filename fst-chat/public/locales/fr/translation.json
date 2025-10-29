@@ -31,5 +31,40 @@
                 "theme": "theme"
             }
         }
+    },
+    "room": {
+        "loadingMessages": "Chargement des messages...",
+        "updateClose": "Mettre à jour / Fermer le serveur",
+        "update": "Mettre à jour le serveur",
+        "open": "Ouvrir le serveur",
+        "openPublic": "Ouvrir au public",
+        "tags": "tags séparés par des virgules",
+        "tagsPlaceholder": "ex : play,chill,french",
+        "cancel": "annuler",
+        "close": "fermer",
+        "confirm": "confirmer"
+    },
+    "server": {
+        "loading": "Chargement du serveur...",
+        "list": "Liste des serveurs",
+        "create": "Créer un serveur",
+        "join": "Rejoindre un serveur",
+        "nodescription": "Aucune description",
+        "noServer": "Aucun serveur disponible. Veuillez ajouter un serveur pour commencer à discuter !",
+        "member": "Membres",
+        "link": "Lien d’invitation du serveur",
+        "connection": "Connexion...",
+        "joinForm": "Rejoindre",
+        "name": "Nom du serveur",
+        "description": "Description du serveur (optionnel)",
+        "find": "Chercher un serveur"
+    },
+    "profil": {
+        "link": {
+            "home": "Serveur",
+            "profile": "Profil",
+            "account": "securité",
+            "theme": "thème"
+        }
     }
 }

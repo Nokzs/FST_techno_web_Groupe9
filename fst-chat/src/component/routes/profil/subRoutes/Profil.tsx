@@ -58,7 +58,7 @@ export function Profil() {
         ref={pictureRef}
         overlayPicture={penSvg}
         handleModif={handleModif}
-        className="m-5 h-32 w-32"
+        className="h-32 flex justify-center "
         imgRef={imgRef}
       />
       <UpdateInput

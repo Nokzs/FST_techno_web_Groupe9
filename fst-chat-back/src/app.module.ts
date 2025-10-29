@@ -13,6 +13,7 @@ import { ChannelModule } from './channel/module/channel.module';
 import { CustomCacheModule } from './cache/module/Cache.module';
 import { GuardModule } from './guards/guards.module';
 import { TokenModule } from './token/token.module';
+import { AuthGuard } from './guards/authGuard';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { TokenModule } from './token/token.module';
     CustomCacheModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthGuard],
+  exports: [AuthGuard],
 })
 export class AppModule {}

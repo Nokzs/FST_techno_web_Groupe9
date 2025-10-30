@@ -121,7 +121,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     setReplyMessage(undefined);
     hasMoreRef.current = prefetchData.hasMore;
     setMessages(prefetchData.messagesArr);
-    scrollToBottom();
   }, [channelId]);
 
   useEffect(() => {

@@ -68,7 +68,6 @@ export class ServerController {
     @Body() body: { serverId: string },
     @Req() request: Request
   ): Promise<void> {
-    Logger.log('Requête openJoin reçue pour le serveur:', body.serverId);
     const serverId = body.serverId;
     const userId = request['user'].sub;
     await this.serverService.joinOpen(serverId, userId);

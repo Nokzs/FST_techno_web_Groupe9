@@ -25,7 +25,6 @@ export class ChannelService {
       .populate('serverId', 'name _id ownerId')
       .lean()
       .exec();
-    Logger.log(populateChannel);
     return populateChannel;
   }
 }

@@ -20,7 +20,6 @@ export class isAdminGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    Logger.log("Vérification de l'admin'");
     const request: Request = context.switchToHttp().getRequest();
 
     // 1️⃣ Récupération du token depuis les cookies
@@ -28,7 +27,6 @@ export class isAdminGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('Token manquant');
     }
-    Logger.log('le body', request.body);
     // 2️⃣ Vérification du serveur ciblé
     const serverId =
       request.params.serverId ||

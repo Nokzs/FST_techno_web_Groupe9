@@ -19,6 +19,7 @@ import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
 import { Message } from '../schema/message.schema';
+import { EventEmitter } from 'stream';
 type reactionType = {
   emoji: string;
   messageId: string;
@@ -31,15 +32,19 @@ export class MessageGateway
 {
   @WebSocketServer()
   server: Server;
-
+  eventEmitter: EventEmitter;
   constructor(
     private readonly messageService: MessageService,
     private readonly tokenService: TokenService
-  ) {}
-  afterInit(server: Server) {
-    server.on('embedding', (message: Message) => {
-      Logger.log('Embedding event received in gateway');
-      this.messageService.embedMessage(message._id.toString());
+  ) {
+    this.eventEmitter = new EventEmitter();
+  }
+  afterInit() {
+    this.eventEmitter.on('embedding', (message: Message) => {
+      Logger.log('je vais embbed');
+      this.messageService.embedMessage(message._id.toString()).then((msg) => {
+        Logger.log(msg);
+      });
     });
   }
 
@@ -109,19 +114,16 @@ export class MessageGateway
     @MessageBody() data: any,
     @ConnectedSocket() socket: Socket
   ) {
-    Logger.log(`Client ${socket.id} is sending a message`);
     // Transforme et valide le DTO (pas automatique comme le controlleur)
+    Logger.log(`Client ${socket.id} is sending a message`);
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     dto.senderId = socket.data.id;
-    Logger.log(dto);
     const errors = await validate(dto);
     if (errors.length > 0) {
       Logger.log(errors);
       return { error: 'Validation failed', details: errors };
     }
-    Logger.log('je vais créer le message');
     const message = await this.messageService.create(dto);
-    Logger.log('new message', message);
     // Broadcast
     if (!dto.channelId) {
       Logger.log('No channelId provided in message DTO');
@@ -130,9 +132,9 @@ export class MessageGateway
     if (message) {
       this.server.to(dto.channelId).emit('newMessage', message);
       //comme l'opération prends on le délégue comme un autre evenement de vite renvoyez le message
-      this.server.emit('embedding', message);
+      Logger.log('emitting embedding event');
+      this.eventEmitter.emit('embedding', message);
     }
-    Logger.log(message?._id.toString());
     console.log('Message broadcasted to channel:', dto.channelId);
     console.log('Message content:', message);
     return message;
@@ -142,7 +144,6 @@ export class MessageGateway
   async handleGetMessages(
     @MessageBody() messagesData: { channelId: string; date: string }
   ) {
-    Logger.log('on me demande des messages');
     const { messages, hasMore } = await this.messageService.findByChannel(
       messagesData.channelId,
       messagesData.date
@@ -162,13 +163,11 @@ export class MessageGateway
     @ConnectedSocket() socket: Socket
   ): Promise<void> {
     const user: string = socket.data.id;
-    Logger.log(user);
     const message = await this.messageService.addReaction(
       reaction.messageId,
       user,
       reaction.emoji
     );
-    Logger.log('newMessage', message);
     this.server.to(reaction.channelId).emit('newReactions', message);
   }
   @SubscribeMessage('updateMessageFiles')
@@ -177,9 +176,6 @@ export class MessageGateway
     this.server
       .to(updatedMessage.channelId.toString())
       .emit('updateMessageFiles', updatedMessage);
-    if (updatedMessage != null) {
-      Logger.log('sending updatedMessage');
-    }
   }
   @SubscribeMessage('deleteMessage')
   async handleDeleteMessage(

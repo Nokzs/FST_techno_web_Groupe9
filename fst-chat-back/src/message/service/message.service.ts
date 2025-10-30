@@ -147,19 +147,19 @@ export class MessageService {
       .exec();
     return result;
   }
-  public async embedMessage(messageId: string) {
+  public async embedMessage(messageId: string): Promise<Message | null> {
     const message = await this.messageModel.findById(messageId).exec();
     if (!message) {
       throw new Error('Message not found');
     }
     const embedding = await this.iaProvider.embed(message.content);
     if (!embedding) {
-      return 'Failed to generate embedding';
+      throw new Error('Failed to generate embedding');
     }
     const embeddingNorm = Math.sqrt(
       embedding.reduce((sum, val) => sum + val * val, 0)
     );
-    await this.messageModel
+    return await this.messageModel
       .findByIdAndUpdate(
         messageId,
         { embedding, embeddingNorm },

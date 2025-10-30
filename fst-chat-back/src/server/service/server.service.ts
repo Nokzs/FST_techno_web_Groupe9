@@ -50,7 +50,6 @@ export class ServerService {
     return server.toObject();
   }
   async getFromChannelId(channelId: string): Promise<Server | null> {
-    Logger.log('channelId', channelId);
     return this.serverModel.findOne({ channels: channelId }).lean().exec();
   }
   async getServerFromId(serverId: string): Promise<Server | null> {
@@ -78,9 +77,6 @@ export class ServerService {
     return server;
   }
   async closeServer(serverId: string, userId: string): Promise<Server | null> {
-    Logger.log('je suis dans le service');
-    Logger.log('le user', userId);
-
     const server = await this.serverModel
       .findByIdAndUpdate({ _id: serverId }, { isPublic: false }, { new: true })
       .exec();
@@ -108,13 +104,6 @@ export class ServerService {
     limit = 20,
     lastId?: string
   ): Promise<Server[]> {
-    Logger.log('Recherche serveurs avec :', {
-      searchName,
-      searchTags,
-      lastId,
-      limit,
-    });
-
     const name = searchName.trim().toLowerCase();
     const tags = searchTags
       .split(',')

@@ -25,7 +25,6 @@ export class ChannelController {
   @UseGuards(AuthGuard)
   async createChannel(@Body() dto: CreateChannelDto): Promise<ChannelDto> {
     const channel = await this.channelService.create(dto);
-    Logger.log('id', channel._id);
     this.storage.createRoomBucket(channel._id.toString());
     return plainToInstance(ChannelDto, channel);
   }

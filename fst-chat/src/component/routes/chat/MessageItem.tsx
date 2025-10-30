@@ -100,6 +100,13 @@ export function MessageItem({
             : "self-start flex-row pl-3",
         )}
       >
+        <UserAvatar
+          rootRef={messageRef}
+          url={
+            message.senderId.urlPicture ||
+            "https://avatar.iran.liara.run/public/20"
+          }
+        />
         <div className="flex flex-col group gap-1 relative w-full">
           <div className={messageClasses}>
             <span

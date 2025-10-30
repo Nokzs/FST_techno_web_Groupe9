@@ -1,7 +1,9 @@
 import { type MessageFile } from "./messageFileType";
 import { useEffect, useRef, useState } from "react";
 import { gunzipSync } from "fflate";
-
+import { cn } from "../../../utils/cn";
+import { AudioPlayer } from "react-audio-play";
+import { useDarkMode } from "../../../hooks/useDarkMode";
 type FilePreviewProps = {
   file: MessageFile;
   scrollContainerRef?: React.RefObject<HTMLElement>; // facultatif
@@ -19,7 +21,7 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
   const isVideo = mime.startsWith("video/");
   const isAudio = mime.startsWith("audio/");
   const isPdf = mime === "application/pdf";
-
+  const { darkMode } = useDarkMode();
   // Observer pour déclencher la pré-décompression
   useEffect(() => {
     const element = ref.current;
@@ -80,7 +82,13 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
   const displayUrl = isCompressed ? decompressedUrl : file.url;
 
   return (
-    <div ref={ref} className="inline-block w-32 h-32">
+    <div
+      ref={ref}
+      className={cn(
+        "inline-block h-auto",
+        isAudio ? "w-full max-w-full" : "w-28 sm:w-32 md:w-40 aspect-square",
+      )}
+    >
       {!displayUrl && isCompressed ? (
         <div className="w-full h-full bg-gray-200 rounded-lg animate-pulse" />
       ) : isImage ? (
@@ -96,11 +104,20 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
           className="w-full h-full rounded-lg shadow"
         />
       ) : isAudio ? (
-        <audio
-          controls
-          src={displayUrl!}
-          className="w-full rounded-lg shadow"
-        />
+        <div
+          className={cn(
+            "w-full flex items-center justify-start p-2 bg-gray-700/20 rounded-lg shadow-sm",
+          )}
+        >
+          <AudioPlayer
+            src={displayUrl!}
+            controls
+            className="w-full rounded-2xl overflow-x-hidden"
+            color={darkMode ? "#f0f0f0" : "#1a1a1a"}
+            sliderColor="#94b9ff"
+            backgroundColor={darkMode ? "#1a1a1a" : "#f0f0f0"}
+          />
+        </div>
       ) : isPdf ? (
         <a
           href={displayUrl!}

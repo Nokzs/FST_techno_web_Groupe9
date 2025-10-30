@@ -118,16 +118,11 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     if (!prefetchData) return;
     if (prefetchData.channelId !== channelId) return;
 
-    // Vérifier si on a déjà exactement les mêmes messages
-    const idsCurrent = messages.map((m) => m._id).join(",");
-    const idsPrefetch = prefetchData.messagesArr.map((m) => m._id).join(",");
-    if (idsCurrent === idsPrefetch) return; // rien à faire, déjà à jour
-
     setReplyMessage(undefined);
     hasMoreRef.current = prefetchData.hasMore;
     setMessages(prefetchData.messagesArr);
     scrollToBottom();
-  }, [channelId, prefetchData]);
+  }, [channelId]);
 
   useEffect(() => {
     socket.emit("joinChannelRoom", channelId);

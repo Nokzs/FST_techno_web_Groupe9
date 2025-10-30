@@ -8,7 +8,7 @@ import { CacheService } from '../service/Cache.service';
   imports: [
     CacheModule.register({
       isGlobal: true,
-      ttl: 3600, // TTL par défaut
+      ttl: 36000000, // TTL par défaut
       max: 100, // optionnel, limite en mémoire
     }),
   ],

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-
+import { Notification } from './notification.schema';
 export type ChannelDocument = HydratedDocument<Channel>;
 
 @Schema({ timestamps: true })
@@ -12,6 +12,9 @@ export class Channel {
 
   @Prop({ required: true })
   name: string;
+
+  @Prop({ default: [] })
+  notification: Notification[];
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

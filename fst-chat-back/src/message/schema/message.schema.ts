@@ -45,7 +45,7 @@ export class Message {
   reactions: Types.ObjectId[];
 
   @Prop({ type: Boolean, default: false })
-  isDetectedAsSpam: boolean;
+  isDeleted: boolean;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

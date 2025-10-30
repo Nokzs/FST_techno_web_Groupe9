@@ -13,7 +13,8 @@
     "tchat": {
         "send": "Send",
         "loadingMessages": "Loading messages...",
-        "deleteMessage": "Supprimer le message",
+        "deleteMessage": "Delete message",
+        "messageDeleted": "Deleted message",
         "tchatRoom": "Chat Room",
         "navigationMenu": {
             "title": "Servers",

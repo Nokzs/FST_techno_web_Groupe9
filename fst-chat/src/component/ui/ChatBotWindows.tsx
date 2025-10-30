@@ -33,8 +33,8 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
   const { t } = useTranslation();
   const { tchatBotData } = useLoaderData();
   const [messages, setMessages] = useState<messageBotType[]>(tchatBotData);
-  const [input, setInput] = useState("");
-
+  const [input, setInput] = useState<string>("");
+  const [typing, setTyping] = useState<boolean>(false);
   const [useUserLanguage, setUseUserLanguage] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -81,7 +81,9 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     setInput("");
     const userMessage: messageBotType = { from: "user", text: input };
     setMessages((prev) => updateMessagesInStorage(prev, userMessage));
+    setTyping(false);
     const answer = await parseInput(input);
+    setTyping(true);
     setMessages((prev) =>
       updateMessagesInStorage(prev, { from: "bot", text: answer }),
     );
@@ -132,7 +134,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                   className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`px-3 py-2 rounded-xl max-w-full break-words text-sm ${
+                    className={`px-3 py-2 rounded-xl max-w-full break-words text-sm whitespace-pre-wrap ${
                       msg.from === "user"
                         ? "bg-blue-600 text-white rounded-br-none"
                         : "bg-gray-200 text-gray-800 rounded-bl-none"
@@ -142,6 +144,13 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                   </div>
                 </div>
               ))}
+              {typing && (
+                <div className="flex justify-start">
+                  <div className="px-3 py-2 rounded-xl bg-gray-200 text-gray-800 text-sm animate-pulse rounded-bl-none">
+                    Le bot est en train de répondre...
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Champ de saisie */}

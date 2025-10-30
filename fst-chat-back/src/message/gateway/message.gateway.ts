@@ -20,6 +20,7 @@ import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
 import { Message } from '../schema/message.schema';
 import { EventEmitter } from 'stream';
+import { ChannelService } from 'src/channel/service/channel.service';
 type reactionType = {
   emoji: string;
   messageId: string;
@@ -35,6 +36,7 @@ export class MessageGateway
   eventEmitter: EventEmitter;
   constructor(
     private readonly messageService: MessageService,
+    private readonly channelService: ChannelService,
     private readonly tokenService: TokenService
   ) {
     this.eventEmitter = new EventEmitter();
@@ -109,6 +111,27 @@ export class MessageGateway
     console.log(`Client ${client.id} left channel room ${channelId}`);
   }
 
+  @SubscribeMessage('joinServer')
+  async handleJoinServerRoom(
+    @MessageBody() serverId: string,
+    @ConnectedSocket() socket: Socket
+  ) {
+    await socket.join(`serveur-${serverId}`);
+  }
+
+  @SubscribeMessage('leaveServer')
+  async handleLeaveServerRoom(
+    @MessageBody() serverId: string,
+    @ConnectedSocket() socket: Socket
+  ) {
+    await socket.leave(`serveur-${serverId}`);
+  }
+
+  @SubscribeMessage('updateServer')
+  handleUpdateServer(@MessageBody() serverId: string) {
+    this.server.to(`serveur-${serverId}`).emit('updateServer', serverId);
+  }
+
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() data: any,
@@ -124,12 +147,21 @@ export class MessageGateway
       return { error: 'Validation failed', details: errors };
     }
     const message = await this.messageService.create(dto);
+
     // Broadcast
     if (!dto.channelId) {
       Logger.log('No channelId provided in message DTO');
       return;
     }
     if (message) {
+      const notif = await this.channelService.addNotification(
+        message.channelId.toString(),
+        message._id.toString(),
+        dto.senderId
+      );
+      this.server
+        .to(`serveur-${notif.serverId}`)
+        .emit('newNotification', notif);
       this.server.to(dto.channelId).emit('newMessage', message);
       //comme l'opération prends on le délégue comme un autre evenement de vite renvoyez le message
       Logger.log('emitting embedding event');
@@ -138,6 +170,16 @@ export class MessageGateway
     console.log('Message broadcasted to channel:', dto.channelId);
     console.log('Message content:', message);
     return message;
+  }
+
+  @SubscribeMessage('read')
+  async readNotif(
+    @MessageBody() messagesData: { channelId: string; userId: string }
+  ) {
+    Logger.log(
+      `le user ${messagesData.userId} veut valider les notif pour ${messagesData.channelId}`
+    );
+    await this.channelService.read(messagesData.userId, messagesData.channelId);
   }
 
   @SubscribeMessage('getMessages')

@@ -22,8 +22,17 @@ export interface Channel {
   topic?: string;
   createdAt?: string;
   updatedAt?: string;
+  notification:notification[]
 }
+export type notification = {  
+  _id: string;
 
+  channelId: string;
+
+  serverId: string;
+
+  seenBy: string[];
+}
 export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);

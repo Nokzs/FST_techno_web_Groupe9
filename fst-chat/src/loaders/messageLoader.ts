@@ -8,6 +8,8 @@ import type {
   MessageFile,
 } from "../component/routes/chat/messageFileType.js";
 import { gunzipSync } from "fflate";
+import type { UserID } from "../types/user.js";
+import { authRouterContext } from "../context/authRouterContext.js";
 
 async function decompressAvatar(url?: string): Promise<void> {
   if (!url) return undefined;
@@ -68,10 +70,16 @@ export type MessageLoaderData = {
   tchatBotData?: messageBotType[];
   hasMore: boolean;
   messagesArr: Message[];
+  userId:string;
 };
 export const messageLoader: LoaderFunction = async (
   data,
 ): Promise<MessageLoaderData> => {
+
+  const userID: UserID | null = data.context.get(authRouterContext);
+  if(!userID){
+    throw redirect("/login")
+  }
   const { channelId } = data.params;
   if (!channelId) {
     throw redirect("/servers");
@@ -150,5 +158,6 @@ export const messageLoader: LoaderFunction = async (
     tchatBotData: tchatBotData,
     hasMore: InitialHasMore,
     messagesArr: messagesArr,
+    userId:userID.id
   };
 };

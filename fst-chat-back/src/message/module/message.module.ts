@@ -14,6 +14,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { IaModule } from '../../IA/ia.module';
 import { iaProvider } from '../../config/constante';
 import { UserModule } from 'src/user/module/user.module';
+import { ChannelModule } from 'src/channel/module/channel.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -26,6 +27,7 @@ import { UserModule } from 'src/user/module/user.module';
     StorageModule.register(provider),
     ConfigModule,
     IaModule.register(iaProvider),
+    ChannelModule,
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageGateway, AuthGuard, ConfigService],

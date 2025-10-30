@@ -1,7 +1,7 @@
 // src/channels/dto/channel.dto.ts
 import { IsString, IsOptional, IsMongoId } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
-import { ServerDto } from '../../server/DTO/server.dto';
+import { NotificationDto } from './NotificationDto';
 @Exclude()
 export class ChannelDto {
   @Expose()
@@ -13,7 +13,8 @@ export class ChannelDto {
   name: string;
 
   @Expose()
-  serverId: string | ServerDto;
+  @IsString()
+  serverId: string;
 
   @Expose()
   @IsOptional()
@@ -22,4 +23,7 @@ export class ChannelDto {
   @Expose()
   @IsOptional()
   updatedAt?: Date;
+
+  @Expose()
+  notification: NotificationDto[];
 }

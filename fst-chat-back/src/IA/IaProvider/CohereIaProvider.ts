@@ -5,7 +5,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Message, MessageDocument } from '../../message/schema/message.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CacheService, QuestionCache } from '../../cache/service/Cache.service';
+import {
+  CacheService,
+  type QuestionCache,
+  type Answer,
+} from '../../cache/service/Cache.service';
 
 @Injectable()
 export class CohereIaProvider implements IIaProvider {
@@ -116,6 +120,7 @@ ${text}
 
     return dot / (Math.sqrt(normQuery) * messageNorm);
   }
+
   /**
    * @description Génère la réponse à une question en se basant sur les messages d'un channel spécifique.
    * @param question La question posée par l'utilisateur.
@@ -134,7 +139,7 @@ ${text}
     userId: string,
     lang: string,
     useUserLanguage = true,
-    detectedLanguage?: string
+    detectedLanguage: string
   ): Promise<string> {
     if (!channelId) throw new Error('channelId is required');
 
@@ -143,19 +148,45 @@ ${text}
     if (!questionEmbedding)
       throw new Error("Impossible de générer l'embedding de la question.");
 
-    // On vérifie qu'il n'y a pas une réponse en cache pour cette question
-    // pour cela on calcule la similarité cosine entre l'embedding de la question et les embeddings des question en cache
-    const cachedAnswers = await this.cacheService.getCachedAnswers(channelId);
-    for (const answer of cachedAnswers) {
+    const cachedAnswers: QuestionCache[] =
+      await this.cacheService.getCachedAnswers(channelId);
+
+    Logger.log(
+      `Vérification du cache pour ${cachedAnswers.length} réponses en cache... pour le channel ${channelId}`
+    );
+    // 2️⃣ Vérifier le cache
+    for (const cacheEntry of cachedAnswers) {
       const similarity = this.cosineSimilarity(
         questionEmbedding,
-        answer.embedding,
-        answer.norm
+        cacheEntry.embedding,
+        cacheEntry.norm
       );
+
       if (similarity > this.similarityThreshold) {
-        return answer.answer;
+        const localized: Answer | undefined = cacheEntry.answer.find(
+          (a) => a.lang === (useUserLanguage ? lang : detectedLanguage)
+        );
+        if (localized) {
+          return localized.answer; // version dans la langue de l'utilisateur
+        }
+
+        // Traduire la première réponse disponible
+        const translated = await this.translate(
+          cacheEntry.answer[0].answer,
+          useUserLanguage ? lang : detectedLanguage
+        );
+
+        // Mettre à jour le cache avec la nouvelle langue
+        await this.cacheService.cacheAnswer(
+          channelId,
+          translated,
+          useUserLanguage ? lang : detectedLanguage,
+          cacheEntry.embedding
+        );
+
+        return translated;
       }
-    } // 1️⃣ Récupérer tous les messages du channel
+    }
     const messages = await this.messageModel
       .find({ channelId })
       .populate('senderId', 'pseudo _id')
@@ -232,6 +263,7 @@ Réponds strictement sous la forme d'un JSON avec les clés suivantes :
 {
   "answer": "la réponse à la question",
   "translateAnswer": "la réponse en anglais"
+  "lang": "la langue de la réponse"
 }
 `;
     // 7️⃣ Appeler le LLM
@@ -247,15 +279,21 @@ Réponds strictement sous la forme d'un JSON avec les clés suivantes :
         .trim()
     ) as { answer: string; translateAnswer: string };
 
-    // 8️⃣ Mettre en cache la réponse en cas de question similaire
     this.cacheService
-      .cacheAnswer(channelId, parsedAnswer.translateAnswer, questionEmbedding)
+      .cacheAnswer(
+        channelId,
+        parsedAnswer.answer,
+        useUserLanguage ? lang : detectedLanguage,
+        questionEmbedding
+      )
       .catch((err) => {
         console.error('Erreur lors de la mise en cache de la réponse :', err);
       });
     return parsedAnswer.answer;
   }
-
+  /**
+   * @description Extrait une date au format ISO 8601 à partir d'une chaîne de caractères en utilisant un modèle de langage.
+   */
   private async getDatefromString(
     dateString: string,
     lang: string,
@@ -344,13 +382,63 @@ Texte : ${dateString}
     if (!textToSummarize) {
       return 'Aucun contenu à résumer.';
     }
+
     const prompt = `
-considère que ${userId}, c'est moi.
-Voici quelques messages de contexte suivis des messages à résumer :
+Considère que ${userId}, c’est moi.
+
+Voici des messages issus d’une discussion :
 ${textToSummarize}
 
-Résume-les de manière concise et claire.
-Réponds en langue: ${useUserLanguage ? lang : detectedLanguage}.
+Ta tâche :
+- Ne fais pas un résumé chronologique message par message.
+- Analyse et regroupe les échanges pour en dégager les **grandes idées, thèmes ou décisions**.
+- Identifie clairement les participants :
+  • Si tu trouves des **prénoms**, utilise-les.  
+  • Sinon, utilise leurs **pseudos** (jamais les user IDs).  
+  • Si aucun nom n’est identifiable, utilise une désignation cohérente (ex. "Participant A", "Participant B").
+- Pour chaque idée importante, indique **qui a exprimé quoi**, de manière fluide et naturelle.
+- Rédige un **résumé conceptuel**, synthétique et clair, centré sur les **idées, positions, arguments et décisions**.
+- Structure le texte de manière **lisible et hiérarchisée**, avec :
+  • **Thèmes / idées principales**
+  • **Sous-sections** (*Contexte*, *Participants*, *Points clés / Discussion*, *Décision / Conclusion*)  
+  • **Sauts de ligne** pour aérer le texte et faciliter la lecture.
+
+Format attendu :
+============================================================
+🟢 **[Thème ou idée principale]**
+
+*Contexte*  
+[Brève description du sujet et du contexte]
+
+*Participants*  
+[Prénom ou pseudo 1 — sa position ou idée principale ; Prénom ou pseudo 2 — sa réponse ou avis, etc.]
+
+*Points clés / Discussion*  
+[Résumé des échanges principaux, arguments et positions de chacun]
+
+*Décision / Conclusion*  
+[Résultat ou état final du point, si applicable]
+
+🟢 **[Thème ou idée suivante]**
+*Contexte*  
+[idem ci-dessus]
+
+*Participants*  
+[idem ci-dessus]
+
+*Points clés / Discussion*  
+[idem ci-dessus]
+
+*Décision / Conclusion*  
+[idem ci-dessus]
+
+📘 **Synthèse finale**  
+[Résumé global de la discussion : principaux accords, désaccords, orientations ou points à approfondir]
+
+============================================================
+
+- Le texte doit rester **fluide, structuré, hiérarchisé, et agréable à lire**, avec **sauts de ligne**.  
+- Langue de réponse : ${useUserLanguage ? lang : detectedLanguage}.
 `;
     const sumarize = await this.prompt(prompt);
     if (!sumarize) {
@@ -393,7 +481,6 @@ Réponds en langue: ${useUserLanguage ? lang : detectedLanguage}.
 `;
 
     const answer = await this.prompt(promptLLm);
-    Logger.log('Parsed command answer: ', answer);
     if (!answer) {
       throw new Error('Impossible de parser la commande.');
     }
@@ -401,5 +488,16 @@ Réponds en langue: ${useUserLanguage ? lang : detectedLanguage}.
       .replace(/^```json\s*/i, '')
       .replace(/```$/i, '')
       .trim();
+  }
+  private async translate(text: string, targetLang: string): Promise<string> {
+    const prompt = `
+  Tu es un assistant de traduction.
+  Traduits le texte suivant en ${targetLang} de manière naturelle et fluide.
+    Texte : ${text} `;
+    const translatedText = await this.prompt(prompt);
+    if (!translatedText) {
+      throw new Error('Impossible de traduire le texte.');
+    }
+    return translatedText;
   }
 }

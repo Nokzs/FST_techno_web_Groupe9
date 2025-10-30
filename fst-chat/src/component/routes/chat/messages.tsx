@@ -122,7 +122,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     hasMoreRef.current = prefetchData.hasMore;
     setMessages(prefetchData.messagesArr);
   }, [channelId]);
-
+ 
   useEffect(() => {
     socket.emit("joinChannelRoom", channelId);
 
@@ -132,6 +132,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
         if (prev.find((m) => m._id === message._id)) return prev;
         return [message, ...prev];
       });
+      socket.emit("read",{userId:user,channelId});
       scrollToBottom();
     });
     socket.on("deleteMessage", (messageId: string) => {
@@ -171,7 +172,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
       socket.off("newReactions");
       socket.off("updateMessageFiles");
     };
-  }, [channelId]);
+  }, [channelId,user]);
 
   const addMessage = async (text: string, files: File[]) => {
     if (!user.id || !channelId) return;

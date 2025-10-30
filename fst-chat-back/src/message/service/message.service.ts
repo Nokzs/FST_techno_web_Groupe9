@@ -207,6 +207,7 @@ export class MessageService {
   }
 
   public async deleteMessage(messageId: string): Promise<Message | null> {
+    Logger.log("le message est supprimé")
     const message = await this.messageModel
       .findByIdAndUpdate(messageId, { isDeleted: true }, { new: true })
       .exec();

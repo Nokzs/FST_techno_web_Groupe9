@@ -10,33 +10,53 @@ import {
 import { socket } from "../../../socket";
 import { useTranslation } from "react-i18next";
 import type { MessageLoaderData } from "../../../loaders/messageLoader";
+import type { notification } from "../../../api/servers/servers-page";
 type NavigationMessageMenuProps = {
-  channelId?: string;
+  channelId: string;
   onSelectChannel?: (channelId: string) => void;
   fetcher: FetcherWithComponents<MessageLoaderData>;
 };
+
+
+
+  const computeNotif = (channels:Channel[],userId:string,channelId:string):Record<string,notification[]> =>{
+   return channels.reduce((acc, channel) => {
+      if(channel._id !== channelId){
+        acc[channel._id] = channel.notification.filter((notif:notification) => !notif.seenBy.includes(userId));
+      }
+      return acc;
+    }, {} as Record<string, notification[]>);
+   
+  }
 
 export function NavigationMessageMenu({
   channelId,
   fetcher,
 }: NavigationMessageMenuProps) {
+
   const { t } = useTranslation();
   const apiUrl = import.meta.env.VITE_API_URL;
-  const { serversData, activeServerData, channelData } = useLoaderData();
+  const { serversData, activeServerData, channelData, userId } = useLoaderData();
   const servers: Server[] = serversData;
+   
   const [channels, setChannels] = useState<Channel[]>(channelData);
+  const [notif,SetNotif] = useState<Record<string,notification[]>>(computeNotif(channelData,userId,channelId))
   const [activeServer, setActiveServer] = useState<Server | null>(
     activeServerData,
   );
   const [menuOpen, setMenuOpen] = useState(false);
   const [direction, setDirection] = useState(0); // 1 = vers channels, -1 = vers serveurs
   const activeChannel = channelId;
-  const refetchChannels = async (signal: AbortSignal) => {
+
+  const refetchChannels = async (signal: AbortSignal,channelId:string) => {
     const channel = await fetch(`${apiUrl}/channels/${activeServer?._id}`, {
       signal,
       credentials: "include",
     }).then((r) => r.json());
+    console.log(channel)
     setChannels(channel);
+    SetNotif(computeNotif(channel,userId,channelId))
+
   };
   // Framer Motion pour bascule serveurs ↔ channels
   const variants = {
@@ -63,22 +83,29 @@ export function NavigationMessageMenu({
     }
     const abortController = new AbortController();
     const signal = abortController.signal;
-    fetch(`${apiUrl}/channels/${activeServer._id}`, {
-      credentials: "include",
-      signal,
-    })
-      .then((r) => r.json())
-      .then(setChannels);
+    refetchChannels(signal,channelId) 
     socket.emit("joinServer", activeServer._id);
     socket.on("updateServer", (updatedServer: string) => {
+      console.log("j'ai recu une update")
       if (updatedServer === activeServer._id) {
-        refetchChannels(signal);
+        refetchChannels(signal,channelId);
       }
     });
+    socket.on("newNotification",(newNotif:notification)=>{
+      
+      if(newNotif.channelId!== channelId){
+        SetNotif((notif) => ({
+          ...notif,
+          [newNotif.channelId]: [...(notif[newNotif.channelId] || []), newNotif],
+        }));
+      }
+    })
     return () => {
       //abortController.abort();
+      socket.emit("leaveServer");
+      socket.off("updateServer");
     };
-  }, [activeServer, apiUrl]);
+  }, [activeServer, apiUrl,channelId]);
 
   const handleSelectServer = (server: Server) => {
     setDirection(1);
@@ -89,6 +116,17 @@ export function NavigationMessageMenu({
     setDirection(-1);
     setActiveServer(null);
   };
+
+  function readNotif(channelId:string): void {
+    SetNotif((prev) => ({
+      ...prev,
+      [channelId]: [],
+    }));
+    socket.emit("read", {
+      channelId: channelId, 
+      userId,
+    });  
+  }
 
   return (
     <div className="flex flex-row items-stretch relative">
@@ -176,28 +214,33 @@ export function NavigationMessageMenu({
                       </p>
                     ) : (
                       <ul className="space-y-1 mt-2">
-                        {channels.map((channel) => (
-                          <li key={channel._id}>
-                            <NavLink
-                              to={`/messages/${channel._id}`}
-                              className="truncate"
-                              onMouseEnter={() => {
-                                return fetcher.load(`/messages/${channel._id}`);
-                              }}
-                            >
-                              <button
-                                className={cn(
-                                  "flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-500 dark:hover:bg-neutral-500 text-black dark:text-white transition",
-                                  activeChannel === channel._id &&
-                                    "bg-neutral-500 ",
-                                )}
+                          {channels.map((channel) => (
+                            <li key={channel._id}>
+                              <NavLink
+                                to={`/messages/${channel._id}`}
+                                className="truncate"
+                                onMouseEnter={() => fetcher.load(`/messages/${channel._id}`)}
+                                onMouseDown={()=>readNotif(channel._id)}
                               >
-                                {channel.name}
-                              </button>
-                            </NavLink>
-                          </li>
-                        ))}
-                      </ul>
+                                <button
+                                  className={cn(
+                                    "flex items-center gap-3 px-4 py-2 w-full text-left hover:bg-neutral-500 dark:hover:bg-neutral-500 text-black dark:text-white transition",
+                                    activeChannel === channel._id && "bg-neutral-500"
+                                  )}
+                                >
+                                  <span className="flex-1 truncate">{channel.name}</span>
+
+                                  {/* 🟢 Affichage du badge de notification */}
+                                  {notif?.[channel._id]?.length > 0 && (
+                                    <span className="ml-2 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                                      {notif[channel._id].length}
+                                    </span>
+                                  )}
+                                </button>
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
                     )}
                   </div>
                 </motion.div>

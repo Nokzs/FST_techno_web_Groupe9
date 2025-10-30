@@ -30,7 +30,6 @@ export class ChatBotController {
 
     // 1️⃣ Parser la commande via le LLM
     const userCommand = await this.iaService.parseCommand(command, language);
-    Logger.log('Résultat de la commande:', userCommand);
 
     const jsonCommand = JSON.parse(userCommand) as {
       type: string;
@@ -49,7 +48,7 @@ export class ChatBotController {
           jsonCommand.lang
         ),
 
-      summary: async (content: string): Promise<string> =>
+      summarize: async (content: string): Promise<string> =>
         this.iaService.makeSummary(
           content,
           channelId,

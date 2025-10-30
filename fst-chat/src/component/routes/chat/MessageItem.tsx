@@ -96,7 +96,7 @@ export function MessageItem({
         className={cn(
           "flex gap-2 my-2 max-w-[75%] relative group",
           isOwner
-            ? "self-end flex-row-reverse pr-3"
+            ? "self-end flex-row-reverse"
             : "self-start flex-row pl-3",
         )}
       >
@@ -133,7 +133,7 @@ export function MessageItem({
             {/* Texte */}
             {message.content &&
               (!message.isDeleted ? (
-                <div className="whitespace-pre-wrap break-words mb-1">
+              <div className="whitespace-pre-wrap break-all overflow-hidden overflow-wrap-anywhere mb-1">
                   {message.content}
                 </div>
               ) : (

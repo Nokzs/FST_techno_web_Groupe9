@@ -25,6 +25,7 @@ export class MessageDto {
   @Type(() => UserLiteDto)
   senderId: UserLiteDto;
 
+  @Expose()
   @IsOptional()
   @ValidateNested()
   @Type(() => UserLiteDto)
@@ -74,4 +75,8 @@ export class MessageDto {
   @Expose()
   @IsBooleanString()
   sending: boolean; // indique si le message est encore en cours de validation / upload
+
+  @Expose()
+  @IsBooleanString()
+  isDeleted?: boolean;
 }

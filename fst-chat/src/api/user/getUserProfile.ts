@@ -28,6 +28,5 @@ export async function getUserProfile(
     return null;
   }
   const profile = await req.json();
-  console.log("profile", profile);
   return profile;
 }

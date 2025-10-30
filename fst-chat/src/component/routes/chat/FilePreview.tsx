@@ -8,7 +8,6 @@ type FilePreviewProps = {
 };
 
 export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
-  console.log(file)
   const [decompressedUrl, setDecompressedUrl] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -29,12 +28,11 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          console.log("je suis vu")
+          console.log("je suis vu");
           setIsVisible(true);
           observer.disconnect(); // plus besoin d'observer après déclenchement
-        }
-        else{
-          setIsVisible(false)
+        } else {
+          setIsVisible(false);
         }
       },
       {
@@ -50,7 +48,7 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
 
   // Décompression uniquement si visible et compressé
   useEffect(() => {
-     if (!isCompressed || !isVisible) {
+    if (!isCompressed || !isVisible) {
       // si plus visible, on révoque l’URL précédente
       if (decompressedUrl) {
         URL.revokeObjectURL(decompressedUrl);
@@ -70,14 +68,14 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
         const blob = new Blob([decompressed], { type: mime });
         setDecompressedUrl(URL.createObjectURL(blob));
       } catch (err) {
-        console.error("Erreur lors de la décompression :", err);
+        console.error("Erreur lors de la décompression :", err, file);
       }
     };
 
     decompress();
 
     return () => controller.abort();
-  }, [file.url, mime, isCompressed, isVisible,decompressedUrl]);
+  }, [file.url, mime, isCompressed, isVisible, decompressedUrl]);
 
   const displayUrl = isCompressed ? decompressedUrl : file.url;
 

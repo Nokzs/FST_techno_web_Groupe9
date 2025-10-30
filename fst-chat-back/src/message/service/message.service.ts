@@ -55,7 +55,6 @@ export class MessageService {
       throw new InternalServerErrorException('Impossible de créer le message');
     }
 
-    Logger.log('je vais partir de la fonction en renvoyant', result);
     return result;
   }
 
@@ -80,15 +79,15 @@ export class MessageService {
     channelId: string,
     date: string
   ): Promise<{ messages: Message[]; hasMore: boolean }> {
-    Logger.log(channelId);
     Logger.log('date', date);
+    const limit = 10;
     const findObj = date
       ? { channelId, createdAt: { $lt: date } }
       : { channelId };
-
+    Logger.log('findObj', findObj);
     const messages = await this.messageModel
       .find(findObj)
-      .limit(51)
+      .limit(limit + 1)
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
@@ -98,8 +97,8 @@ export class MessageService {
       .lean()
       .sort({ createdAt: -1 })
       .exec();
-    const hasMore = messages.length > 50;
-    const slicedMessages = hasMore ? messages.slice(0, 50) : messages;
+    const hasMore = messages.length > limit;
+    const slicedMessages = hasMore ? messages.slice(0, limit) : messages;
     return {
       messages: slicedMessages,
       hasMore: hasMore,
@@ -111,7 +110,6 @@ export class MessageService {
     userId: string,
     emoji: string
   ): Promise<Message | null> {
-    Logger.log(messageId);
     const message = await this.messageModel.findById(messageId);
     if (!message) throw new Error('Message not found');
     // Cherche ou crée la réaction globale
@@ -170,7 +168,6 @@ export class MessageService {
       .exec();
   }
   public async updateMessageFiles(messageDto: MessageDto) {
-    Logger.log('le message update', messageDto);
     if (!messageDto._id) {
       throw new BadRequestException(
         'Message ID is required to update the message'
@@ -207,5 +204,15 @@ export class MessageService {
     }
 
     return updatedMessage;
+  }
+
+  public async deleteMessage(messageId: string): Promise<Message | null> {
+    const message = await this.messageModel
+      .findByIdAndUpdate(messageId, { isDeleted: true }, { new: true })
+      .exec();
+    if (!message) {
+      throw new NotFoundException(`Message with ID ${messageId} not found`);
+    }
+    return message;
   }
 }

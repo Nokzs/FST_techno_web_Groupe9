@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Server } from "../../../api/servers/servers-page";
+import toast, { Toaster } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { NavLink } from "react-router";
 
 export function FindServer() {
   const [searchName, setSearchName] = useState("");
@@ -7,29 +10,33 @@ export function FindServer() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-
+  const { t } = useTranslation();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const last_id = servers.length > 0 ? servers[servers.length - 1]._id : "";
 
   const joinServer = async (serverId: string) => {
-    console.log("Joining server", serverId);
-    fetch(`${API_URL}/servers/openJoin`, {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify({ serverId }),
-      headers: { "Content-Type": "application/json" },
-    }).then((res) => {
+    try {
+      const res = await fetch(`${API_URL}/servers/openJoin`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ serverId }),
+        headers: { "Content-Type": "application/json" },
+      });
+
       if (res.ok) {
-        alert("Vous avez rejoint le serveur !");
-        // Optionnel : retirer le serveur de la liste après l'avoir rejoint
         setServers((prev) => prev.filter((s) => s._id !== serverId));
+        toast.success("Vous avez rejoint le serveur !"); // <-- toast succès
       } else {
-        alert("Erreur lors du join du serveur.");
+        toast.error("Impossible de rejoindre le serveur."); // <-- toast erreur
       }
-    });
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur réseau."); // <-- toast erreur
+    }
   };
+
   const getServers = useCallback(
     async (id?: string) => {
       if (loading) return;
@@ -44,13 +51,9 @@ export function FindServer() {
         if (!res.ok) throw new Error("Erreur serveur");
         const data = await res.json();
 
-        if (id) {
-          setServers((prev) => [...prev, ...data]);
-        } else {
-          setServers(data);
-        }
+        if (id) setServers((prev) => [...prev, ...data]);
+        else setServers(data);
 
-        // Si on reçoit moins que la limite (20 par défaut), plus rien à charger
         setHasMore(data.length >= 20);
       } catch (err) {
         console.error(err);
@@ -61,7 +64,7 @@ export function FindServer() {
     [API_URL, searchName, searchTags, loading],
   );
 
-  // 🔁 Debounce la recherche
+  // Debounce la recherche
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMore(true);
@@ -71,16 +74,15 @@ export function FindServer() {
     return () => clearTimeout(timer);
   }, [searchName, searchTags]);
 
-  // 👁️ Intersection observer pour le scroll infini
+  // Intersection observer pour scroll infini
   const sentinelRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loading) return;
-      if (observerRef.current) observerRef.current.disconnect();
+      if (observerRef.current) observerRef.current?.disconnect();
 
       observerRef.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
           getServers(last_id);
-          console.log("Chargement plus de serveurs");
         }
       });
 
@@ -91,8 +93,13 @@ export function FindServer() {
 
   return (
     <div className="p-4 min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <h2 className="text-2xl font-bold mb-4">Chercher un serveur</h2>
-
+      <Toaster position="top-right" />
+      <div className="flex items-center mb-6 gap-4 justify-center">
+        <NavLink to="/servers" className="text-2xl">
+          {"<-"}
+        </NavLink>
+        <h2 className="text-2xl font-bold  text-center">{t("server.find")}</h2>
+      </div>
       <div className="flex flex-col md:flex-row gap-2 mb-6">
         <input
           type="text"
@@ -106,10 +113,9 @@ export function FindServer() {
           placeholder="Tags séparés par des virgules..."
           value={searchTags}
           onChange={(e) => setSearchTags(e.target.value)}
-          className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400"
+          className="flex-1 p-2 border rounded-md bg-white text-black dark:text-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400"
         />
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {servers.length > 0
           ? servers.map((server) => (
@@ -147,12 +153,13 @@ export function FindServer() {
               </p>
             )}
       </div>
-
       {/* Sentinel pour scroll infini */}
       <div
         ref={sentinelRef}
         className="h-10 mt-4 flex justify-center items-center"
-      ></div>
+      >
+        {loading && <span className="text-gray-500">Chargement...</span>}
+      </div>
     </div>
   );
 }

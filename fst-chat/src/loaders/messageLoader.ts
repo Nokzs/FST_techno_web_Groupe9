@@ -2,12 +2,28 @@ import { redirect, type LoaderFunction } from "react-router-dom";
 import type { Server, Channel } from "../api/servers/servers-page.js";
 import type { messageBotType } from "../component/ui/ChatBotWindows.js";
 import { socket } from "../socket.js";
-import { fileCache } from "../cache/fileCache.js";
+import { fileCache, avatarCache } from "../cache/fileCache.js";
 import type {
   Message,
   MessageFile,
 } from "../component/routes/chat/messageFileType.js";
 import { gunzipSync } from "fflate";
+
+async function decompressAvatar(url?: string): Promise<void> {
+  if (!url) return undefined;
+
+  if (avatarCache.has(url)) return;
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: "image/*" });
+    avatarCache.set(url, blob);
+  } catch (err) {
+    console.error("Erreur chargement avatar :", err);
+  }
+}
+
 export async function decompressMessageFile(
   file: MessageFile,
 ): Promise<MessageFile> {
@@ -15,7 +31,9 @@ export async function decompressMessageFile(
     // On récupère le fichier compressé
     let fileUrl = fileCache.get(file._id);
     const nameWithoutGz = file.originalName.replace(/\.gz$/, "");
-
+    if (!file.originalMymeType) {
+      return file;
+    }
     if (!fileUrl) {
       const compressedData = await fetch(file.url)
         .then((res) => res.arrayBuffer())
@@ -38,7 +56,7 @@ export async function decompressMessageFile(
       mimetype: file.originalMymeType,
     };
   } catch (err) {
-    console.error("Erreur de décompression du fichier :", file.url, err);
+    console.error("Erreur de décompression du fichier :", file, err);
     return file; // fallback
   }
 }
@@ -103,13 +121,17 @@ export const messageLoader: LoaderFunction = async (
         messages: Message[];
         hasMore: boolean;
       }) => {
-        const visibleMessages: Message[] = messages.slice(0, 5);
+        const visibleMessages: Message[] = messages.slice(0, 10);
         for (const msg of visibleMessages) {
           if (msg.files?.length) {
             const decompressedFiles = await Promise.all(
               msg.files.map(decompressMessageFile),
             );
             msg.files = decompressedFiles;
+          }
+
+          if (msg.senderId.urlPicture) {
+            await decompressAvatar(msg.senderId.urlPicture);
           }
         }
         resolve({ messagesArr: messages, InitialHasMore: hasMore });

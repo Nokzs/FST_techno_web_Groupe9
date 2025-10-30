@@ -38,6 +38,7 @@ export class MessageGateway
   ) {}
   afterInit(server: Server) {
     server.on('embedding', (message: Message) => {
+      Logger.log('Embedding event received in gateway');
       this.messageService.embedMessage(message._id.toString());
     });
   }
@@ -141,12 +142,11 @@ export class MessageGateway
   async handleGetMessages(
     @MessageBody() messagesData: { channelId: string; date: string }
   ) {
-    Logger.log('date gateway', messagesData.date);
+    Logger.log('on me demande des messages');
     const { messages, hasMore } = await this.messageService.findByChannel(
       messagesData.channelId,
       messagesData.date
     );
-    Logger.log('message', messages);
 
     return {
       messages: messages.map((msg) => {
@@ -173,14 +173,19 @@ export class MessageGateway
   }
   @SubscribeMessage('updateMessageFiles')
   async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
-    Logger.log('PUTAIN LANCE LE !');
     const updatedMessage = await this.messageService.updateMessageFiles(data);
-    Logger.log('PUTAIN LANCE LE !');
     this.server
       .to(updatedMessage.channelId.toString())
       .emit('updateMessageFiles', updatedMessage);
     if (updatedMessage != null) {
       Logger.log('sending updatedMessage');
     }
+  }
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(
+    @MessageBody() data: { messageId: string; channelId: string }
+  ) {
+    await this.messageService.deleteMessage(data.messageId);
+    this.server.to(data.channelId).emit('deleteMessage', data.messageId);
   }
 }

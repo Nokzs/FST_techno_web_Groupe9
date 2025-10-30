@@ -13,6 +13,7 @@
     "tchat": {
         "send": "Send",
         "loadingMessages": "Loading messages...",
+        "deleteMessage": "Supprimer le message",
         "tchatRoom": "Chat Room",
         "navigationMenu": {
             "title": "Servers",
@@ -40,6 +41,7 @@
         "update": "Update server",
         "open": "Open server",
         "openPublic": "Open to public",
+        "openToPublic": "Open public",
         "tags": "tags split by commas",
         "tagsPlaceholder": "ex:play,chill,french",
         "cancel": "cancel",

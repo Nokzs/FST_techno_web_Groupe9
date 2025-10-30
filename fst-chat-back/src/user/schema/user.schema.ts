@@ -29,7 +29,7 @@ export class User {
   @Prop({ default: '' })
   bio: string;
 
-  @Prop({ default: '' })
+  @Prop({ default: 'https://avatar.iran.liara.run/public/20' })
   urlPicture: string;
 }
 

@@ -1,6 +1,6 @@
 import type { User } from "../../../types/user";
 export interface MessageFile {
-  _id: string;
+  _id?: string;
   originalName: string;
   url: string;
   mimetype: string;
@@ -22,4 +22,5 @@ export interface Message {
   replyMessage: Message | null;
   reactions: reaction[];
   sending: boolean;
+  isDeleted?: boolean;
 }

@@ -1,5 +1,4 @@
-﻿import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+﻿import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage, LoginPage, RegisterPage } from "./component/routes";
 import "./i18n/i18n.js";
@@ -85,9 +84,7 @@ const router = createBrowserRouter(routes);
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 root.render(
-  <StrictMode>
-    <DarkModeProvider>
-      <RouterProvider router={router} />
-    </DarkModeProvider>
-  </StrictMode>,
+  <DarkModeProvider>
+    <RouterProvider router={router} />
+  </DarkModeProvider>,
 );

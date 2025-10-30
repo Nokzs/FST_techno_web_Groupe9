@@ -129,7 +129,7 @@ export function ServerItem({ server }: { server: Server }) {
       {/* Affichage public */}
       {isPublic && isOwner && (
         <div className="mt-2 text-sm text-green-700 font-medium">
-          {t("room.openPublic")}
+          {t("room.openToPublic")}
         </div>
       )}
 
@@ -157,7 +157,7 @@ export function ServerItem({ server }: { server: Server }) {
                 value={tags}
                 required
                 onChange={(e) => setTags(e.target.value)}
-                className="w-full p-3 rounded-lg mb-4 bg-gray-300 dark:bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 dark:placeholder-gray-300 placeholder-neutral-950"
+                className="w-full p-3 rounded-lg mb-4 text-black dark:text-white bg-gray-300 dark:bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 dark:placeholder-gray-300 placeholder-neutral-950"
                 placeholder={t("room.tagsPlaceholder")}
               />
 

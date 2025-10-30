@@ -22,4 +22,6 @@ export type User = {
   password?: string;
 
   urlPicture?: string;
+
+  avatarBlob?: Blob;
 };

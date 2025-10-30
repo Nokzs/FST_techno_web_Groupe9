@@ -13,6 +13,7 @@
     "tchat": {
         "send": "Envoyer",
         "loadingMessages": "Chargement des messages...",
+        "deleteMessage": "Supprimer le message",
         "tchatRoom": "Salle de discussion",
         "navigationMenu": {
             "title": "Serveurs",
@@ -37,6 +38,7 @@
         "updateClose": "Mettre à jour / Fermer le serveur",
         "update": "Mettre à jour le serveur",
         "open": "Ouvrir le serveur",
+        "openToPublic": "Ouvert au public",
         "openPublic": "Ouvrir au public",
         "tags": "tags séparés par des virgules",
         "tagsPlaceholder": "ex : play,chill,french",

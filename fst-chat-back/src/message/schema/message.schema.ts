@@ -43,6 +43,9 @@ export class Message {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Reaction' }], default: [] })
   reactions: Types.ObjectId[];
+
+  @Prop({ type: Boolean, default: false })
+  isDetectedAsSpam: boolean;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

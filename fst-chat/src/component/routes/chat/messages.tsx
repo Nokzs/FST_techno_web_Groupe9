@@ -17,23 +17,27 @@ import { ChatBotWindow } from "../../ui/ChatBotWindows";
 import type { MessageLoaderData } from "../../../loaders/messageLoader";
 type MessagesProps = {
   channelId: string | undefined;
-  prefetchData:MessageLoaderData;
+  prefetchData: MessageLoaderData;
 };
 export function Messages({ channelId, prefetchData }: MessagesProps) {
   const { t } = useTranslation();
-  const {hasMore,messagesArr} = useLoaderData();
-  console.log("les données du loader sont", typeof hasMore)
+  const { hasMore, messagesArr } = useLoaderData();
 
-  const takePrefetchData = prefetchData && prefetchData.channelId === channelId 
-  console.log("je dois prendre les données prefetch", takePrefetchData ? "oui":"non")
-  const [messages, setMessages] = useState<Message[]>( takePrefetchData ? prefetchData.messagesArr : messagesArr);
+  const [messages, setMessages] = useState<Message[]>(messagesArr);
   const [user, setUser] = useState<User | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
 
-  const hasMoreRef = useRef<boolean>(takePrefetchData ? prefetchData.hasMore : hasMore);
+  const hasMoreRef = useRef<boolean>(hasMore);
+
+  console.log(
+    "Messages rendus :",
+    messages.length,
+    "il y a encore des messages ",
+    hasMoreRef.current,
+  );
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   // Scroll automatique après chaque nouveau message
@@ -42,11 +46,19 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
   };
 
   const paginateMessages = useCallback(() => {
+    if (!channelId || messages.length === 0) return;
+    if (!hasMoreRef.current) return;
     socket.emit(
       "getMessages",
       { channelId, date: messages[messages.length - 1]?.createdAt },
-      ({ messages, hasMore }) => {
-        setMessages((oldMessages) => [...oldMessages, ...messages]);
+      ({ messages: newMessages, hasMore }) => {
+        const filtered = newMessages.filter((msg) => {
+          return (
+            msg.channelId === channelId &&
+            !messages.find((m) => m._id === msg._id)
+          );
+        });
+        setMessages((prev) => [...prev, ...filtered]);
         hasMoreRef.current = hasMore;
       },
     );
@@ -60,7 +72,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     const observer = new IntersectionObserver(
       async (entries) => {
         const first = entries[0];
-        if (first.isIntersecting   && hasMoreRef.current) {
+        if (first.isIntersecting && hasMoreRef.current) {
           // Petit délai de debounce
           clearTimeout(debounceTimeout);
           debounceTimeout = setTimeout(async () => {
@@ -96,80 +108,72 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     };
     fetchUser();
     return () => {
-      //abortController.abort();
+      abortController.abort();
     };
   }, []);
 
   // 🔹 Connexion socket + récupération des messages
   useEffect(() => {
     if (!channelId) return;
+    if (!prefetchData) return;
+    if (prefetchData.channelId !== channelId) return;
 
-     const takePrefetchData = prefetchData && prefetchData.channelId === channelId 
-     setReplyMessage(undefined)
-    setMessages(takePrefetchData ? prefetchData.messagesArr : messagesArr)
-    console.log("resultat ?",
-takePrefetchData ? prefetchData.hasMore : hasMore
-    )
-    hasMoreRef.current  = true
-    // rejoindre la "room" du channel
-    //socket.emit("joinChannelRoom", channelId);
-    /*socket.emit(
-      "getMessages",
-      { channelId, date: null },
-      ({ messages, hasMore }: { messages: Message[]; hasMore: boolean }) => {
-        console.log("Récupération des messages pour le channel :", channelId);
+    // Vérifier si on a déjà exactement les mêmes messages
+    const idsCurrent = messages.map((m) => m._id).join(",");
+    const idsPrefetch = prefetchData.messagesArr.map((m) => m._id).join(",");
+    if (idsCurrent === idsPrefetch) return; // rien à faire, déjà à jour
 
-        console.log("Messages reçus :", messages);
+    setReplyMessage(undefined);
+    hasMoreRef.current = prefetchData.hasMore;
+    setMessages(prefetchData.messagesArr);
+    scrollToBottom();
+  }, [channelId, prefetchData]);
 
-        setMessages(messages);
-
-        console.log("Messages chargés :", messages);
-
-        hasMoreRef.current = hasMore;
-
-        scrollToBottom();
-
-        setLoading(false);
-      },
-    );*/
-    
+  useEffect(() => {
     socket.emit("joinChannelRoom", channelId);
-    scrollToBottom()
+
     socket.on("newMessage", (message: Message) => {
-      console.log("Événement newMessage reçu :", message);
-      if (message.channelId === channelId) {
-        console.log("Nouveau message reçu :", message);
-        setMessages((prev) => [message, ...prev]);
-        scrollToBottom();
-      }
+      if (message.channelId !== channelId) return;
+      setMessages((prev) => {
+        if (prev.find((m) => m._id === message._id)) return prev;
+        return [message, ...prev];
+      });
+      scrollToBottom();
+    });
+    socket.on("deleteMessage", (messageId: string) => {
+      // on met à true la valeur de isDeleted pour le messageId
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, isDeleted: true } : msg,
+        ),
+      );
     });
     socket.on("newReactions", (updatedMessage: Message) => {
-      console.log(
-        "Message mis à jour avec de nouvelles réactions :",
-        updatedMessage,
-      );
-      setMessages((messages) =>
-        messages.map((msg) =>
+      if (updatedMessage.channelId !== channelId) return;
+      setMessages((prev) =>
+        prev.map((msg) =>
           msg._id === updatedMessage._id ? updatedMessage : msg,
         ),
       );
     });
+
     // Gestion de la mise à jour du message avec fichiers
     socket.on("updateMessageFiles", (updatedMessage: Message) => {
-      console.log("Message mis à jour avec des fichiers :", updatedMessage);
-
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
+      if (updatedMessage.channelId !== channelId) return;
+      setMessages((prev) =>
+        prev.map((msg) =>
           msg._id === updatedMessage._id
-            ? { ...updatedMessage, sending: false } // met sending à false pour la version finale
+            ? { ...updatedMessage, sending: false }
             : msg,
         ),
       );
     });
+
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
       socket.off("newMessage");
+      socket.off("deleteMessage");
       socket.off("newReactions");
       socket.off("updateMessageFiles");
     };
@@ -207,7 +211,6 @@ takePrefetchData ? prefetchData.hasMore : hasMore
         finalMessage._id = message._id;
       });
 
-      console.log(finalMessage);
       // Upload des fichiers
       await Promise.all(
         files.map(async (file) => {
@@ -217,7 +220,7 @@ takePrefetchData ? prefetchData.hasMore : hasMore
             channelId,
           );
 
-          await uploadFile(file, signedUrl);
+          await uploadFile(file, signedUrl, true);
 
           const { publicUrl } = await getMessageFilePublicUrl(path, channelId);
           messagesFiles.push({
@@ -229,7 +232,6 @@ takePrefetchData ? prefetchData.hasMore : hasMore
         }),
       );
 
-      console.log("Envoi du message final avec fichiers :", finalMessage);
       socket.emit("updateMessageFiles", finalMessage);
     } else {
       // Cas sans fichiers : envoi direct
@@ -246,8 +248,6 @@ takePrefetchData ? prefetchData.hasMore : hasMore
     }
   };
 
-  
-
   if (!channelId) {
     return <></>;
   }
@@ -258,8 +258,10 @@ takePrefetchData ? prefetchData.hasMore : hasMore
       <div className="h-screen flex flex-col p-10 w-full">
         <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
         <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-          <NavLink to="/servers">{"<-"}</NavLink>
-          {t("tchat.tchatRoom")}
+          <NavLink to="/servers">
+            {"<-"}
+            {t("tchat.tchatRoom")}
+          </NavLink>
         </h1>
 
         {/* Liste des messages */}
@@ -271,9 +273,10 @@ takePrefetchData ? prefetchData.hasMore : hasMore
           <div ref={messagesEndRef} />
           {messages.slice().map((msg, index: number) => (
             <MessageItem
-              key={index}
-              messageRef={messagesRef}
+              key={msg._id + index}
+              messageRef={messagesRef!}
               message={msg}
+              isOwner={msg.senderId._id === user?.id}
               currentUserId={user?.id}
               channelId={channelId!}
               onReply={setReplyMessage}

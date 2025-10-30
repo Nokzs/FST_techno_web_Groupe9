@@ -66,20 +66,20 @@ export function ServersPage() {
 
       <div className="flex gap-2 mb-4">
         <button
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          className="bg-blue-500 dark:text-white text-black px-3 py-1 rounded hover:bg-blue-600"
           onClick={() => setActiveForm("create")}
         >
           {t("server.create")}
         </button>
         <button
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+          className="bg-green-500 dark:text-white text-black px-3 py-1 rounded hover:bg-green-600"
           onClick={() => setActiveForm("join")}
         >
           {t("server.join")}
         </button>
         <NavLink
           to="/servers/find"
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+          className="bg-green-500 dark:text-white text-black px-3 py-1 rounded hover:bg-green-600"
         >
           {t("server.find")}
         </NavLink>

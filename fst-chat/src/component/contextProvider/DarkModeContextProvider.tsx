@@ -21,7 +21,6 @@ export function DarkModeProvider({
   console.log("mon navigateur prefere", preferMedia);
 
   const darkModeStorage: string | null = localStorage.getItem("darkMode");
-  console.log("mon application connait ", darkModeStorage, "pour mon darkMode");
   const [darkMode, setDarkMode] = useState<boolean>(
     (!darkModeStorage && preferMedia) || darkModeStorage === "true",
   );
@@ -41,6 +40,18 @@ export function DarkModeProvider({
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "darkMode") {
+        const isDark = event.newValue === "true";
+        document.documentElement.classList.toggle("dark", isDark);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <darkModeContext.Provider value={{ darkMode, changeDarkMode }}>

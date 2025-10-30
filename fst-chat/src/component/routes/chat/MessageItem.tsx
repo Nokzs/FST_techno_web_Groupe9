@@ -5,13 +5,17 @@ import { ReactionMenu } from "../../ui/reactionsPicker";
 import { socket } from "../../../socket";
 import type { User } from "../../../types/user";
 import { cn } from "../../../utils/cn";
-import { AnimatePresence, easeIn, easeInOut, motion } from "framer-motion";
+import { AnimatePresence, motion, easeInOut, easeIn } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { UserAvatar } from "../../ui/userAvatar";
+
 interface MessageProps {
   currentUserId: string;
   message: Message;
   onReply?: (message: Message) => void;
   channelId?: string;
   messageRef?: React.RefObject<HTMLDivElement>;
+  isOwner: boolean;
 }
 
 export function MessageItem({
@@ -20,11 +24,15 @@ export function MessageItem({
   onReply,
   channelId,
   messageRef,
+  isOwner,
 }: MessageProps) {
-  const isOwnMessage = message.senderId._id === currentUserId;
+  const { t } = useTranslation();
   const [showReactionMenu, setShowReactionMenu] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isReplyToMe =
+    message.replyMessage && message.receiverId?._id === currentUserId;
+
   const date = new Date(message.createdAt);
   const formattedDate = date.toLocaleTimeString([], {
     day: "2-digit",
@@ -33,118 +41,158 @@ export function MessageItem({
     hour: "2-digit",
     minute: "2-digit",
   });
+
   const grouped = message.reactions.reduce((acc: Record<string, User[]>, r) => {
     acc[r.emoji] = acc[r.emoji] ? [...acc[r.emoji], r.userId] : [r.userId];
     return acc;
   }, {});
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
       }
     };
-
     if (menuOpen) {
       const timeout = setTimeout(() => {
         window.addEventListener("click", handleClickOutside);
       }, 0);
-
       return () => {
         clearTimeout(timeout);
         window.removeEventListener("click", handleClickOutside);
       };
     }
   }, [menuOpen]);
+
   const addReaction = (emoji: string) => {
     socket.emit("newReactions", { messageId: message._id, emoji, channelId });
   };
+
+  const messageClasses = cn(
+    "pt-8 pb-1 px-5 rounded-2xl shadow-sm flex flex-col relative transition-all",
+    isOwner
+      ? "bg-green-500 text-white rounded-bl-none"
+      : "bg-blue-500 text-white rounded-br-none",
+    isReplyToMe &&
+      "bg-[rgba(4,40,145,0.3)] border-4 border-[rgba(4,40,145,0.95)] shadow-[0_0_20px_5px_rgba(4,40,145,0.95)]",
+  );
+
+  function deleteMessage() {
+    fetch(`/api/messages/delete`, {
+      method: "POST",
+      credentials: "include",
+    }).then(() => {
+      socket.emit("deleteMessage", { messageId: message._id, channelId });
+    });
+  }
+
+  if (!currentUserId || isOwner === undefined) {
+    return null;
+  }
+
   return (
     <Suspense fallback={<></>}>
       <div
-        className={`flex flex-col group gap-1 my-2 max-w-[75%] relative ${
-          isOwnMessage
-            ? "self-end items-end pr-3"
-            : "self-start items-start pl-3"
-        }`}
+        className={cn(
+          "flex gap-2 my-2 max-w-[75%] relative group",
+          isOwner
+            ? "self-end flex-row-reverse pr-3"
+            : "self-start flex-row pl-3",
+        )}
       >
-        <div
-          className={`py-8 px-5 rounded-2xl shadow-sm flex flex-col relative ${
-            isOwnMessage
-              ? "bg-green-500 text-white rounded-bl-none"
-              : "bg-blue-500 text-white rounded-br-none"
-          }`}
-        >
-          {message.replyMessage && (
-            <div className="mb-2 p-2 bg-white/20 rounded border-l-4 border-white/50 text-sm">
-              <span className="font-medium">{message.receiverId?.pseudo}</span>
-              <span className="line-clamp-1">
-                {message.replyMessage.content}
-              </span>
-            </div>
-          )}
+        <div className="flex flex-col group gap-1 relative w-full">
+          <div className={messageClasses}>
+            <span
+              className={cn(
+                "font-medium absolute top-0 mt-2 ml-2",
+                isOwner ? "right-0 mr-2" : "left-0",
+              )}
+            >
+              {message.senderId.pseudo}
+            </span>
 
-          {/* Texte */}
-          {message.content && (
-            <div className="whitespace-pre-wrap break-words mb-1">
-              {message.content}
-            </div>
-          )}
+            {/* Message cité */}
+            {message.replyMessage && (
+              <div className="mb-2 p-2 bg-white/20 rounded border-l-4 border-white/50 text-sm">
+                <span className="font-medium">
+                  {message.receiverId?.pseudo}
+                </span>
+                <span className="line-clamp-1">
+                  {message.replyMessage.content}
+                </span>
+              </div>
+            )}
 
-          {/* Fichiers */}
-          {message.files?.length > 0 && (
-            <div className="flex flex-wrap gap-3 mt-1">
-              {message.files.map((file, index) => (
-                <FilePreview
-                  key={index}
-                  file={file}
-                  scrollContainerRef={messageRef}
-                />
+            {/* Texte */}
+            {message.content &&
+              (!message.isDeleted ? (
+                <div className="whitespace-pre-wrap break-words mb-1">
+                  {message.content}
+                </div>
+              ) : (
+                <div className="italic text-white/70 mb-1">
+                  {t("tchat.messageDeleted")}
+                </div>
               ))}
+
+            {/* Fichiers */}
+            {message.files?.length > 0 && !message.isDeleted && (
+              <div className="flex flex-wrap gap-3 mt-1">
+                {message.files.map((file, index) => (
+                  <FilePreview
+                    key={index}
+                    file={file}
+                    scrollContainerRef={messageRef}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Loader */}
+            {message.sending && message.files?.length === 0 && (
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-4 h-4 rounded-full bg-white animate-pulse" />
+                <span className="text-xs text-white/80">Envoi...</span>
+              </div>
+            )}
+
+            {/* Nom + heure */}
+            <div
+              className={`text-xs mt-2 opacity-80 ${isOwner ? "text-right" : "text-left"}`}
+            >
+              <span>{formattedDate}</span>
             </div>
-          )}
 
-          {/* Loader si sending et pas encore de fichiers */}
-          {message.sending && message.files?.length === 0 && (
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-4 h-4 rounded-full bg-white animate-pulse" />
-              <span className="text-xs text-white/80">Envoi...</span>
-            </div>
-          )}
+            {/* Menu réactions et options */}
+            <div
+              className={`opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-1 flex flex-row ${
+                isOwner ? "left-1 flex-row-reverse" : "right-1"
+              }`}
+            >
+              <ReactionMenu
+                onSelect={addReaction}
+                showMenu={showReactionMenu}
+                setShowMenu={setShowReactionMenu}
+              />
 
-          {/* Nom + heure */}
-          <div
-            className={`text-xs mt-2 opacity-80 ${
-              isOwnMessage ? "text-right" : "text-left"
-            }`}
-          >
-            <span className="font-medium">{message.senderId.pseudo}</span> —{" "}
-            <span>{formattedDate}</span>
-          </div>
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  className="p-1 rounded-full hover:bg-white/20"
+                >
+                  :
+                </button>
 
-          {/* Bouton menu */}
-          {!isOwnMessage && (
-            <>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-1 right-1 flex flex-row">
-                <ReactionMenu
-                  onSelect={addReaction}
-                  showMenu={showReactionMenu}
-                  setShowMenu={setShowReactionMenu}
-                />
-                <div className="relative">
-                  <button
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                    className=" top-2 right-2 p-1 rounded-full hover:bg-white/20"
+                {menuOpen && (
+                  <div
+                    ref={menuRef}
+                    className={cn(
+                      "absolute top-0 bg-white text-black rounded-lg shadow-lg z-10 w-32",
+                      isOwner ? "right-[100%] mr-2" : "left-[100%] ml-2",
+                    )}
                   >
-                    :
-                  </button>
-
-                  {/* Menu contextuel */}
-                  {menuOpen && (
-                    <div
-                      ref={menuRef}
-                      className="absolute top-0 left-[100%] ml-2 bg-white text-black rounded-lg shadow-lg z-10 w-32"
-                    >
-                      <ul className="flex flex-col">
+                    <ul className="flex flex-col">
+                      {!isOwner && (
                         <li
                           className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
                           onClick={() => {
@@ -157,29 +205,30 @@ export function MessageItem({
                         >
                           Répondre
                         </li>
+                      )}
+
+                      {isOwner && (
                         <li
-                          className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
+                          className="px-3 py-2 hover:bg-gray-200 cursor-pointer text-red-600 font-medium"
                           onClick={() => {
-                            alert("Option supprimer");
+                            deleteMessage();
                             setMenuOpen(false);
                           }}
                         >
-                          Supprimer
+                          {t("tchat.deleteMessage")}
                         </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                      )}
+                    </ul>
+                  </div>
+                )}
               </div>
-            </>
-          )}
+            </div>
 
-          {/* Réactions */}
-          {Object.keys(grouped).length > 0 && (
+            {/* Réactions */}
             <div
               className={cn(
-                "flex gap-2 mt-2 absolute bottom-0 translate-y-full mb-5",
-                isOwnMessage
+                "flex gap-2 mt-2 absolute -bottom-4 translate-y-full mb-5",
+                isOwner
                   ? "justify-end right-0 flex-row-reverse"
                   : "justify-start left-0 flex-row",
               )}
@@ -206,8 +255,11 @@ export function MessageItem({
                         transition: { duration: 0.1, ease: easeIn },
                       }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition 
-                  ${reacted ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600"}`}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition ${
+                        reacted
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-700 hover:bg-gray-600"
+                      }`}
                     >
                       <span>{emoji}</span>
                       <span>{users.length}</span>
@@ -216,7 +268,7 @@ export function MessageItem({
                 })}
               </AnimatePresence>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </Suspense>

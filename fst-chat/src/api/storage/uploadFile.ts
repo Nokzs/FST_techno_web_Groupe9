@@ -1,17 +1,22 @@
 import { gzipSync } from "fflate";
-export const uploadFile = async (file: File, signedUrl: string) => {
+export const uploadFile = async (
+  file: File,
+  signedUrl: string,
+  compress: boolean,
+) => {
   const formData = new FormData();
-
-  // Lire le fichier en ArrayBuffer
-  const arrayBuffer = new Uint8Array(await file.arrayBuffer());
-  // Compresser
-  const compressed = gzipSync(arrayBuffer);
-  // Créer un nouveau File compressé
-  const compressedFiles = new File([compressed], file.name + ".gz", {
-    type: file.type,
-  });
-  console.log(compressedFiles);
-  formData.append("file", compressedFiles);
+  let fileUrl;
+  if (compress) {
+    // Lire le fichier en ArrayBuffer
+    const arrayBuffer = new Uint8Array(await file.arrayBuffer());
+    // Compresser
+    const compressed = gzipSync(arrayBuffer);
+    // Créer un nouveau File compressé
+    fileUrl = new File([compressed], file.name + ".gz", {
+      type: file.type,
+    });
+  }
+  formData.append("file", fileUrl);
 
   await fetch(signedUrl, {
     method: "PUT",

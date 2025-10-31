@@ -6,7 +6,7 @@ import EmojiPicker, {
 import { AudioRecorder } from "./AudioRecorder";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../../utils/cn";
-import type { Message } from "./messageFileType";
+import type { Message } from "../../../types/messageFileType";
 import { useTranslation } from "react-i18next";
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;

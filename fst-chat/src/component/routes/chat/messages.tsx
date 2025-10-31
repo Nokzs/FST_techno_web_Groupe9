@@ -5,7 +5,7 @@ import { getSignedUrl } from "../../../api/storage/signedUrl";
 import { v4 as uuidv4 } from "uuid";
 import { getMessageFilePublicUrl } from "../../../api/message/getMessageFilePublicUrl";
 import { uploadFile } from "../../../api/storage/uploadFile";
-import { type MessageFile, type Message } from "./messageFileType";
+import { type MessageFile, type Message } from "../../../types/messageFileType";
 import { MessageItem } from "./MessageItem";
 import { socket } from "../../../socket";
 import { NavLink, useLoaderData } from "react-router";

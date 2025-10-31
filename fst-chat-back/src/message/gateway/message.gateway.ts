@@ -116,6 +116,7 @@ export class MessageGateway
     @MessageBody() serverId: string,
     @ConnectedSocket() socket: Socket
   ) {
+    Logger.log('clientConnected');
     await socket.join(`serveur-${serverId}`);
   }
 
@@ -159,16 +160,14 @@ export class MessageGateway
         message._id.toString(),
         dto.senderId
       );
+      Logger.log(notif.serverId);
       this.server
         .to(`serveur-${notif.serverId}`)
         .emit('newNotification', notif);
       this.server.to(dto.channelId).emit('newMessage', message);
       //comme l'opération prends on le délégue comme un autre evenement de vite renvoyez le message
-      Logger.log('emitting embedding event');
       this.eventEmitter.emit('embedding', message);
     }
-    console.log('Message broadcasted to channel:', dto.channelId);
-    console.log('Message content:', message);
     return message;
   }
 
@@ -193,7 +192,6 @@ export class MessageGateway
     const dtos = messages.map((msg) => {
       return plainToInstance(MessageDto, msg);
     });
-    Logger.log(dtos);
     return {
       messages: dtos,
       hasMore,

@@ -4,8 +4,21 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { DynamicIoAdapter } from './message/adapter/DynamicIoAdapter';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('FST-Chat Api')
+    .setDescription("Api de l'application FST-Chat")
+    .setVersion('1.0')
+    .addTag('auth', "Operation de connexion et d'inscription")
+    .addTag('channels', 'routes associées aux salon')
+    .addBearerAuth()
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
+
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
 
@@ -14,7 +27,7 @@ async function bootstrap(): Promise<void> {
     'FRONTEND_URL',
     'http://localhost:5173'
   );
-  const port = configService.get('PORT');
+  const port = configService.get('PORT') || 3000;
   app.enableCors({
     origin: frontendUrl,
     credentials: true,
@@ -23,7 +36,7 @@ async function bootstrap(): Promise<void> {
   app.useWebSocketAdapter(new DynamicIoAdapter(app));
   Logger.log('Application lancee sur le port ' + String(port), 'Bootstrap');
 
-  await app.listen(port || 3000);
+  await app.listen(port);
   console.log(`application lance sur le port ${port}`);
 }
 

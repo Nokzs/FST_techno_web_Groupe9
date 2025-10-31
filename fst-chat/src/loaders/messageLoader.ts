@@ -6,7 +6,7 @@ import { fileCache, avatarCache } from "../cache/fileCache.js";
 import type {
   Message,
   MessageFile,
-} from "../component/routes/chat/messageFileType.js";
+} from "../types/messageFileType";
 import { gunzipSync } from "fflate";
 import type { UserID } from "../types/user.js";
 import { authRouterContext } from "../context/authRouterContext.js";

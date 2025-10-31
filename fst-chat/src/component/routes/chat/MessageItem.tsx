@@ -1,4 +1,4 @@
-import type { Message } from "./messageFileType";
+import type { Message } from "../../../types/messageFileType";
 import { FilePreview } from "./FilePreview";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { ReactionMenu } from "../../ui/reactionsPicker";

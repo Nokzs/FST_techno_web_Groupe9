@@ -66,10 +66,10 @@
     },
     "profil": {
         "link": {
-            "home": "Serveur",
+            "home": "Accueil",
             "profile": "Profil",
-            "account": "securité",
-            "theme": "thème"
+            "account": "Securité",
+            "theme": "Thème"
         }
     }
 }

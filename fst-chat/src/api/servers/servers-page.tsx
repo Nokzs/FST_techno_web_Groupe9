@@ -20,6 +20,7 @@ export interface Channel {
   _id: string;
   name: string;
   topic?: string;
+  serverId: string;
   createdAt?: string;
   updatedAt?: string;
   notification:notification[]

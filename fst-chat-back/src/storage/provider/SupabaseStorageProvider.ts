@@ -1,6 +1,10 @@
 import { IStorageProvider } from './IStorageProvider';
 import { ConfigService } from '@nestjs/config';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { TYPE_EVENT } from '../typeEvent';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
@@ -57,9 +61,12 @@ export class SupabaseStorageProvider implements IStorageProvider {
     salonId?: string
   ): string {
     const bucket: string = this.getBucket(eventType, salonId);
-    const { data } = this.supabaseClient.storage
+    const { data, error } = this.supabaseClient.storage
       .from(bucket)
       .getPublicUrl(fileName);
+    if (error || !data.publicUrl) {
+      throw new Error("impossible de récupérer l'url publique");
+    }
     return data.publicUrl;
   }
   async deleteFile(bucket: string, fileName: string): Promise<any> {
@@ -96,8 +103,8 @@ export class SupabaseStorageProvider implements IStorageProvider {
         throw error;
       });
   }
-  createRoomBucket(roomId: string): void {
-    this.supabaseClient.storage
+  async createRoomBucket(roomId: string): Promise<void> {
+    await this.supabaseClient.storage
       .createBucket(`fstChatMessageFileBucket${roomId}`, { public: true })
       .catch((error) => {
         throw error;

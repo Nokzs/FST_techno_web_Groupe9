@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import type { Channel, Server } from "../../../api/servers/servers-page";
+import type { Channel, Server,notification } from "../../../api/servers/servers-page";
 import { cn } from "../../../utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,25 +10,45 @@ import {
 import { socket } from "../../../socket";
 import { useTranslation } from "react-i18next";
 import type { MessageLoaderData } from "../../../loaders/messageLoader";
-import type { notification } from "../../../api/servers/servers-page";
+
 type NavigationMessageMenuProps = {
   channelId: string;
   onSelectChannel?: (channelId: string) => void;
   fetcher: FetcherWithComponents<MessageLoaderData>;
 };
+type ChannelNotifications = Record<string, notification[]>;
+type ServerNotifications = {
+  total: number;
+  channels: ChannelNotifications;
+};
+async function fetchAllNotifications(userServers: Server[],userId:string) {
+  const notifications: Record<string, ServerNotifications> = {};
+  const apiUrl = import.meta.env.VITE_API_URL
+  await Promise.all(
+    userServers.map(async server => {
+      // Récupération des channels + notifications pour ce serveur
+      const signal = new AbortController().signal
+      const userChannel = await fetch(`${apiUrl}/channels/${server._id}`, {
+        signal,
+        credentials: "include",
+      }).then((r) => r.json());
 
+      const channels: ChannelNotifications = {};
+      let total = 0;
 
+      userChannel.forEach((channel: Channel) => {
+        const filteredNotif = channel.notification.filter(notif => !notif.seenBy.includes(userId))
+        channels[channel._id] = filteredNotif;
+        total += filteredNotif.length;
+      });
 
-  const computeNotif = (channels:Channel[],userId:string,channelId:string):Record<string,notification[]> =>{
-   return channels.reduce((acc, channel) => {
-      if(channel._id !== channelId){
-        acc[channel._id] = channel.notification.filter((notif:notification) => !notif.seenBy.includes(userId));
-      }
-      return acc;
-    }, {} as Record<string, notification[]>);
-   
-  }
+      notifications[server._id] = { total, channels };
+    })
+  );
 
+  return notifications;
+}
+ 
 export function NavigationMessageMenu({
   channelId,
   fetcher,
@@ -40,7 +60,8 @@ export function NavigationMessageMenu({
   const servers: Server[] = serversData;
    
   const [channels, setChannels] = useState<Channel[]>(channelData);
-  const [notif,SetNotif] = useState<Record<string,notification[]>>(computeNotif(channelData,userId,channelId))
+  
+  const [notif, SetNotif] = useState<Record<string, ServerNotifications>> ({});
   const [activeServer, setActiveServer] = useState<Server | null>(
     activeServerData,
   );
@@ -48,14 +69,12 @@ export function NavigationMessageMenu({
   const [direction, setDirection] = useState(0); // 1 = vers channels, -1 = vers serveurs
   const activeChannel = channelId;
 
-  const refetchChannels = async (signal: AbortSignal,channelId:string) => {
+  const refetchChannels = async (signal: AbortSignal) => {
     const channel = await fetch(`${apiUrl}/channels/${activeServer?._id}`, {
       signal,
       credentials: "include",
     }).then((r) => r.json());
-    console.log(channel)
     setChannels(channel);
-    SetNotif(computeNotif(channel,userId,channelId))
 
   };
   // Framer Motion pour bascule serveurs ↔ channels
@@ -75,29 +94,56 @@ export function NavigationMessageMenu({
       transition: { duration: 0.3, ease: "easeInOut" },
     }),
   };
+  useEffect(() => {
+    async function init(){
+      const notif = await fetchAllNotifications(serversData,userId)
+      SetNotif(notif)    
+    }
+    init();
+   // rejoindre les rooms WebSocket
+    serversData.forEach((serverId:Server) => {
+      console.log(serverId._id)
+      socket.emit("joinServer", serverId._id);
+    });
+    return ()=>{
+      serversData.forEach((serverId:Server) => {  
+      socket.emit("leaveServer",serverId._id);
+      });
+    }
+  },[serversData,userId]);
 
   useEffect(() => {
     if (!activeServer?._id) {
       setChannels([]);
-      return;
+    }else{
+      const abortController = new AbortController();
+      const signal = abortController.signal;
+      refetchChannels(signal) 
+      socket.on("updateServer", (updatedServer: string) => {
+        if (updatedServer === activeServer?._id) {
+          refetchChannels(signal);
+        }
+      });
     }
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-    refetchChannels(signal,channelId) 
-    socket.emit("joinServer", activeServer._id);
-    socket.on("updateServer", (updatedServer: string) => {
-      console.log("j'ai recu une update")
-      if (updatedServer === activeServer._id) {
-        refetchChannels(signal,channelId);
-      }
-    });
     socket.on("newNotification",(newNotif:notification)=>{
-      
-      if(newNotif.channelId!== channelId){
-        SetNotif((notif) => ({
-          ...notif,
-          [newNotif.channelId]: [...(notif[newNotif.channelId] || []), newNotif],
-        }));
+     console.log("coucou") 
+      if(newNotif.channelId!== channelId && !newNotif.seenBy.includes(userId)){
+        console.log(newNotif) 
+        SetNotif(prev => {
+          const server = prev[newNotif.serverId] || { total: 0, channels: {} };
+          const channelNotifs = server.channels[newNotif.channelId] || [];
+
+          return {
+            ...prev,
+            [newNotif.serverId]: {
+              total: server.total + 1,
+              channels: {
+                ...server.channels,
+                [newNotif.channelId]: [...channelNotifs, newNotif],
+              },
+            },
+          };
+        });
       }
       else{
         console.log("j'ignore")
@@ -105,11 +151,10 @@ export function NavigationMessageMenu({
     })
     return () => {
       //abortController.abort();
-      socket.emit("leaveServer");
       socket.off("updateServer");
       socket.off("newNotification")
     };
-  }, [activeServer, apiUrl,channelId]);
+  }, [activeServer, apiUrl,channelId,userId]);
 
   const handleSelectServer = (server: Server) => {
     setDirection(1);
@@ -121,11 +166,21 @@ export function NavigationMessageMenu({
     setActiveServer(null);
   };
 
-  function readNotif(channelId:string): void {
-    SetNotif((prev) => ({
+  function readNotif(channelId:string,serverId:string): void {
+    SetNotif(prev => {
+    const server = prev[serverId];
+    if (!server) return prev;
+
+    const removedCount = server.channels[channelId]?.length || 0;
+
+    return {
       ...prev,
-      [channelId]: [],
-    }));
+      [serverId]: {
+        total: server.total - removedCount,
+        channels: { ...server.channels, [channelId]: [] },
+      },
+    };
+  });    
     socket.emit("read", {
       channelId: channelId, 
       userId,
@@ -178,6 +233,11 @@ export function NavigationMessageMenu({
                               <span className="truncate whitespace-nowrap text-black dark:text-white">
                                 {server.name}
                               </span>
+                                {notif[server._id]?.total > 0 && (
+                                    <span className="ml-2 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                                      {notif[server._id]?.total}
+                                    </span>
+                                  )}                        
                             </button>
                           </li>
                         ))}
@@ -218,13 +278,13 @@ export function NavigationMessageMenu({
                       </p>
                     ) : (
                       <ul className="space-y-1 mt-2">
-                          {channels.map((channel) => (
+                          {channels.map((channel:Channel) => (
                             <li key={channel._id}>
                               <NavLink
                                 to={`/messages/${channel._id}`}
                                 className="truncate"
                                 onMouseEnter={() => fetcher.load(`/messages/${channel._id}`)}
-                                onMouseDown={()=>readNotif(channel._id)}
+                                onMouseDown={()=>readNotif(channel._id,activeServer._id)}
                               >
                                 <button
                                   className={cn(
@@ -233,13 +293,12 @@ export function NavigationMessageMenu({
                                   )}
                                 >
                                   <span className="flex-1 truncate">{channel.name}</span>
-
-                                  {/* 🟢 Affichage du badge de notification */}
-                                  {notif?.[channel._id]?.length > 0 && (
+                                  {/* 🟢 Affichage du badge de notification pour un channel */}
+                                  {notif[activeServer._id]?.channels?.[channel._id]?.length > 0 && (
                                     <span className="ml-2 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-0.5">
-                                      {notif[channel._id].length}
+                                      {notif[activeServer._id]?.channels?.[channel._id]?.length}
                                     </span>
-                                  )}
+                                  )}                                
                                 </button>
                               </NavLink>
                             </li>

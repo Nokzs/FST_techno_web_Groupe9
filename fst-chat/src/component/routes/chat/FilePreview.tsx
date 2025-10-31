@@ -1,4 +1,4 @@
-import { type MessageFile } from "./messageFileType";
+import { type MessageFile } from "../../../types/messageFileType";
 import { useEffect, useRef, useState } from "react";
 import { gunzipSync } from "fflate";
 import { cn } from "../../../utils/cn";

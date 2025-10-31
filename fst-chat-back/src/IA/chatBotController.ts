@@ -5,27 +5,38 @@ import {
   Logger,
   UseGuards,
   Inject,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { AuthGuard } from '../guards/authGuard';
 import type { IIaProvider } from './IaProvider/IiaProvider';
-
+import { AskBodyDto } from './DTO/askDto';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 type CommandHandler = (content: string) => Promise<string>;
-
-interface AskBody {
-  command: string;
-  channelId: string;
-  userId: string;
-  language: string;
-  useUserLanguage: boolean;
-}
-
+@ApiTags('chatBot')
 @Controller('/chatBot')
 export class ChatBotController {
   constructor(@Inject('IA_PROVIDER') private readonly iaService: IIaProvider) {}
 
+  @ApiOperation({
+    description:
+      "route de récéption d'une commande  et de l'envoie de la réponse",
+  })
+  @ApiUnauthorizedResponse({
+    description: 'token manquant ou invalide',
+  })
+  @ApiOkResponse({
+    type: String,
+  })
+  @ApiBearerAuth()
   @Post('/command')
   @UseGuards(AuthGuard)
-  async chatBotCommand(@Body() body: AskBody): Promise<string> {
+  async chatBotCommand(@Body() body: AskBodyDto): Promise<string> {
     const { command, channelId, userId, language, useUserLanguage } = body;
 
     // 1️⃣ Parser la commande via le LLM
@@ -67,8 +78,7 @@ export class ChatBotController {
       const answer = await handler(jsonCommand.content);
       return answer;
     } catch (error) {
-      Logger.error('Erreur lors du traitement de la commande:', error);
-      return '';
+      throw new ServiceUnavailableException('le bot à un problème');
     }
   }
 }

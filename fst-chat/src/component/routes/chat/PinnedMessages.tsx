@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { FilePreview } from "./FilePreview";
-import type { Message, MessageFile } from "./messageFileType";
+import type { Message, MessageFile } from "../../../types/messageFileType";
 import { socket } from "../../../socket";
 import { UserAvatar } from "../../ui/userAvatar";
 type PinnedMessagesProps = {
@@ -19,7 +19,7 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = ({ messages }) => {
       </div>
     );
   }
-
+ if(!scrollRef) return <></>
   return (
     <div
       ref={scrollRef}

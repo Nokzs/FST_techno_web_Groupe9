@@ -248,8 +248,7 @@ ${text}
       })
       .join('\n');
 
-   
-const prompt = `
+    const prompt = `
 Contexte (messages pertinents) :
 ${contextText}
 

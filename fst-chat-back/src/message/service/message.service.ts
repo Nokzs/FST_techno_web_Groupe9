@@ -91,8 +91,8 @@ export class MessageService {
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
-        path: "replyMessage",
-        select: "_id content createdAt isDeleted",
+        path: 'replyMessage',
+        select: '_id content createdAt isDeleted',
       })
       .populate({
         path: 'reactions',

@@ -18,6 +18,7 @@ import { PublicUrlDTO } from '../../storage/DTO/publicUrl';
 import { plainToInstance } from 'class-transformer';
 import { AuthGuard } from '../../guards/authGuard';
 import {
+  ApiBearerAuth,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -43,6 +44,7 @@ export class MessageController {
     description: 'Erreur dans la création du message',
   })
   @Post()
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   async create(
     @Body() createMessageDto: CreateMessageDto,
@@ -72,7 +74,9 @@ export class MessageController {
   @ApiServiceUnavailableResponse({
     description: "Erreur lors de la récupération de l'url publique",
   })
+  @ApiBearerAuth()
   @Get('filePublicUrl')
+  @UseGuards(AuthGuard)
   getPublicUrl(
     @Query('fileName') fileName: string,
     @Query('channelId') channelId: string

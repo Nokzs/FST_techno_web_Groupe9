@@ -3,7 +3,6 @@ import {
   IsOptional,
   IsArray,
   ValidateNested,
-  IsBooleanString,
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';

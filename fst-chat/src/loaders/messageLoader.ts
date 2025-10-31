@@ -70,15 +70,15 @@ export type MessageLoaderData = {
   tchatBotData?: messageBotType[];
   hasMore: boolean;
   messagesArr: Message[];
-  userId:string;
+  userId: string;
+  pinnedMessages: Message[];
 };
 export const messageLoader: LoaderFunction = async (
   data,
 ): Promise<MessageLoaderData> => {
-
   const userID: UserID | null = data.context.get(authRouterContext);
-  if(!userID){
-    throw redirect("/login")
+  if (!userID) {
+    throw redirect("/login");
   }
   const { channelId } = data.params;
   if (!channelId) {
@@ -150,6 +150,16 @@ export const messageLoader: LoaderFunction = async (
     setTimeout(() => reject(new Error("Socket timeout")), 10000);
   });
 
+  // initiliasation des messages
+  const messagesPinnedArr = await new Promise<Message[]>((resolve, reject) => {
+    socket.emit("getPinnedMessages", channelId, (messages: Message[]) => {
+      resolve(messages);
+    });
+
+    // Optionnel : si le serveur ne répond pas après 5s
+    setTimeout(() => reject(new Error("Socket timeout")), 10000);
+  });
+
   return {
     channelId,
     serversData: servers,
@@ -158,6 +168,7 @@ export const messageLoader: LoaderFunction = async (
     tchatBotData: tchatBotData,
     hasMore: InitialHasMore,
     messagesArr: messagesArr,
-    userId:userID.id
+    userId: userID.id,
+    pinnedMessages: messagesPinnedArr,
   };
 };

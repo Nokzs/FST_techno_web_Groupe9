@@ -46,6 +46,9 @@ export class Message {
 
   @Prop({ type: Boolean, default: false })
   isDeleted: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  isPin: boolean;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

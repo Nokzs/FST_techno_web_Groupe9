@@ -99,11 +99,15 @@ export function NavigationMessageMenu({
           [newNotif.channelId]: [...(notif[newNotif.channelId] || []), newNotif],
         }));
       }
+      else{
+        console.log("j'ignore")
+      }
     })
     return () => {
       //abortController.abort();
       socket.emit("leaveServer");
       socket.off("updateServer");
+      socket.off("newNotification")
     };
   }, [activeServer, apiUrl,channelId]);
 

@@ -12,6 +12,7 @@
     },
     "tchat": {
         "send": "Send",
+        "pinMessage": "Pin message",
         "loadingMessages": "Loading messages...",
         "deleteMessage": "Delete message",
         "messageDeleted": "Deleted message",
@@ -23,9 +24,10 @@
         "chatBot": {
             "welcomeMessage": "Hi 👋, here the command you can use \n -/question followed by your question about the discussion of this channel",
             "input": {
-                "placeholder": "Écrire un message...",
-                "send": "Envoyer"
-            }
+                "placeholder": "Write a message...",
+                "send": "Send"
+            },
+            "typing": "Bot is typing..."
         }
     },
     "profil": {

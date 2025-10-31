@@ -12,6 +12,7 @@
     },
     "tchat": {
         "send": "Envoyer",
+        "pinMessage": "Epingler le message",
         "loadingMessages": "Chargement des messages...",
         "deleteMessage": "Supprimer le message",
         "messageDeleted": "Message supprimé",
@@ -31,7 +32,8 @@
                 "profile": "Profile",
                 "account": "security",
                 "theme": "theme"
-            }
+            },
+            "typing": "Le bot est en train d'écrire"
         }
     },
     "room": {

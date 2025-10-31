@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 @Exclude()
 export class replyMessageDto {
@@ -14,4 +14,9 @@ export class replyMessageDto {
   @Expose()
   @IsOptional()
   createdAt?: Date;
+
+  @Expose()
+  @IsOptional()
+  @IsBoolean()
+  isDeleted: boolean;
 }

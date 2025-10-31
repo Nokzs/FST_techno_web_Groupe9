@@ -4,6 +4,7 @@ import {
   IsArray,
   ValidateNested,
   IsBooleanString,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MessageFileDto } from './MessageFileDto';
@@ -73,10 +74,14 @@ export class MessageDto {
   reactions?: ReactionDto[];
 
   @Expose()
-  @IsBooleanString()
+  @IsBoolean()
   sending: boolean; // indique si le message est encore en cours de validation / upload
 
   @Expose()
-  @IsBooleanString()
+  @IsBoolean()
   isDeleted?: boolean;
+
+  @Expose()
+  @IsBoolean()
+  isPin: boolean;
 }

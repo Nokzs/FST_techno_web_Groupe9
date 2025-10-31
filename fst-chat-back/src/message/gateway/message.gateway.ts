@@ -8,7 +8,7 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../service/message.service';
@@ -190,15 +190,22 @@ export class MessageGateway
       messagesData.channelId,
       messagesData.date
     );
-
+    const dtos = messages.map((msg) => {
+      return plainToInstance(MessageDto, msg);
+    });
+    Logger.log(dtos);
     return {
-      messages: messages.map((msg) => {
-        return plainToInstance(MessageDto, msg);
-      }),
+      messages: dtos,
       hasMore,
     };
   }
-
+  @SubscribeMessage('getPinnedMessages')
+  async handleGetPinnedMessages(
+    @MessageBody() channelId: string
+  ): Promise<MessageDto[]> {
+    const pinnedMessages = await this.messageService.findPinnedMsg(channelId);
+    return pinnedMessages.map((msg) => plainToInstance(MessageDto, msg));
+  }
   @SubscribeMessage('newReactions')
   async handleNewMessageReaction(
     @MessageBody() reaction: reactionType,
@@ -225,5 +232,15 @@ export class MessageGateway
   ) {
     await this.messageService.deleteMessage(data.messageId);
     this.server.to(data.channelId).emit('deleteMessage', data.messageId);
+  }
+  @SubscribeMessage('pinMessage')
+  async handlePinMessage(@MessageBody() data: MessageDto): Promise<void> {
+    if (!data._id) {
+      throw new NotFoundException('Pin impossible');
+    }
+    const message = await this.messageService.pinMessage(data?._id);
+    this.server
+      .to(data.channelId)
+      .emit('pinMessage', plainToInstance(MessageDto, message));
   }
 }

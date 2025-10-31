@@ -23,4 +23,5 @@ export interface Message {
   reactions: reaction[];
   sending: boolean;
   isDeleted?: boolean;
+  isPin: boolean;
 }

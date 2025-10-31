@@ -15,14 +15,17 @@ import type { User } from "../../../types/user";
 import { getUserProfile } from "../../../api/user/getUserProfile";
 import { ChatBotWindow } from "../../ui/ChatBotWindows";
 import type { MessageLoaderData } from "../../../loaders/messageLoader";
+import { PinnedMessages } from "./PinnedMessages";
 type MessagesProps = {
   channelId: string | undefined;
   prefetchData: MessageLoaderData;
 };
 export function Messages({ channelId, prefetchData }: MessagesProps) {
   const { t } = useTranslation();
-  const { hasMore, messagesArr } = useLoaderData();
-
+  const { hasMore, messagesArr, pinnedMessages } =
+    useLoaderData<MessageLoaderData>();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pinnedMessage, setPinnedMessage] = useState<Message[]>(pinnedMessages);
   const [messages, setMessages] = useState<Message[]>(messagesArr);
   const [user, setUser] = useState<User | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
@@ -32,12 +35,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
 
   const hasMoreRef = useRef<boolean>(hasMore);
 
-  console.log(
-    "Messages rendus :",
-    messages.length,
-    "il y a encore des messages ",
-    hasMoreRef.current,
-  );
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   // Scroll automatique après chaque nouveau message
@@ -64,8 +61,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     );
   }, [channelId, messages]);
 
-  /*Résumé du UseEffect : installer un IntersectionObserver 
-  pour charger plus de messages lorsque l'utilisateur fait défiler vers le haut.*/
   useEffect(() => {
     let debounceTimeout: NodeJS.Timeout;
 
@@ -121,8 +116,9 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     setReplyMessage(undefined);
     hasMoreRef.current = prefetchData.hasMore;
     setMessages(prefetchData.messagesArr);
+    setPinnedMessage(prefetchData.pinnedMessages);
   }, [channelId]);
- 
+
   useEffect(() => {
     socket.emit("joinChannelRoom", channelId);
 
@@ -132,15 +128,19 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
         if (prev.find((m) => m._id === message._id)) return prev;
         return [message, ...prev];
       });
-      socket.emit("read",{userId:user,channelId});
+
+      socket.emit("read", { userId: user.id, channelId });
       scrollToBottom();
     });
     socket.on("deleteMessage", (messageId: string) => {
       // on met à true la valeur de isDeleted pour le messageId
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === messageId ? { ...msg, isDeleted: true } : msg,
-        ),
+      setMessages((messages) =>
+        messages.map((msg) => {
+          if (msg._id === messageId) return {...msg,isDeleted:true}; // message supprimé
+          if (msg.replyMessage?._id === messageId)
+            return { ...msg, replyMessage: {...msg.replyMessage,isDeleted:true} }; // mettre à jour la réponse
+          return msg;
+        })
       );
     });
     socket.on("newReactions", (updatedMessage: Message) => {
@@ -164,6 +164,18 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
       );
     });
 
+    socket.on("pinMessage", (message: Message) => {
+      setMessages((messages) =>
+        messages.map((msg) => {
+          return msg._id === message._id ? message : msg;
+        }),
+      );
+      setPinnedMessage((messages) =>
+        message.isPin
+          ? [...messages.filter((m) => m._id !== message._id), message]
+          : messages.filter((m) => m._id !== message._id),
+      );
+    });
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
@@ -171,8 +183,9 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
       socket.off("deleteMessage");
       socket.off("newReactions");
       socket.off("updateMessageFiles");
+      socket.off("pinMessage");
     };
-  }, [channelId,user]);
+  }, [channelId, user]);
 
   const addMessage = async (text: string, files: File[]) => {
     if (!user.id || !channelId) return;
@@ -250,14 +263,23 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
   return (
     <>
       <ChatBotWindow channelId={channelId} userId={user} />
-      <div className="h-screen flex flex-col p-10 w-full">
+      <div className="h-screen flex flex-col p-10 w-full relative">
         <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
+
         <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
           <NavLink to="/servers">
             {"<-"}
             {t("tchat.tchatRoom")}
           </NavLink>
         </h1>
+
+        {/* Bouton pour ouvrir le drawer des messages épinglés */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="px-4 py-2 bg-yellow-400 text-black rounded mb-2 self-start"
+        >
+          📌 Messages épinglés
+        </button>
 
         {/* Liste des messages */}
         <div
@@ -279,11 +301,30 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
           ))}
           {messages.length > 0 && <div ref={topRef}></div>}
         </div>
+
         <ChatInput
           sendMessage={addMessage}
           replyMessage={replyMessage}
           onReply={setReplyMessage}
         />
+
+        {/* Drawer des messages épinglés */}
+        {drawerOpen && (
+          <div className="fixed top-0 right-0 w-80 h-full bg-gray-900 text-white shadow-lg z-50 flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <h2 className="font-bold text-lg">📌 Messages épinglés</h2>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="text-white text-lg font-bold"
+              >
+                X
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <PinnedMessages messages={pinnedMessage} />
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

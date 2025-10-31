@@ -34,6 +34,7 @@ export function MessageItem({
     message.replyMessage && message.receiverId?._id === currentUserId;
 
   const date = new Date(message.createdAt);
+  console.log(message);
   const formattedDate = date.toLocaleTimeString([], {
     day: "2-digit",
     month: "2-digit",
@@ -86,6 +87,10 @@ export function MessageItem({
     });
   }
 
+  const pinMessage = () => {
+    socket.emit("pinMessage", message);
+  };
+
   if (!currentUserId || isOwner === undefined) {
     return null;
   }
@@ -95,9 +100,7 @@ export function MessageItem({
       <div
         className={cn(
           "flex gap-2 my-2 max-w-[75%] relative group",
-          isOwner
-            ? "self-end flex-row-reverse"
-            : "self-start flex-row pl-3",
+          isOwner ? "self-end flex-row-reverse" : "self-start flex-row pl-3",
         )}
       >
         <UserAvatar
@@ -116,16 +119,23 @@ export function MessageItem({
               )}
             >
               {message.senderId.pseudo}
+              {message.isPin && (
+                <span className="ml-1 text-yellow-400" title="Message épinglé">
+                  📌
+                </span>
+              )}
             </span>
 
             {/* Message cité */}
             {message.replyMessage && (
-              <div className="mb-2 p-2 bg-white/20 rounded border-l-4 border-white/50 text-sm">
+              <div className="mb-2 p-2 bg-white/20 max-w-32 truncate rounded border-l-4 border-white/50 text-sm">
                 <span className="font-medium">
                   {message.receiverId?.pseudo}
                 </span>
                 <span className="line-clamp-1">
-                  {message.replyMessage.content}
+                  {message.replyMessage.isDeleted
+                    ? t("tchat.messageDeleted")
+                    : message.replyMessage.content}
                 </span>
               </div>
             )}
@@ -133,7 +143,7 @@ export function MessageItem({
             {/* Texte */}
             {message.content &&
               (!message.isDeleted ? (
-              <div className="whitespace-pre-wrap break-all overflow-hidden overflow-wrap-anywhere mb-1">
+                <div className="whitespace-pre-wrap break-all overflow-hidden overflow-wrap-anywhere mb-1">
                   {message.content}
                 </div>
               ) : (
@@ -225,6 +235,16 @@ export function MessageItem({
                           {t("tchat.deleteMessage")}
                         </li>
                       )}
+
+                      <li
+                        className="px-3 py-2 hover:bg-gray-200 cursor-pointer text-black font-medium"
+                        onClick={() => {
+                          pinMessage();
+                          setMenuOpen(false);
+                        }}
+                      >
+                        {t("tchat.pinMessage")}
+                      </li>
                     </ul>
                   </div>
                 )}

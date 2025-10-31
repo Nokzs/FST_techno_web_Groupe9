@@ -248,21 +248,27 @@ ${text}
       })
       .join('\n');
 
-    const prompt = `
+   
+const prompt = `
 Contexte (messages pertinents) :
 ${contextText}
 
-Question :
+Informations sur l'utilisateur (moi) :
+- ID : ${userId}
+
+Texte utilisateur :
 ${question}
 
-Considère que l'utilisateur avec ID ${userId} est moi.
-Réponds de manière concise dans la langue : ${useUserLanguage ? lang : detectedLanguage}, en te basant uniquement sur le contexte ci-dessus.
-Si le contexte est insuffisant pour répondre, indique clairement que tu n'as pas assez d'informations, toujours dans la même langue.
-
-Réponds strictement sous la forme d'un JSON avec les clés suivantes :
+Instructions :
+1. Réponds aux questions **en rapport avec la discussion ou les utilisateurs mentionnés**, y compris l'utilisateur lui-même.
+2. Si la question est en rapport avec le contexte, répond de manière concise et utile.
+3. Si le texte n'est pas une question ou ne peut pas être répondu à partir du contexte, répond par :
+   "Je ne peux répondre qu'aux questions pertinentes pour la discussion."
+4. Ne fabrique pas d’informations qui ne sont pas dans le contexte ou les informations utilisateur.
+5. Répond strictement sous la forme d'un JSON avec les clés suivantes :
 {
-  "answer": "la réponse à la question",
-  "translateAnswer": "la réponse en anglais"
+  "answer": "la réponse basée sur le contexte et les infos utilisateur",
+  "translateAnswer": "la réponse en anglais",
   "lang": "la langue de la réponse"
 }
 `;
@@ -449,35 +455,41 @@ Format attendu :
   async parseCommand(command: string, language: string): Promise<string> {
     console.log('Parsing command:', command, 'for language:', language);
     const promptLLm = `
-        Tu es un assistant qui extrait la commande principale d'une phrase utilisateur.
-        Les patterns sont les suivants :
+Tu es un assistant qui transforme une phrase utilisateur en commande JSON.
 
-        1. Si la commande commence par /question :
-          - Renvoie un objet JSON strict sous la forme :
-            {
-              "type": "question",
-              "content": "le reste de la phrase après /question",
-              "lang": "la langue de la question (fr, en, es...)"
-            } 
-          - si le reste de la phrase est vide, mets "content" la traduction en ${language} de "Veuillez poser une question après la commande /question" et met "type" à "unknown".
-        2. Si la commande commence par /summarize :
-          - Renvoie un objet JSON strict sous la forme :
-            {
-              "type": "summarize",
-              "content": "le reste de la phrase après /summarize"
-              "lang": "la langue detecté" si tu arrives à détecter la langue remplace par null
-            }
+Patterns :
 
-        3. Si aucun pattern n'est reconnu :
-          - Renvoie un objet JSON strict sous la forme :
-            {
-              "type": "unknown",
-              "content": "La commande n'a pas été reconnue"
-            }
-          - Traduits **automatiquement** le texte de "content" dans la langue de l'utilisateur, qui est : ${language}.
+1. /question
+   - Si la phrase commence strictement par "/question", renvoie :
+     {
+       "type": "question",
+       "content": "le reste de la phrase après /question",
+       "lang": "${language}"
+     }
+   - Si le reste est vide, renvoie :
+     {
+       "type": "unknown",
+       "content": "Traduction en ${language} de 'Veuillez poser une question après la commande /question'"
+     }
 
-        Phrase utilisateur : "${command}"
-        Répond uniquement par l'objet JSON correspondant.
+2. /summarize
+   - Si la phrase commence strictement par "/summarize", renvoie :
+     {
+       "type": "summarize",
+       "content": "le reste de la phrase après /summarize",
+       "lang": "la langue détectée ou null"
+     }
+
+3. Aucun pattern reconnu
+   - Renvoie :
+     {
+       "type": "unknown",
+       "content": "La commande n'a pas été reconnue (traduite automatiquement en ${language})"
+     }
+
+Phrase utilisateur : "${command}"
+
+⚠️ Répond uniquement par **l'objet JSON**, sans texte supplémentaire.
 `;
 
     const answer = await this.prompt(promptLLm);

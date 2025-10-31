@@ -91,6 +91,10 @@ export class MessageService {
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
+        path: "replyMessage",
+        select: "_id content createdAt isDeleted",
+      })
+      .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },
       })
@@ -105,6 +109,19 @@ export class MessageService {
     };
   }
 
+  async findPinnedMsg(channelId: string): Promise<Message[]> {
+    const messages = await this.messageModel
+      .find({ channelId, isPin: true })
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+    return messages;
+  }
   async addReaction(
     messageId: string,
     userId: string,
@@ -207,7 +224,7 @@ export class MessageService {
   }
 
   public async deleteMessage(messageId: string): Promise<Message | null> {
-    Logger.log("le message est supprimé")
+    Logger.log('le message est supprimé');
     const message = await this.messageModel
       .findByIdAndUpdate(messageId, { isDeleted: true }, { new: true })
       .exec();
@@ -215,5 +232,23 @@ export class MessageService {
       throw new NotFoundException(`Message with ID ${messageId} not found`);
     }
     return message;
+  }
+
+  public async pinMessage(messageId: string): Promise<Message | null> {
+    const message = await this.messageModel
+      .findById(messageId)
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .exec();
+
+    if (!message) {
+      throw new NotFoundException(' Message non trouvé ');
+    }
+    message.isPin = !message.isPin;
+    return await message.save();
   }
 }

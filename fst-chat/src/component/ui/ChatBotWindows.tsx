@@ -76,18 +76,28 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     return messageAfterUpdate;
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    setInput("");
-    const userMessage: messageBotType = { from: "user", text: input };
-    setMessages((prev) => updateMessagesInStorage(prev, userMessage));
-    setTyping(false);
-    const answer = await parseInput(input);
-    setTyping(true);
-    setMessages((prev) =>
-      updateMessagesInStorage(prev, { from: "bot", text: answer }),
-    );
-  };
+const handleSend = async () => {
+  if (!input.trim()) return;
+
+  // Ajouter le message utilisateur
+  const userMessage: messageBotType = { from: "user", text: input };
+  setMessages((prev) => updateMessagesInStorage(prev, userMessage));
+
+  setInput("");
+
+  // Afficher le typing avant de générer la réponse
+  setTyping(true);
+
+  // Attendre la réponse
+  const answer = await parseInput(input);
+
+  // Ajouter le message du bot
+  const botMessage: messageBotType = { from: "bot", text: answer };
+  setMessages((prev) => updateMessagesInStorage(prev, botMessage));
+
+  // Arrêter le typing
+  setTyping(false);
+};
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
@@ -128,6 +138,14 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
 
             {/* Zone de messages */}
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 flex flex-col-reverse bg-gray-50">
+
+              {typing && (
+                <div className="flex justify-start">
+                  <div className="px-3 py-2 rounded-xl bg-gray-200 text-gray-800 text-sm animate-pulse rounded-bl-none">
+                    {t("tchat.chatBot.typing")}
+                  </div>
+                </div>
+              )}
               {messages.map((msg, i) => (
                 <div
                   key={i}
@@ -144,13 +162,6 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                   </div>
                 </div>
               ))}
-              {typing && (
-                <div className="flex justify-start">
-                  <div className="px-3 py-2 rounded-xl bg-gray-200 text-gray-800 text-sm animate-pulse rounded-bl-none">
-                    Le bot est en train de répondre...
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Champ de saisie */}

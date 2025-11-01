@@ -16,7 +16,7 @@ export function Profil() {
   const bioRef = useRef<HTMLTextAreaElement>(null);
   const langsRef = useRef<HTMLSelectElement>(null);
   const pictureRef = useRef<File>(null);
-  const srcRef = user.urlPicture;
+  //const srcRef = user.urlPicture;
   const cancelUpdate = () => {
     /* pseudoRef.current.value = user.pseudo;
     bioRef.current.value = user.bio;

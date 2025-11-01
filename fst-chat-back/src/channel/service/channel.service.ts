@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { Channel, ChannelDocument } from '../schema/channel.schema';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectModel } from 'src/common/mongoose/inject-model.decorator';
 import { CreateChannelDto } from '../DTO/create-channel.dto';
 import { Model } from 'mongoose';
 
@@ -17,6 +17,8 @@ export class ChannelService {
   }
 
   async getChannelsByServer(serverId: string): Promise<Channel[]> {
-    return this.channelModel.find({ serverId }).lean().exec();
+    return this.channelModel.find({ serverId }).lean().exec() as Promise<
+      Channel[]
+    >;
   }
 }

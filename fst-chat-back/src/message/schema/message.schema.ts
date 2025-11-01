@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type MessageDocument = HydratedDocument<Message>;
+export type MessageDocument = Message & Document;
 
 @Schema({ timestamps: true })
 export class Message {
@@ -17,9 +17,14 @@ export class Message {
   @Prop({ required: true })
   content: string;
 
-  // Liste des utilisateurs qui ont lu le message
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   readBy: Types.ObjectId[];
+
+  @Prop({ default: 'auto' })
+  detectedLanguage?: string;
+
+  @Prop({ type: Map, of: String, default: {} })
+  translations?: Record<string, string>;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

@@ -40,9 +40,11 @@ export class UserController {
     return userDto;
   }
 
-  @UseGuards(AuthGuard) 
+  @UseGuards(AuthGuard)
   @Get(':id/profilPictureUrl')
-  async getPublicProfilePicture(@Param('id') id: string):Promise<PublicUrlDTO> {
+  async getPublicProfilePicture(
+    @Param('id') id: string
+  ): Promise<PublicUrlDTO> {
     const user = this.userService.findById(id);
     if (!user) {
       throw new NotFoundException();
@@ -51,13 +53,13 @@ export class UserController {
       `${id}/profilePicture`,
       'profilPicture'
     );
-    return plainToInstance(PublicUrlDTO,url)
+    return plainToInstance(PublicUrlDTO, url);
   }
   @UseGuards(AuthGuard)
   @Put(':id/update')
-  async updateUser(@Body() body: UpdateUserDTO){
+  async updateUser(@Body() body: UpdateUserDTO) {
     const user = this.userService.findById(body.id);
-    if(!user){
+    if (!user) {
       throw new NotFoundException();
     }
     this.userService.updateUser(body);

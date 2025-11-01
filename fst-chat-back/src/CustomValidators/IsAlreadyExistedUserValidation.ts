@@ -1,38 +1,38 @@
-import {
+﻿import {
   registerDecorator,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
-import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from '../user/schema/user.schema';
+import { InjectModel } from 'src/common/mongoose/inject-model.decorator';
+import { User, UserDocument } from '../user/schema/user.schema';
 
-@ValidatorConstraint({ async: true }) // important pour Mongo !
+@ValidatorConstraint({ async: true })
 export class IsUserAlreadyExistConstraint
   implements ValidatorConstraintInterface
 {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async validate(value: string, args: ValidationArguments): Promise<boolean> {
     const user = await this.userModel
       .findOne({ [args.property]: value })
+      .lean<User | null>()
       .exec();
-    return !user; // valide seulement si aucun utilisateur trouvé
+    return !user;
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `User with email "${args.value}" already exists`;
+    return `User with ${args.property} "${args.value}" already exists`;
   }
 }
 
-// décorateur pour usage simple
 export function IsUserAlreadyExist(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: IsUserAlreadyExistConstraint,
     });

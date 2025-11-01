@@ -1,8 +1,8 @@
-// src/server/schema/server.schema.ts
+﻿// src/server/schema/server.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type ServerDocument = HydratedDocument<Server>;
+export type ServerDocument = Server & Document;
 
 @Schema({ timestamps: true })
 export class Server {

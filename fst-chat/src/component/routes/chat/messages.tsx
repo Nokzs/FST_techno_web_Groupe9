@@ -1,14 +1,18 @@
-// component/routes/MessagesPage.tsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { socket } from "../../../socket";
 import { useParams } from "react-router";
 
 interface Message {
+  _id?: string;
   channelId: string;
   content: string;
   createdAt: string;
   senderId: string;
   updatedAt: string;
+  originalContent?: string;
+  translatedContent?: string;
+  targetLanguage?: string;
+  detectedLanguage?: string;
 }
 
 export function Messages() {
@@ -19,66 +23,75 @@ export function Messages() {
   const { channelId } = useParams<{ channelId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll automatique après chaque nouveau message
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  // 🔹 Récupération du userId via le cookie dès le chargement
+  }, []);
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const res = await fetch("http://localhost:3000/messages/userId", {
-          credentials: "include", // le cookie est envoyé
+          credentials: "include",
         });
         const data = await res.json();
-        if (data.userId) setUserId(data.userId);
+        if (data.userId) {
+          setUserId(data.userId);
+        } else {
+          setLoading(false);
+        }
       } catch (err) {
-        console.error("Erreur récupération userId :", err);
+        console.error("Erreur recuperation userId :", err);
+        setLoading(false);
       }
     };
-    fetchUserId();
+
+    void fetchUserId();
   }, []);
-
-  // 🔹 Connexion socket + récupération des messages
   useEffect(() => {
-    if (!channelId) return;
+    if (!channelId || !userId) {
+      return;
+    }
 
-    // rejoindre la "room" du channel
-    socket.emit("joinChannelRoom", channelId);
+    setLoading(true);
 
-    socket.emit("getMessages", channelId, (messages: Message[]) => {
-      setMessages(messages);
-      setLoading(false);
-      scrollToBottom();
-    });
-
-    socket.on("newMessage", (message: Message) => {
-      if (message.channelId === channelId) {
-        console.log("Nouveau message reçu :", message);
-        setMessages((prev) => [...prev, message]);
-        scrollToBottom();
+    const handleNewMessage = (message: Message) => {
+      if (message.channelId !== channelId) {
+        return;
       }
+      setMessages((prev) => [...prev, message]);
+    };
+
+    socket.emit("joinChannelRoom", { channelId, userId });
+
+    socket.emit("getMessages", channelId, (fetchedMessages: Message[]) => {
+      const initialMessages = Array.isArray(fetchedMessages)
+        ? fetchedMessages
+        : [];
+      setMessages(initialMessages);
+      setLoading(false);
     });
+
+    socket.on("newMessage", handleNewMessage);
 
     return () => {
-      socket.emit("leaveRoom", channelId);
-      socket.off("newMessage");
+      socket.emit("leaveChannelRoom", channelId);
+      socket.off("newMessage", handleNewMessage);
     };
-  }, [channelId]);
-
-  // 🔹 Envoi d’un message
+  }, [channelId, userId]);
+  useEffect(() => {
+    if (!loading) {
+      scrollToBottom();
+    }
+  }, [messages, loading, scrollToBottom]);
   const addMessage = (text: string) => {
-    if (!userId || !channelId) return;
+    if (!userId || !channelId) {
+      return;
+    }
 
-    const newMessage = {
+    socket.emit("sendMessage", {
       senderId: userId,
       content: text,
       channelId,
-    };
-
-    socket.emit("sendMessage", newMessage);
-    console.log("Message envoyé :", newMessage);
+    });
   };
 
   if (loading) {
@@ -95,40 +108,55 @@ export function Messages() {
         Salon de discussion
       </h1>
 
-      {/* Liste des messages */}
       <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-2">
         {messages
           .slice()
           .reverse()
-          .map((msg, index) => (
-            <div
-              key={index}
-              className={`p-2 rounded-xl max-w-xs ${
-                msg.senderId === userId
-                  ? "self-end bg-green-500"
-                  : "self-start bg-blue-500"
-              } text-white`}
-            >
-              <div>{msg.content}</div>
-              <div className="text-xs flex justify-between mt-1 opacity-80">
-                <span>{msg.senderId}</span>
-                <span>
-                  {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+          .map((msg) => {
+            const key = msg._id ?? `${msg.createdAt}-${msg.senderId}`;
+            const translated = msg.translatedContent ?? msg.content;
+            const showOriginal =
+              msg.originalContent &&
+              msg.originalContent !== translated;
+
+            const containerClasses =
+              msg.senderId === userId
+                ? "p-2 rounded-xl max-w-xs self-end bg-green-500 text-white"
+                : "p-2 rounded-xl max-w-xs self-start bg-blue-500 text-white";
+
+            return (
+              <div key={key} className={containerClasses}>
+                <div>{translated}</div>
+                {showOriginal && (
+                  <div className="text-xs opacity-80 italic mt-1">
+                    {msg.originalContent}
+                  </div>
+                )}
+                <div className="text-xs flex justify-between mt-1 opacity-80">
+                  <span>{msg.senderId}</span>
+                  <span
+                    title={
+                      msg.targetLanguage
+                        ? `Langue cible : ${msg.targetLanguage}`
+                        : undefined
+                    }
+                  >
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Zone d’envoi */}
       <div className="mt-2 flex gap-2">
         <input
           type="text"
-          placeholder="Écrire un message..."
+          placeholder="Ecrire un message..."
           className="flex-1 p-2 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           id="messageInput"
         />
@@ -137,9 +165,9 @@ export function Messages() {
           onClick={() => {
             const input = document.getElementById(
               "messageInput",
-            ) as HTMLInputElement;
-            if (input.value.trim()) {
-              addMessage(input.value);
+            ) as HTMLInputElement | null;
+            if (input && input.value.trim()) {
+              addMessage(input.value.trim());
               input.value = "";
             }
           }}

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+﻿import { Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
+import { InjectModel } from 'src/common/mongoose/inject-model.decorator';
 import { Server, ServerDocument } from '../schema/server.schema';
 import { CreateServerDto } from '../DTO/create-server.dto';
-import { S } from 'node_modules/react-router/dist/development/routeModules-DnUHijGz';
+
 @Injectable()
 export class ServerService {
   constructor(
@@ -17,21 +17,20 @@ export class ServerService {
   }
 
   async findAll(): Promise<Server[]> {
-    return this.serverModel.find().lean().exec();
+    return this.serverModel.find().lean().exec() as Promise<Server[]>;
   }
 
-  async findByUserId(userId: any): Promise<Server[]> {
-    return this.serverModel
-      .find({ members: new Types.ObjectId(userId) })
-      .lean()
-      .exec();
+  async findByUserId(userId: string): Promise<Server[]> {
+    return this.serverModel.find({ members: userId }).lean().exec() as Promise<
+      Server[]
+    >;
   }
 
   async addMember(serverId: string, userId: string) {
-    //TODO
+    // TODO
   }
 
   async addChannel(serverId: string, channelId: string) {
-    //TODO
+    // TODO
   }
 }

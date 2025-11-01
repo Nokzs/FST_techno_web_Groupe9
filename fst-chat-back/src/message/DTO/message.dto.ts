@@ -1,16 +1,16 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsObject } from 'class-validator';
 
 export class MessageDto {
   @IsOptional()
   @IsString()
-  _id?: string; // généré automatiquement par MongoDB
+  _id?: string; // g�n�r� automatiquement par MongoDB
 
   @IsString()
   senderId: string;
 
   @IsOptional()
   @IsString()
-  receiverId?: string; // si réponse à quelqu’un
+  receiverId?: string; // si r�ponse � quelqu'un
 
   @IsString()
   channelId: string;
@@ -27,4 +27,12 @@ export class MessageDto {
 
   @IsOptional()
   updatedAt?: Date;
+
+  @IsOptional()
+  @IsString()
+  detectedLanguage?: string;
+
+  @IsOptional()
+  @IsObject()
+  translations?: Record<string, string>;
 }

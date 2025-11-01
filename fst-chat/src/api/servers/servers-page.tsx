@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ServersList } from "./servers-list";
 import { CreateServerForm } from "./create-server-form";
 import { JoinServerForm } from "./join-server-form";
@@ -26,34 +26,43 @@ export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+  // Typage explicite pour éviter les surprises de build
+  const API_URL: string =
+    (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchServers() {
       try {
+        setLoading(true);
         const res = await fetch(`${API_URL}/servers`, {
-          // le cookie avec le token est inclus dans la requete
-          credentials: "include",
+          credentials: "include", // inclure le cookie token
         });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
         const data = await res.json();
-        setServers(Array.isArray(data) ? data : []);
+        if (isMounted) {
+          setServers(Array.isArray(data) ? data : []);
+        }
       } catch (err) {
         console.error("Erreur récupération serveurs :", err);
+        if (isMounted) setServers([]);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
-
     fetchServers();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [API_URL]); // ✅ ajoute API_URL dans les dépendances
 
-  const handleServerAdded = (newServer: Server) => {
+  const handleServerAdded = useCallback((newServer: Server) => {
     setServers((prev) => [...prev, newServer]);
-    console.log("Nouveau serveur ajouté :", newServer);
-    console.log("Serveurs actuels :", servers);
     setActiveForm(null);
-  };
+  }, []);
 
   if (loading) return <div>Chargement des serveurs...</div>;
 

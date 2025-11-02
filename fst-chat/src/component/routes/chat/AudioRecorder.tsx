@@ -1,118 +1,137 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { cn } from "../../../utils/cn";
+
 interface AudioRecorderProps {
   onStop: (file: File) => void;
 }
 
 export function AudioRecorder({ onStop }: AudioRecorderProps) {
-  const mediaRecorderRef = useRef<MediaRecorder>(null);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [isCancel, setIsCancel] = useState<boolean>(false);
-  const [duration, setDuration] = useState<number>(0);
-  const intervalRef = useRef<number>(null);
-  const audioChunk = useRef<Blob[]>([]);
-  useEffect(() => {
-    // 1️⃣ Première initialisation — ne se fait qu’une fois
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: {
-            noiseSuppression: true,
-            echoCancellation: true,
-            autoGainControl: true,
-          },
-        })
-        .then((stream) => {
-          const recorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = recorder;
-        })
-        .catch((err) => {
-          console.error("getUserMedia error:", err);
-        });
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const durationRef = useRef<number>(0); // Ref pour la durée exacte
+  const isCancelRef = useRef<boolean>(false); // Ref pour l’annulation exacte
+  const isRecordingRef = useRef<boolean>(false); // Ref pour l’état exact
+  const intervalRef = useRef<number | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isCancel, setIsCancel] = useState(false);
+  const [duration, setDuration] = useState(0);
+
+  const cleanup = () => {
+    window.removeEventListener("mouseup", handleMouseUp);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, []); // 👈 une seule fois au montage
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    mediaRecorderRef.current = null;
+    durationRef.current = 0;
+    isCancelRef.current = false;
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    setIsCancel(false);
+    setDuration(0);
+  };
 
-  useEffect(() => {
-    // 2️⃣ Réattache les handlers quand certaines dépendances changent
-    const recorder = mediaRecorderRef.current;
-    if (!recorder) return;
+  const handleMouseDown = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (e.button !== 0) return;
 
-    recorder.ondataavailable = (ev) => {
-      audioChunk.current.push(ev.data);
-    };
+    try {
+      // 🔹 On obtient le micro uniquement au moment de l’enregistrement
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          noiseSuppression: true,
+          echoCancellation: true,
+          autoGainControl: true,
+        },
+      });
 
-    recorder.onstop = () => {
-      console.log(duration);
-      if (duration > 1) {
-        console.log(
-          isCancel ? "Enregistrement annulé" : "Enregistrement terminé",
-        );
-        const file = new File(audioChunk.current, "audio_message.webm", {
-          type: "audio/webm",
-        });
-        if (!isCancel) {
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunks.current = [];
+
+      recorder.ondataavailable = (ev) => audioChunks.current.push(ev.data);
+
+      recorder.onstop = () => {
+        const currentDuration = durationRef.current;
+        if (!isCancelRef.current && currentDuration > 1) {
+          const file = new File(audioChunks.current, "audio_message.webm", {
+            type: "audio/webm",
+          });
           onStop(file);
         }
-      }
-      setIsRecording(false);
-      setIsCancel(false);
-      audioChunk.current = [];
-    };
-  }, [onStop, isCancel, duration]); // 👈 tu peux y mettre ce dont dépendent les handlers
+        cleanup();
+      };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button === 0 && mediaRecorderRef.current) {
-      console.log("Démarrage de l’enregistrement audio");
-      setIsCancel(false); // reset erreur
-      setIsRecording(true); // commence à enregistrer
+      // 🔹 Initialisation state & refs
+      setIsRecording(true);
+      isRecordingRef.current = true;
+      setIsCancel(false);
+      isCancelRef.current = false;
       setDuration(0);
-      mediaRecorderRef.current?.start();
+      durationRef.current = 0;
+
+      recorder.start();
+
+      // 🔹 Timer pour mise à jour de la durée
       const startTime = Date.now();
       intervalRef.current = window.setInterval(() => {
-        const duration = Math.floor((Date.now() - startTime) / 1000);
-        setDuration(duration);
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        durationRef.current = seconds;
+        setDuration(seconds); // ✅ update visuel
       }, 100);
+
+      // 🔹 Capture global du mouseup
       window.addEventListener("mouseup", handleMouseUp);
+    } catch (err) {
+      console.error("Erreur d’accès au micro :", err);
     }
   };
 
   const handleMouseUp = () => {
-    console.log("Arrêt de l’enregistrement audio");
     window.removeEventListener("mouseup", handleMouseUp);
-    if (intervalRef.current) {
-      window.clearInterval(intervalRef.current);
+    if (
+      isRecordingRef.current &&
+      mediaRecorderRef.current?.state === "recording"
+    ) {
+      mediaRecorderRef.current.stop();
+    } else {
+      cleanup();
     }
-    if (!mediaRecorderRef.current) {
-      return;
-    }
-    mediaRecorderRef.current?.stop();
   };
 
   const handleMouseLeave = () => {
-    if (isRecording) {
-      setIsCancel(true);
+    if (isRecordingRef.current) {
+      setIsCancel(true); // pour l’affichage
+      isCancelRef.current = true; // pour la logique d’annulation
     }
   };
+
   const handleMouseEnter = () => {
-    if (isRecording) {
+    if (isRecordingRef.current) {
       setIsCancel(false);
+      isCancelRef.current = false;
     }
   };
-  const displayDuration = (duration: number) => {
-    const seconde = duration % 60;
-    const minute = Math.floor(duration / 60);
-    return `${minute.toString().padStart(2, "0")}:${seconde.toString().padStart(2, "0")}`;
+
+  const displayDuration = (d: number) => {
+    const s = d % 60;
+    const m = Math.floor(d / 60);
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
+
   return (
     <button
       onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
       className={cn(
-        "text-white h-full flex items-center justify-center transition-all duration-500 ease-in-out rounded-lg whitespace-nowrap",
+        "text-white h-full flex items-center justify-center transition-all duration-500 ease-in-out rounded-lg whitespace-nowrap select-none",
         isCancel
-          ? "bg-yellow-600 min-w-64" // plus large pour cancel
+          ? "bg-yellow-600 min-w-64"
           : isRecording
             ? "bg-red-600 min-w-64 animate-pulse"
             : "bg-green-700 min-w-[100px] hover:bg-green-800",
@@ -120,9 +139,7 @@ export function AudioRecorder({ onStop }: AudioRecorderProps) {
     >
       <div className="flex items-center justify-center gap-2 truncate px-2">
         {isCancel ? (
-          <>
-            <p className="text-lg truncate">Relâchez pour annuler</p>
-          </>
+          <p className="text-lg truncate">Relâchez pour annuler</p>
         ) : isRecording ? (
           <>
             <p>🎙️</p>

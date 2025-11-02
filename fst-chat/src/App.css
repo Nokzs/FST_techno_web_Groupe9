@@ -95,3 +95,32 @@ textarea .EmojiPickerReact {
 .messages-container::-webkit-scrollbar-thumb:hover {
   background-color: #555;
 }
+
+/* Assure-toi que cette classe ne soit pas écrasée par le CSS default de react-audio-play */
+.chat-audio-player.rap-container {
+  background-color: transparent;
+  /* pour voir le fond du chat */
+  color: #f0f0f0;
+}
+
+/* styliser la “slider / progress bar” */
+.chat-audio-player.rap-container .rap-slider .rap-progress {
+  background-color: #94b9ff;
+}
+
+/* le “pin” de la barre */
+.chat-audio-player.rap-container .rap-slider .rap-progress .rap-pin {
+  background-color: #ffffff;
+}
+
+/* bouton play / pause & icônes */
+.chat-audio-player.rap-container .rap-pp-icon path,
+.chat-audio-player.rap-container .rap-volume-btn path {
+  fill: #f0f0f0;
+  /* icônes claires */
+}
+
+/* survol volume ou autres interactions */
+.chat-audio-player.rap-container .rap-volume-btn:hover path {
+  filter: brightness(1.2);
+}

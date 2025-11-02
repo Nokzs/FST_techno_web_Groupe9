@@ -36,19 +36,18 @@ export function Profil() {
         "profilPicture",
       );
 
-      await uploadFile(pictureRef.current, signedUrl);
+      await uploadFile(pictureRef.current, signedUrl, false);
       const { publicUrl } = await getProfilUrl();
-      console.log(publicUrl);
-      const pseudo = pseudoRef.current?.value;
-      const bio = bioRef.current?.value;
-      const lang = langsRef.current?.value;
-      user.pseudo = pseudo || user.pseudo;
-      user.bio = bio || user.bio;
-      user.language = lang || user.language;
       user.urlPicture = publicUrl || user.urlPicture;
-      await updateUser(user);
-      setModif(false);
     }
+    const pseudo = pseudoRef.current?.value;
+    const bio = bioRef.current?.value;
+    const lang = langsRef.current?.value;
+    user.pseudo = pseudo || user.pseudo;
+    user.bio = bio || user.bio;
+    user.language = lang || user.language;
+    await updateUser(user);
+    setModif(false);
   };
 
   return (
@@ -59,7 +58,7 @@ export function Profil() {
         ref={pictureRef}
         overlayPicture={penSvg}
         handleModif={handleModif}
-        className="m-5 h-32 w-32"
+        className="h-32 flex justify-center "
         imgRef={imgRef}
       />
       <UpdateInput

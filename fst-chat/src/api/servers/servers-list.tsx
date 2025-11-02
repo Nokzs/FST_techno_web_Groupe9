@@ -1,6 +1,5 @@
 import type { Server } from "./servers-page";
 import { ServerItem } from "./server-item";
-
 interface ServersListProps {
   servers: Server[];
   roles?: Record<string, string>;
@@ -9,7 +8,9 @@ interface ServersListProps {
 
 export function ServersList({ servers, roles = {}, onRemoved }: ServersListProps) {
   if (!servers.length)
-    return <div className="text-gray-400 text-center">Aucun serveur pour le moment.</div>;
+    return (
+      <div className="text-gray-400 text-center">{t("server.noServer")}</div>
+    );
 
   return (
     <ul className="space-y-3">

@@ -6,7 +6,7 @@ import EmojiPicker, {
 import { AudioRecorder } from "./AudioRecorder";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../../utils/cn";
-import type { Message } from "./messageFileType";
+import type { Message } from "../../../types/messageFileType";
 import { useTranslation } from "react-i18next";
 import { socket } from "../../../socket";
 type ChatInputProps = {
@@ -101,15 +101,15 @@ export function ChatInput({
   };
 
   const handleSend = () => {
+    console.log("envoi du message :", message);
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
-    setMessage("");
+    setMessage(() => "");
     onReply?.(undefined);
     filesLengthRef.current = 0;
     setFiles([]);
     stopTypingNow();
   };
-
   const onStopRecording = (file: File) => {
     console.log("je recois le fichier audio");
     setFiles((prev) => [...prev, file]);
@@ -249,6 +249,7 @@ export function ChatInput({
         <input
           type="text"
           value={message}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
           onChange={handleTextChange}
           placeholder="Écris un message..."
           className="w-full border-2 dark:border-white border-black  rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800 transition-all duration-75"
@@ -270,7 +271,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "-100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "-100%" }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.05, ease: "easeInOut" }}
                 onAnimationStart={() => {
                   // background actif dès le début de l'animation
                   if (recordRef.current)
@@ -286,7 +287,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "100%" }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.05, ease: "easeInOut" }}
                 onAnimationStart={() => {
                   if (recordRef.current)
                     recordRef.current.classList.add("bg-green-700");

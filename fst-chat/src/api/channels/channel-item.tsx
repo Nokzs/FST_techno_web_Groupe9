@@ -26,7 +26,7 @@ export function ChannelItem({ _id, name, serverId, role, onRemoved }: { _id: str
   return (
     <li
       className="p-2 hover:bg-gray-200 rounded cursor-pointer flex items-center justify-between"
-      onClick={() => navigate(`/servers/${serverId}/messages/${_id}`)}
+      onClick={() => navigate(`/messages/${serverId}/${_id}`)}
     >
       <span>{name}</span>
       {can(role, 'CREATOR') && (

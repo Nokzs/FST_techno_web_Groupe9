@@ -5,9 +5,9 @@ export type UserID = {
 export type User = {
   id: string;
 
-  email?: string;
+  email: string;
 
-  pseudo?: string;
+  pseudo: string;
 
   createdAt?: Date;
 
@@ -15,11 +15,13 @@ export type User = {
 
   isAdmin?: boolean;
 
-  language?: string;
+  language: string;
 
   bio?: string;
 
   password?: string;
 
   urlPicture?: string;
+
+  avatarBlob?: Blob;
 };

@@ -7,11 +7,12 @@ import { UserModule } from './user/module/user.module';
 import { AuthModule } from './auth/module/auth.module';
 import { MessageModule } from './message/module/message.module';
 import { StorageModule } from './storage/storage.module';
-import { StorageProviderType } from './storage/storage.module';
 import { provider } from './config/constante';
 import { ServerModule } from './server/module/server.module';
 import { ChannelModule } from './channel/module/channel.module';
-import { RolesModule } from './roles/roles.module';
+import { GuardModule } from './guards/guards.module';
+import { TokenModule } from './token/token.module';
+import { AuthGuard } from './guards/authGuard';
 
 @Module({
   imports: [
@@ -27,13 +28,15 @@ import { RolesModule } from './roles/roles.module';
     }),
     UserModule,
     AuthModule,
+    GuardModule,
+    TokenModule,
     MessageModule,
     StorageModule.register(provider),
     ServerModule,
     ChannelModule,
-    RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthGuard],
+  exports: [AuthGuard],
 })
 export class AppModule {}

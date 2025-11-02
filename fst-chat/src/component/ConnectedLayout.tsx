@@ -1,21 +1,10 @@
-import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
-import { socket } from "../socket";
+import { Outlet, useLoaderData } from "react-router-dom";
 
 export function ConnectedLayout() {
-  useEffect(() => {
-    try {
-      if (!socket.connected) socket.connect();
-    } catch { /* ignore */ }
-    return () => {
-      try {
-        if (socket.connected) socket.disconnect();
-      } catch { /* ignore */ }
-    };
-  }, []);
+  const user = useLoaderData();
   return (
-    <div className="bg-main h-screen">
-      <Outlet />
+    <div className="bg-main min-h-screen">
+      <Outlet context={user} />
     </div>
   );
 }

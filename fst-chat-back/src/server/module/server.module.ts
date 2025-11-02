@@ -10,6 +10,7 @@ import { UserModule } from '../../user/module/user.module';
 import { ChannelModule } from '../../channel/module/channel.module';
 import { RolesGuard } from '../../roles/roles.guard';
 import { RolesModule } from '../../roles/roles.module';
+import { GuardModule } from '../../guards/guards.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RolesModule } from '../../roles/roles.module';
     UserModule,
     forwardRef(() => ChannelModule),
     RolesModule,
+    forwardRef(() => GuardModule),
   ],
   controllers: [ServerController],
   providers: [ServerService, AuthGuard, ServerGateway, RolesGuard],

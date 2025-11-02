@@ -1,44 +1,42 @@
 ﻿import { useState } from "react";
 import type { Server } from "./servers-page";
-
 interface JoinServerFormProps {
-    onJoined: (server: Server) => void;
+  onJoined: (server: Server) => void;
 }
 
 export function JoinServerForm({ onJoined }: JoinServerFormProps) {
-    const [code, setCode] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  async function handleJoin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    async function handleJoin(e: React.FormEvent) {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        try {
-            const res = await fetch(`${API_URL}/servers/join`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({ code }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                onJoined(data);
-                setCode("");
-            } else {
-                setError(data.message || "Erreur inconnue");
-            }
-        } catch (err) {
-            setError("Erreur r�seau");
-            console.error("Erreur rejoindre serveur :", err);
-        } finally {
-            setLoading(false);
-        }
+    try {
+      const res = await fetch(`${API_URL}/servers/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onJoined(data);
+        setCode("");
+      } else {
+        setError(data.message || "Erreur inconnue");
+      }
+    } catch (err) {
+      setError("Erreur r�seau");
+      console.error("Erreur rejoindre serveur :", err);
+    } finally {
+      setLoading(false);
     }
+  }
 
     return (
     <form onSubmit={handleJoin} className="mb-6 p-4 bg-gray-800 rounded-2xl shadow-md w-full max-w-md mx-auto">

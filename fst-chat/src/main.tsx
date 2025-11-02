@@ -67,7 +67,7 @@ const routes = [
         Component: ServersPage,
       },
       {
-        path: "/messages/:channelId",
+        path: "/servers/:serverId/messages/:channelId",
         Component: Messages,
       },
     ],

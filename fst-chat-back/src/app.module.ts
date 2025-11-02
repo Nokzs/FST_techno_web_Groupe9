@@ -11,6 +11,7 @@ import { StorageProviderType } from './storage/storage.module';
 import { provider } from './config/constante';
 import { ServerModule } from './server/module/server.module';
 import { ChannelModule } from './channel/module/channel.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ChannelModule } from './channel/module/channel.module';
     StorageModule.register(provider),
     ServerModule,
     ChannelModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

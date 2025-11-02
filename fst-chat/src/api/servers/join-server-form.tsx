@@ -1,4 +1,4 @@
-import { useState } from "react";
+ï»¿import { useState } from "react";
 import type { Server } from "./servers-page";
 
 interface JoinServerFormProps {
@@ -33,7 +33,7 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
                 setError(data.message || "Erreur inconnue");
             }
         } catch (err) {
-            setError("Erreur réseau");
+            setError("Erreur rï¿½seau");
             console.error("Erreur rejoindre serveur :", err);
         } finally {
             setLoading(false);
@@ -41,32 +41,29 @@ export function JoinServerForm({ onJoined }: JoinServerFormProps) {
     }
 
     return (
-    <form
-      onSubmit={handleJoin}
-      className="p-4 border rounded bg-gray-50 flex flex-col gap-2"
-    >
-      <h2 className="text-lg font-semibold">Rejoindre un serveur</h2>
+    <form onSubmit={handleJoin} className="mb-6 p-4 bg-gray-800 rounded-2xl shadow-md w-full max-w-md mx-auto">
+      <h2 className="text-xl font-semibold text-white mb-3 text-center">Rejoindre un serveur</h2>
 
-      <input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        placeholder="Code d'invitation du serveur"
-        value={code}
-        onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-        className="border p-2 rounded"
-        required
-      />
+      <div className="flex flex-col space-y-3">
+        <input
+          type="text"
+          placeholder="Code d'invitation du serveur"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          className="border border-gray-300 p-2 rounded bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
 
-      {error && <div className="text-red-500 text-sm">{error}</div>}
+        {error && <div className="text-red-400 text-sm">{error}</div>}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        {loading ? "Connexion..." : "Rejoindre"}
-      </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition disabled:opacity-60"
+        >
+          {loading ? "Connexion..." : "Rejoindre"}
+        </button>
+      </div>
     </form>
   );
 }

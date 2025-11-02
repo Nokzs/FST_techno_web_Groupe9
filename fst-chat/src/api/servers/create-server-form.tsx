@@ -8,7 +8,10 @@ interface CreateServerFormProps {
 export function CreateServerForm({ onCreated }: CreateServerFormProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const [defaultRole, setDefaultRole] = useState<'MEMBER' | 'READER'>(
+    'MEMBER'
+  );
+  
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   async function handleSubmit(e: React.FormEvent) {
@@ -18,15 +21,15 @@ export function CreateServerForm({ onCreated }: CreateServerFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name, description, inviteCode }),
+        body: JSON.stringify({ name, description, defaultRole }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        onCreated(data);
-        setName("");
+        onCreated(data);setName("");
         setDescription("");
-        setInviteCode("");
+        setDefaultRole('MEMBER');
+        
       } else {
         console.error("Erreur création serveur :", data);
       }
@@ -56,16 +59,17 @@ export function CreateServerForm({ onCreated }: CreateServerFormProps) {
           className="border border-gray-300 p-2 rounded bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
         />
 
-        <input
-          type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          placeholder="Code d'invitation (numérique)"
-          value={inviteCode}
-          onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, ""))}
-          className="border border-gray-300 p-2 rounded bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+        <div className="flex items-center gap-3 text-white">
+          <label className="text-sm">Rôle par défaut des nouveaux membres</label>
+          <select
+            value={defaultRole}
+            onChange={(e) => setDefaultRole(e.target.value as 'MEMBER' | 'READER')}
+            className="border border-gray-300 p-2 rounded bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="MEMBER">Membres (peuvent publier)</option>
+            <option value="READER">Lecteurs (lecture seule)</option>
+          </select>
+        </div>
 
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition">
           Créer le serveur
@@ -74,3 +78,7 @@ export function CreateServerForm({ onCreated }: CreateServerFormProps) {
     </form>
   );
 }
+
+
+
+

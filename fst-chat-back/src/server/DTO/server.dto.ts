@@ -1,5 +1,6 @@
 // src/server/dto/server.dto.ts
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { Role } from '../../roles/role.enum';
 
 export class ServerDto {
   @IsString()
@@ -21,6 +22,14 @@ export class ServerDto {
   @IsOptional()
   @IsArray()
   channels?: string[];
+
+  @IsOptional()
+  @IsString()
+  inviteCode?: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  defaultRole?: Role;
 
   @IsOptional()
   createdAt?: Date;

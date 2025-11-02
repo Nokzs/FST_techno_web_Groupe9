@@ -21,6 +21,7 @@ import {
   clearTimeout as clearNodeTimeout,
 } from 'timers';
 import { UserService } from '../../user/service/user.service';
+// simplified: no cross-gateway presence updates
 
 type reactionType = {
   emoji: string;

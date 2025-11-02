@@ -19,4 +19,13 @@ export class ChannelService {
   async getChannelsByServer(serverId: string): Promise<Channel[]> {
     return this.channelModel.find({ serverId }).exec();
   }
+
+  async getById(channelId: string): Promise<Channel | null> {
+    return this.channelModel.findById(channelId).lean().exec();
+  }
+
+  async deleteById(channelId: string): Promise<Channel | null> {
+    const deleted = await this.channelModel.findByIdAndDelete(channelId).lean().exec();
+    return deleted as unknown as Channel | null;
+  }
 }

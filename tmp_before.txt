@@ -1,16 +1,15 @@
 import { useState } from "react";
 import type { Channel, Server } from "./servers-page";
 import { ChannelList } from "../channels/channels-list";
-import { can, type AppRole } from "../../utils/roles";
 
 // ðŸ”¹ Composant interne pour un seul serveur
-export function ServerItem({ server, role, onRemoved }: { server: Server; role?: AppRole; onRemoved?: (serverId: string) => void }) {
+export function ServerItem({ server, onRemoved }: { server: Server; onRemoved?: (serverId: string) => void }) {
   const [showChannels, setShowChannels] = useState(false);
   const [channels, setChannels] = useState(server.channels || []);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-  const inviteCode = server.inviteCode as string | undefined;
+  const inviteCode = (server as any).inviteCode as string | undefined;
 
   const copyInvite = async () => {
     if (!inviteCode) return;
@@ -24,8 +23,7 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
     if (!showChannels && channels.length === 0) {
       setLoadingChannels(true);
       try {
-        const sid = server._id ?? server.id;
-        const res = await fetch(`${API_URL}/channels/${sid}`, {
+        const res = await fetch(`${API_URL}/channels/${server._id}`, {
           credentials: "include",
         });
         const data = await res.json();
@@ -43,9 +41,6 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
   const handleChannelAdded = (newChannel: Channel) => {
     console.log(newChannel);
     setChannels((prev) => [...prev, newChannel]);
-  };
-  const handleChannelRemoved = (channelId: string) => {
-    setChannels((prev) => prev.filter((c) => c._id !== channelId));
   };
 
   async function leaveServer(serverId: string) {
@@ -66,33 +61,11 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
     }
   }
 
-  async function deleteServer(serverId: string) {
-    try {
-      const res = await fetch(`${API_URL}/servers/${serverId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        onRemoved?.(serverId);
-      } else {
-        console.error('Erreur suppression serveur:', await res.text());
-      }
-    } catch (err) {
-      console.error('Erreur suppression serveur:', err);
-    }
-  }
-
 
   return (
-    <li
-      className="p-4 rounded-2xl shadow-md bg-gray-100 text-gray-900 border border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform duration-200"
-    >
+    <li className="p-4 rounded-2xl shadow-md bg-gray-100 text-gray-900 border border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform duration-200">
       <div
-        className="flex justify-between items-center cursor-pointer"
-        onClick={() => toggleChannels()}
-        role="button"
-        aria-expanded={showChannels}
-      >
+        className="flex justify-between items-center">
         <div>
           <div className="font-semibold text-lg">{server.name}</div>
           <div className="text-sm text-gray-600 mt-1">
@@ -124,19 +97,10 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
         <div className="flex items-center gap-3">
           <button
             className="text-red-600 text-sm hover:underline"
-            onClick={(e) => { e.stopPropagation(); leaveServer((server._id ?? server.id)!); }}
+            onClick={(e) => { e.stopPropagation(); leaveServer(server._id); }}
           >
             Quitter
           </button>
-          {can(role, 'CREATOR') && (
-          <button
-            className="text-red-700 text-sm hover:underline"
-            onClick={(e) => { e.stopPropagation(); deleteServer((server._id ?? server.id)!); }}
-            title="Supprimer le serveur"
-          >
-            Supprimer
-          </button>
-          )}
           <button className="text-gray-500" onClick={(e) => { e.stopPropagation(); toggleChannels(); }} title={showChannels ? "Réduire" : "Dérouler"}>
             {showChannels ? "▼" : "►"}
           </button>
@@ -151,11 +115,9 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
             </div>
           ) : (
             <ChannelList
-              serverId={(server._id ?? server.id)!}
+              serverId={server._id}
               channels={channels}
               onChannelAdded={handleChannelAdded}
-              onChannelRemoved={handleChannelRemoved}
-              role={role}
             />
           )}
         </div>

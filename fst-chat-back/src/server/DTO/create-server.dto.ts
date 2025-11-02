@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsArray, IsNumberString } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { Role } from '../../roles/role.enum';
 
 export class CreateServerDto {
   @IsString()
@@ -14,6 +15,11 @@ export class CreateServerDto {
   @IsArray()
   members?: string[];
 
-  @IsNumberString()
-  inviteCode: string;
+  @IsOptional()
+  @IsString()
+  inviteCode?: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  defaultRole?: Role; // MEMBER ou READER (par défaut MEMBER)
 }

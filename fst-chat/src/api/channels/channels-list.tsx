@@ -3,17 +3,22 @@ import { ChannelItem } from "./channel-item";
 import type { Channel } from "../servers/servers-page";
 import { CreateChannelForm } from "./create-channel-form";
 import { useState } from "react";
+import { can, type AppRole } from "../../utils/roles";
 
 interface ChannelListProps {
   serverId: string;
   channels: Channel[];
   onChannelAdded: (newChannel: Channel) => void;
+  onChannelRemoved?: (channelId: string) => void;
+  role?: AppRole;
 }
 
 export function ChannelList({
   serverId,
   channels,
   onChannelAdded,
+  onChannelRemoved,
+  role,
 }: ChannelListProps) {
   const [showForm, setShowForm] = useState(false);
 
@@ -24,15 +29,17 @@ export function ChannelList({
         <h3 className="font-semibold text-gray-800">
           Salons ({channels.length})
         </h3>
-        <button
-          onClick={() => setShowForm((prev) => !prev)}
-          className="text-sm text-blue-500 hover:underline"
-        >
-          {showForm ? "Annuler" : "Ajouter un salon"}
-        </button>
+        {can(role, 'CREATOR') && (
+          <button
+            onClick={() => setShowForm((prev) => !prev)}
+            className="text-sm text-blue-500 hover:underline"
+          >
+            {showForm ? "Annuler" : "Ajouter un salon"}
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {can(role, 'CREATOR') && showForm && (
         <CreateChannelForm serverId={serverId} onCreated={onChannelAdded} />
       )}
 
@@ -42,6 +49,9 @@ export function ChannelList({
             key={channel._id}
             _id={channel._id}
             name={channel.name}
+            serverId={serverId}
+            role={role}
+            onRemoved={onChannelRemoved}
           />
         ))}
       </ul>

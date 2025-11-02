@@ -22,8 +22,12 @@ export class Server {
   channels: Types.ObjectId[]; // les salons
 
   // Code d'invitation numérique pour rejoindre le serveur
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, index: true })
   inviteCode: string;
+
+  // Rôle par défaut attribué aux nouveaux membres (MEMBER ou READER)
+  @Prop({ required: false, enum: ['MEMBER', 'READER'], default: 'MEMBER' })
+  defaultRole?: string;
 }
 
 export const ServerSchema = SchemaFactory.createForClass(Server);

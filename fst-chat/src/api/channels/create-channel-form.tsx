@@ -1,6 +1,7 @@
 // src/channels/create-channel-form.tsx
 import { useState } from "react";
 import type { Channel } from "../servers/servers-page";
+import { socket } from "../../socket";
 
 interface CreateChannelFormProps {
   serverId: string;
@@ -29,6 +30,7 @@ export function CreateChannelForm({
         console.log(data);
         onCreated(data);
         setName("");
+        socket.emit("updateServer",serverId)
       } else {
         console.error("Erreur création salon :", data);
       }

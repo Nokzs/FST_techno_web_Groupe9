@@ -17,7 +17,7 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
       overlayPicture,
       className,
       handleModif,
-      imgRef
+      imgRef,
     }: ProfilePictureProps,
     ref,
   ) => {
@@ -25,13 +25,12 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
-      if(file?.size > 3000000){
+      if (file?.size > 3000000) {
         //changer pour une modale
-        window.alert("fichier trop volumineux")
-        return
+        window.alert("fichier trop volumineux");
+        return;
       }
-      
-      console.log(file)
+
       if (!file) return;
 
       if (ref) {
@@ -40,11 +39,11 @@ export const ProfilePicture = forwardRef<File | null, ProfilePictureProps>(
         } else {
           (ref as React.MutableRefObject<File | null>).current = file;
         }
-      } 
+      }
       const reader = new FileReader();
       reader.onload = () => {
         setSrcPicture(reader.result as string);
-        if(handleModif) handleModif();
+        if (handleModif) handleModif();
       };
       reader.readAsDataURL(file);
     };

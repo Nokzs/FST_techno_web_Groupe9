@@ -29,7 +29,6 @@ export function SvgTextFit({
 
     const bbox = textRef.current.getBBox();
     const ratio = svgRef.current.width.animVal.value / bbox.width;
-    console.log("width:", svgRef.current.width.animVal.value);
     let newFontSize = fontSizeRef * ratio;
 
     // Limiter la taille pour rester lisible

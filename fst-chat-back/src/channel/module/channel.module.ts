@@ -5,9 +5,9 @@ import { ChannelService } from '../service/channel.service';
 import { ChannelController } from '../controller/channel.controller';
 import { Channel, ChannelSchema } from '../schema/channel.schema';
 import { AuthGuard } from '../../guards/authGuard';
-import { TokenModule } from 'src/token/token.module';
-import { StorageModule } from 'src/storage/storage.module';
-import { provider } from 'src/config/constante';
+import { TokenModule } from '../../token/token.module';
+import { StorageModule } from '../../storage/storage.module';
+import { provider } from '../../config/constante';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Channel.name, schema: ChannelSchema }]),

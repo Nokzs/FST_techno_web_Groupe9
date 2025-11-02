@@ -1,8 +1,10 @@
 import type { User } from "../../../types/user";
 export interface MessageFile {
+  _id?: string;
   originalName: string;
-  url?: string;
+  url: string;
   mimetype: string;
+  originalMymeType: string;
 }
 export type reaction = {
   userId: User;
@@ -14,9 +16,12 @@ export interface Message {
   receiverId?: User;
   content: string;
   createdAt: string;
-  senderId: User;
   updatedAt: string;
+  senderId: User;
   files: MessageFile[];
   replyMessage: Message | null;
   reactions: reaction[];
+  sending: boolean;
+  isDeleted?: boolean;
+  isPin: boolean;
 }

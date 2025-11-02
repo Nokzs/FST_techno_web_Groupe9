@@ -2,16 +2,19 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  Inject,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateMessageDto } from '../DTO/create-message.dto';
 import { MessageFile } from '../schema/messageFile.schema';
 import { MessageFileDto } from '../DTO/MessageFileDto';
+import { MessageDto } from '../DTO/message.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message, MessageDocument } from '../schema/message.schema';
 import { Reaction } from '../schema/reaction.schema';
-import { plainToInstance } from 'class-transformer';
-
+import type { IIaProvider } from '../../IA/IaProvider/IiaProvider';
 @Injectable()
 export class MessageService {
   constructor(
@@ -20,11 +23,11 @@ export class MessageService {
     @InjectModel(MessageFile.name)
     private readonly messageFileModel: Model<MessageFile>,
     @InjectModel(Reaction.name)
-    private readonly reactionModel: Model<Reaction>
+    private readonly reactionModel: Model<Reaction>,
+    @Inject('IA_PROVIDER') private readonly iaProvider: IIaProvider
   ) {}
 
   async create(createMessageDto: CreateMessageDto): Promise<Message | null> {
-    Logger.log('le dto', createMessageDto);
     const files: MessageFile[] = await Promise.all(
       (createMessageDto.files || []).map(async (f: MessageFileDto) => {
         return this.createMessageFile(f); // async handler
@@ -35,6 +38,7 @@ export class MessageService {
       ...createMessageDto,
       files: files,
     });
+
     await newMessage.save();
     const result = await this.messageModel
       .findById(newMessage._id)
@@ -50,7 +54,7 @@ export class MessageService {
     if (!result) {
       throw new InternalServerErrorException('Impossible de créer le message');
     }
-    Logger.log('je vais partir de la fonction en renvoyant', result);
+
     return result;
   }
 
@@ -71,12 +75,25 @@ export class MessageService {
       .exec();
   }
 
-  findByChannel(channelId: string): Promise<Message[]> {
-    Logger.log(channelId);
-    return this.messageModel
-      .find({ channelId })
+  async findByChannel(
+    channelId: string,
+    date: string
+  ): Promise<{ messages: Message[]; hasMore: boolean }> {
+    Logger.log('date', date);
+    const limit = 10;
+    const findObj = date
+      ? { channelId, createdAt: { $lt: date } }
+      : { channelId };
+    Logger.log('findObj', findObj);
+    const messages = await this.messageModel
+      .find(findObj)
+      .limit(limit + 1)
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'replyMessage',
+        select: '_id content createdAt isDeleted',
+      })
       .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },
@@ -84,14 +101,32 @@ export class MessageService {
       .lean()
       .sort({ createdAt: -1 })
       .exec();
+    const hasMore = messages.length > limit;
+    const slicedMessages = hasMore ? messages.slice(0, limit) : messages;
+    return {
+      messages: slicedMessages,
+      hasMore: hasMore,
+    };
   }
 
+  async findPinnedMsg(channelId: string): Promise<Message[]> {
+    const messages = await this.messageModel
+      .find({ channelId, isPin: true })
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+    return messages;
+  }
   async addReaction(
     messageId: string,
     userId: string,
     emoji: string
   ): Promise<Message | null> {
-    Logger.log(messageId);
     const message = await this.messageModel.findById(messageId);
     if (!message) throw new Error('Message not found');
     // Cherche ou crée la réaction globale
@@ -129,4 +164,119 @@ export class MessageService {
       .exec();
     return result;
   }
+  public async embedMessage(messageId: string): Promise<Message | null> {
+    const message = await this.messageModel.findById(messageId).exec();
+    if (!message) {
+      throw new Error('Message not found');
+    }
+    const embedding = await this.iaProvider.embed(message.content);
+    if (!embedding) {
+      throw new Error('Failed to generate embedding');
+    }
+    const embeddingNorm = Math.sqrt(
+      embedding.reduce((sum, val) => sum + val * val, 0)
+    );
+    return await this.messageModel
+      .findByIdAndUpdate(
+        messageId,
+        { embedding, embeddingNorm },
+        { new: true } // retourne le document mis à jour
+      )
+      .exec();
+  }
+  public async updateMessageFiles(messageDto: MessageDto) {
+    if (!messageDto._id) {
+      throw new BadRequestException(
+        'Message ID is required to update the message'
+      );
+    }
+
+    // Création des fichiers si présents
+    const files: MessageFile[] = await Promise.all(
+      (messageDto.files || []).map(async (f: MessageFileDto) =>
+        this.createMessageFile(f)
+      )
+    );
+
+    // Mise à jour du message via _id et passage de sending à false
+    const updatedMessage = await this.messageModel
+      .findByIdAndUpdate(
+        messageDto._id,
+        { $set: { ...messageDto, files, sending: false } },
+        { new: true }
+      )
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .lean()
+      .exec();
+
+    if (!updatedMessage) {
+      throw new NotFoundException(
+        `Message with ID ${messageDto._id} not found`
+      );
+    }
+
+    return updatedMessage;
+  }
+
+  public async deleteMessage(messageId: string): Promise<Message | null> {
+    Logger.log('le message est supprimé');
+    const message = await this.messageModel
+      .findByIdAndUpdate(messageId, { isDeleted: true }, { new: true })
+      .exec();
+    if (!message) {
+      throw new NotFoundException(`Message with ID ${messageId} not found`);
+    }
+    return message;
+  }
+
+  public async pinMessage(messageId: string): Promise<Message | null> {
+    const message = await this.messageModel
+      .findById(messageId)
+      .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .exec();
+
+    if (!message) {
+      throw new NotFoundException(' Message non trouvé ');
+    }
+    message.isPin = !message.isPin;
+    return await message.save();
+  }
+/**
+ * syncMessage
+ */
+public async syncMessage(channelId:string,lastSync:string,lastMessage:string) { 
+ const query = {
+    channelId,
+    updatedAt: { $gt: new Date(lastSync) },
+    createdAt: { $gt: new Date(lastMessage) },
+  };
+    if(!channelId || !lastSync || !lastMessage || isNaN(new Date(lastMessage).getTime()) || isNaN(new Date(lastSync).getTime())){
+      throw new BadRequestException('Missing required query parameters');
+          }
+  return this.messageModel
+    .find(query)
+    .populate('senderId', 'pseudo _id urlPicture')
+      .populate('receiverId', '_id pseudo urlPicture')
+      .populate({
+        path: 'replyMessage',
+        select: '_id content createdAt isDeleted',
+      })
+      .populate({
+        path: 'reactions',
+        populate: { path: 'userId', select: 'pseudo urlPicture' },
+      })
+      .lean()
+      .sort({ createdAt: -1 })
+      .exec();
+}
 }

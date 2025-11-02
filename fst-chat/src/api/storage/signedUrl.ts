@@ -13,7 +13,7 @@ export const getSignedUrl = async (
     body: JSON.stringify({
       fileName: fileName,
       eventType: eventType,
-      salonId,
+      salonId: salonId,
     }),
   }).then((res) => res.json());
 };

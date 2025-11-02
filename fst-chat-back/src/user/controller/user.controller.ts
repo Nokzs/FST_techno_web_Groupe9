@@ -18,7 +18,7 @@ import { UserService } from '../service/user.service';
 import { CompleteUserResponseDto } from '../DTO/UserResponseDto';
 import { User } from '../schema/user.schema';
 import { plainToInstance } from 'class-transformer';
-import type { IStorageProvider } from 'src/storage/provider/IStorageProvider';
+import type { IStorageProvider } from '../../storage/provider/IStorageProvider';
 import type { Request } from 'express';
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
 @Controller('user')

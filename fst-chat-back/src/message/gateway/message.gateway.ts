@@ -6,8 +6,10 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
+
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../service/message.service';
 import { plainToInstance } from 'class-transformer';
@@ -16,7 +18,9 @@ import { CreateMessageDto } from '../DTO/create-message.dto';
 import { TokenService } from '../../token/token.service';
 import * as cookie from 'cookie';
 import { MessageDto } from '../DTO/message.dto';
-
+import { Message } from '../schema/message.schema';
+import { EventEmitter } from 'stream';
+import { ChannelService } from 'src/channel/service/channel.service';
 type reactionType = {
   emoji: string;
   messageId: string;
@@ -25,16 +29,42 @@ type reactionType = {
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
   server: Server;
-
+  eventEmitter: EventEmitter;
   constructor(
     private readonly messageService: MessageService,
+    private readonly channelService: ChannelService,
     private readonly tokenService: TokenService
-  ) {}
-
+  ) {
+    this.eventEmitter = new EventEmitter();
+  }
+  /**
+   * Méthode appelée après l'initialisation du gateway
+   * @description Ecoute l'evenement d'embedding de message afin de soulager le processus d'envoi de message
+   *
+   */
+  afterInit() {
+    this.eventEmitter.on('embedding', (message: Message) => {
+      try{
+        this.messageService.embedMessage(message._id.toString()).then((msg) => {
+          Logger.log(msg);
+        });
+      }
+      catch(E){
+        Logger.log('Erreur lors de l\'embedding du message : ' + E);
+      }
+      
+    });
+  }
+  /**
+   *
+   * Méthode appelée lorsqu'un client se connecte au gateway
+   * @param client Le socket du client connecté
+   * Enregistre l'ID utilisateur dans le socket après vérification du token d'authentification
+   */
   async handleConnection(client: Socket) {
     Logger.log(`New client connected: ${client.id}`);
     const rawCookie = client.handshake?.headers?.cookie;
@@ -76,7 +106,11 @@ export class MessageGateway
       }
     });
   }
-
+  /**
+   * Méthode appelée lorsqu'un client s'initialise
+   * @param server Le serveur WebSocket
+   * @description intègre le client dans la room du channel spécifié
+   */
   @SubscribeMessage('joinChannelRoom')
   handleJoinRoom(
     @MessageBody() channelId: string,
@@ -87,6 +121,11 @@ export class MessageGateway
   }
 
   // Quitter une room
+  /**
+   *
+   * Méthode appelée lorsqu'un client quitte une room
+   * @param channelId L'ID du channel à quitter
+   */
   @SubscribeMessage('leaveChannelRoom')
   handleLeaveRoom(
     @MessageBody() channelId: string,
@@ -96,60 +135,189 @@ export class MessageGateway
     console.log(`Client ${client.id} left channel room ${channelId}`);
   }
 
+  /**
+   *
+   * Méthode appelée lorsqu'un client rejoint la room d'un serveur
+   *
+   */
+  @SubscribeMessage('joinServer')
+  async handleJoinServerRoom(
+    @MessageBody() serverId: string,
+    @ConnectedSocket() socket: Socket
+  ) {
+    Logger.log('clientConnected');
+    await socket.join(`serveur-${serverId}`);
+  }
+  /**
+   *
+   * Méthode appelée lorsqu'un client quitte la room d'un serveur
+   */
+  @SubscribeMessage('leaveServer')
+  async handleLeaveServerRoom(
+    @MessageBody() serverId: string,
+    @ConnectedSocket() socket: Socket
+  ) {
+    await socket.leave(`serveur-${serverId}`);
+  }
+
+  /**
+   * Méthode appelée pour notifier les clients d'une mise à jour du serveur
+   * @param serverId L'ID du serveur mis à jour
+   * @description Émet un événement 'updateServer' à tous les clients dans la room du serveur spécifié
+   */
+  @SubscribeMessage('updateServer')
+  handleUpdateServer(@MessageBody() serverId: string) {
+    this.server.to(`serveur-${serverId}`).emit('updateServer', serverId);
+  }
+
+  /**
+   * Méthode appelée lorsqu'un client envoie un message
+   * @param data Les données du message envoyées par le client
+   * @param socket Le socket du client envoyant le message
+   */
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() data: any,
     @ConnectedSocket() socket: Socket
   ) {
-    Logger.log(`Client ${socket.id} is sending a message`);
     // Transforme et valide le DTO (pas automatique comme le controlleur)
+    Logger.log(`Client ${socket.id} is sending a message`);
     const dto: CreateMessageDto = plainToInstance(CreateMessageDto, data);
     dto.senderId = socket.data.id;
-    Logger.log(dto);
     const errors = await validate(dto);
     if (errors.length > 0) {
       Logger.log(errors);
       return { error: 'Validation failed', details: errors };
     }
-    Logger.log('je vais créer le message');
     const message = await this.messageService.create(dto);
-    Logger.log('new message', message);
+
     // Broadcast
     if (!dto.channelId) {
       Logger.log('No channelId provided in message DTO');
       return;
     }
-
-    this.server.to(dto.channelId).emit('newMessage', message);
-    console.log('Message broadcasted to channel:', dto.channelId);
-    console.log('Message content:', message);
+    if (message) {
+      const notif = await this.channelService.addNotification(
+        message.channelId.toString(),
+        message._id.toString(),
+        dto.senderId
+      );
+      Logger.log(notif.serverId);
+      this.server
+        .to(`serveur-${notif.serverId}`)
+        .emit('newNotification', notif);
+      this.server.to(dto.channelId).emit('newMessage', message);
+      //comme l'opération prends on le délégue comme un autre evenement de vite renvoyez le message
+      this.eventEmitter.emit('embedding', message);
+    }
     return message;
   }
-
-  @SubscribeMessage('getMessages')
-  async handleGetMessages(@MessageBody() channelId: string) {
-    const messages = await this.messageService.findByChannel(channelId);
-    Logger.log('message', messages);
-
-    return messages.map((msg) => {
-      return plainToInstance(MessageDto, msg);
-    });
+  /**
+   * Méthode appelée lorsqu'un client marque les notifications comme lues
+   * @param messagesData Les données contenant l'ID du channel et l'ID de l'utilisateur
+   * @description Met à jour les notifications pour l'utilisateur spécifié dans le channel donné
+   */
+  @SubscribeMessage('read')
+  async readNotif(
+    @MessageBody() messagesData: { channelId: string; userId: string }
+  ) {
+    Logger.log(
+      `le user ${messagesData.userId} veut valider les notif pour ${messagesData.channelId}`
+    );
+    await this.channelService.read(messagesData.userId, messagesData.channelId);
   }
 
+  /**
+   *
+   * Méthode appelée lorsqu'un client demande les messages d'un channel
+   * @param messagesData Les données contenant l'ID du channel et la date de référence
+   * @description Récupère les messages du channel spécifié avant la date donnée
+   */
+  @SubscribeMessage('getMessages')
+  async handleGetMessages(
+    @MessageBody() messagesData: { channelId: string; date: string }
+  ) {
+    const { messages, hasMore } = await this.messageService.findByChannel(
+      messagesData.channelId,
+      messagesData.date
+    );
+    const dtos = messages.map((msg) => {
+      return plainToInstance(MessageDto, msg);
+    });
+    return {
+      messages: dtos,
+      hasMore,
+    };
+  }
+  /**
+   * Méthode appelée lorsqu'un client demande les messages épinglés d'un channel
+   * @param channelId L'ID du channel dont les messages épinglés sont demandés
+   * @description Récupère les messages épinglés du channel spécifié
+   */
+  @SubscribeMessage('getPinnedMessages')
+  async handleGetPinnedMessages(
+    @MessageBody() channelId: string
+  ): Promise<MessageDto[]> {
+    const pinnedMessages = await this.messageService.findPinnedMsg(channelId);
+    return pinnedMessages.map((msg) => plainToInstance(MessageDto, msg));
+  }
+  /**
+   *
+   * Méthode appelée lorsqu'un client ajoute une réaction à un message
+   * @param reaction Les données de la réaction envoyée par le client
+   * @param socket Le socket du client ajoutant la réaction
+   * @description Ajoute la réaction au message spécifié et émet un événement 'newReactions' à tous les clients dans la room du channel
+   *
+   */
   @SubscribeMessage('newReactions')
   async handleNewMessageReaction(
     @MessageBody() reaction: reactionType,
     @ConnectedSocket() socket: Socket
   ): Promise<void> {
     const user: string = socket.data.id;
-
-    Logger.log(user);
     const message = await this.messageService.addReaction(
       reaction.messageId,
       user,
       reaction.emoji
     );
-    Logger.log('newMessage', message);
     this.server.to(reaction.channelId).emit('newReactions', message);
+  }
+  /**
+   *
+   * Méthode appelée lorsqu'un client met à jour les fichiers d'un message
+   * @param data Les données du message mises à jour envoyées par le client
+   */
+  @SubscribeMessage('updateMessageFiles')
+  async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
+    const updatedMessage = await this.messageService.updateMessageFiles(data);
+    this.server
+      .to(updatedMessage.channelId.toString())
+      .emit('updateMessageFiles', updatedMessage);
+  }
+
+  /**
+   * Méthode appelée lorsqu'un client supprime un message
+   * @param data Les données contenant l'ID du message et l'ID du channel
+   */
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(
+    @MessageBody() data: { messageId: string; channelId: string }
+  ) {
+    await this.messageService.deleteMessage(data.messageId);
+    this.server.to(data.channelId).emit('deleteMessage', data.messageId);
+  }
+  /**
+   * Méthode appelée lorsqu'un client épingle un message
+   * @param data Les données du message à épingler
+   */
+  @SubscribeMessage('pinMessage')
+  async handlePinMessage(@MessageBody() data: MessageDto): Promise<void> {
+    if (!data._id) {
+      throw new NotFoundException('Pin impossible');
+    }
+    const message = await this.messageService.pinMessage(data?._id);
+    this.server
+      .to(data.channelId)
+      .emit('pinMessage', plainToInstance(MessageDto, message));
   }
 }

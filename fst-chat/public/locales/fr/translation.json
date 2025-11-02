@@ -5,6 +5,8 @@
             "part2": "Découvre de nouvelles personnes qui partagent vos passions",
             "learn": "En savoir plus"
         },
+        "signin": "Se connecter",
+        "signup": "S'inscrire",
         "translate": "N'ayez plus peur de la barrière de la langue, notre application la franchit pour vous"
     },
     "profile": {
@@ -12,7 +14,64 @@
     },
     "tchat": {
         "send": "Envoyer",
+        "pinMessage": "Epingler le message",
         "loadingMessages": "Chargement des messages...",
-        "tchatRoom": "Salle de discussion"
+        "deleteMessage": "Supprimer le message",
+        "messageDeleted": "Message supprimé",
+        "tchatRoom": "Salle de discussion",
+        "navigationMenu": {
+            "title": "Serveurs",
+            "noServer": "Aucun serveur disponible. Veuillez ajouter un serveur pour commencer à discuter !"
+        },
+        "chatBot": {
+            "welcomeMessage": "Salut 👋, voici les commandes que tu peux utiliser \n -/question suivi de ta question sur la discussion de ce channel",
+            "input": {
+                "placeholder": "Écrire un message...",
+                "send": "Envoyer"
+            },
+            "link": {
+                "home": "Home",
+                "profile": "Profile",
+                "account": "security",
+                "theme": "theme"
+            },
+            "typing": "Le bot est en train d'écrire"
+        }
+    },
+    "room": {
+        "loadingMessages": "Chargement des messages...",
+        "updateClose": "Mettre à jour / Fermer le serveur",
+        "update": "Mettre à jour le serveur",
+        "open": "Ouvrir le serveur",
+        "openToPublic": "Ouvert au public",
+        "openPublic": "Ouvrir au public",
+        "tags": "tags séparés par des virgules",
+        "tagsPlaceholder": "ex : play,chill,french",
+        "cancel": "annuler",
+        "close": "fermer",
+        "confirm": "confirmer"
+    },
+    "server": {
+        "loading": "Chargement du serveur...",
+        "list": "Liste des serveurs",
+        "create": "Créer un serveur",
+        "join": "Rejoindre un serveur",
+        "nodescription": "Aucune description",
+        "noServer": "Aucun serveur disponible. Veuillez ajouter un serveur pour commencer à discuter !",
+        "member": "Membres",
+        "link": "Lien d’invitation du serveur",
+        "connection": "Connexion...",
+        "joinForm": "Rejoindre",
+        "name": "Nom du serveur",
+        "description": "Description du serveur (optionnel)",
+        "find": "Chercher un serveur"
+    },
+    "profil": {
+        "link": {
+            "home": "Accueil",
+            "profile": "Profil",
+            "account": "Securité",
+            "theme": "Thème"
+        }
     }
 }

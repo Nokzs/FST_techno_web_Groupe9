@@ -25,7 +25,10 @@ export class ChannelService {
   }
 
   async deleteById(channelId: string): Promise<Channel | null> {
-    const deleted = await this.channelModel.findByIdAndDelete(channelId).lean().exec();
+    const deleted = await this.channelModel
+      .findByIdAndDelete(channelId)
+      .lean()
+      .exec();
     return deleted as unknown as Channel | null;
   }
 }

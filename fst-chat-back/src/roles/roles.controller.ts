@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Patch, Body, UseGuards, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Body,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { AuthGuard } from '../guards/authGuard';
@@ -30,11 +38,12 @@ export class RolesController {
   ) {
     const server = await this.serverService.findById(serverId);
     if (!server) throw new ForbiddenException('Server not found');
-    const owner = (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
+    const owner =
+      (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
     // Interdire de toucher au creator
-    if (owner && owner === userId) throw new ForbiddenException('Cannot change creator role');
+    if (owner && owner === userId)
+      throw new ForbiddenException('Cannot change creator role');
     await this.rolesService.setUserRole(serverId, userId, body.role);
     return { success: true };
   }
 }
-

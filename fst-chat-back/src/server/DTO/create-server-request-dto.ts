@@ -14,4 +14,3 @@ export class CreateServerRequestDto {
   @IsEnum(Role)
   defaultRole?: Role; // MEMBER ou READER
 }
-

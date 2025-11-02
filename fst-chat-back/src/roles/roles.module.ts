@@ -1,7 +1,10 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RolesService } from './roles.service';
-import { RoleAssignment, RoleAssignmentSchema } from './schema/role-assignment.schema';
+import {
+  RoleAssignment,
+  RoleAssignmentSchema,
+} from './schema/role-assignment.schema';
 import { RolesController } from './roles.controller';
 import { ServerModule } from '../server/module/server.module';
 import { TokenModule } from '../token/token.module';
@@ -11,7 +14,9 @@ import { RolesGuard } from './roles.guard';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: RoleAssignment.name, schema: RoleAssignmentSchema }]),
+    MongooseModule.forFeature([
+      { name: RoleAssignment.name, schema: RoleAssignmentSchema },
+    ]),
     forwardRef(() => ServerModule),
     forwardRef(() => ChannelModule),
     TokenModule,

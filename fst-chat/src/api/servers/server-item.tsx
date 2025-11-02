@@ -122,12 +122,15 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
           )}
         </div>
         <div className="flex items-center gap-3">
-          <button
-            className="text-red-600 text-sm hover:underline"
-            onClick={(e) => { e.stopPropagation(); leaveServer((server._id ?? server.id)!); }}
-          >
-            Quitter
-          </button>
+          {role !== 'CREATOR' && (
+            <button
+              className="text-red-600 text-sm hover:underline"
+              onClick={(e) => { e.stopPropagation(); leaveServer((server._id ?? server.id)!); }}
+              title="Quitter ce serveur"
+            >
+              Quitter
+            </button>
+          )}
           {can(role, 'CREATOR') && (
           <button
             className="text-red-700 text-sm hover:underline"

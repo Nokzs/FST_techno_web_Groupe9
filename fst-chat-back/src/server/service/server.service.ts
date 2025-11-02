@@ -20,11 +20,14 @@ export class ServerService {
       if (!exists) return code;
     }
     // on allonge le code si code unique pas trouvé
-    return randomBytes(12).toString('base64url').slice(0, len + 4);
+    return randomBytes(12)
+      .toString('base64url')
+      .slice(0, len + 4);
   }
 
   async create(dto: CreateServerDto): Promise<Server> {
-    const inviteCode = dto.inviteCode ?? (await this.generateUniqueInviteCode());
+    const inviteCode =
+      dto.inviteCode ?? (await this.generateUniqueInviteCode());
     const newServer = new this.serverModel({ ...dto, inviteCode });
     const saved = await newServer.save();
     return saved.toObject();
@@ -58,10 +61,9 @@ export class ServerService {
     if (!server) return null;
     const uid = new Types.ObjectId(userId);
     // Utiliser $addToSet pour éviter les doublons en concurrence
-    await this.serverModel.updateOne(
-      { _id: server._id },
-      { $addToSet: { members: uid } }
-    ).exec();
+    await this.serverModel
+      .updateOne({ _id: server._id }, { $addToSet: { members: uid } })
+      .exec();
     const updated = await this.serverModel.findById(server._id).lean().exec();
     return updated as unknown as Server;
   }
@@ -76,7 +78,9 @@ export class ServerService {
     return (updated || null) as unknown as Server | null;
   }
 
-  async getMembersByServerId(serverId: string): Promise<CompleteUserResponseDto[]> {
+  async getMembersByServerId(
+    serverId: string
+  ): Promise<CompleteUserResponseDto[]> {
     const srv = await this.serverModel
       .findById(serverId)
       .populate('members', 'pseudo email urlPicture bio')
@@ -96,7 +100,9 @@ export class ServerService {
   }
 
   async deleteById(serverId: string): Promise<boolean> {
-    const res = await this.serverModel.deleteOne({ _id: new Types.ObjectId(serverId) }).exec();
+    const res = await this.serverModel
+      .deleteOne({ _id: new Types.ObjectId(serverId) })
+      .exec();
     return (res?.deletedCount ?? 0) > 0;
   }
 }

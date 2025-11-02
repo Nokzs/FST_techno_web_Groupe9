@@ -16,6 +16,6 @@ export class RoleAssignment {
   role: Role;
 }
 
-export const RoleAssignmentSchema = SchemaFactory.createForClass(RoleAssignment);
+export const RoleAssignmentSchema =
+  SchemaFactory.createForClass(RoleAssignment);
 RoleAssignmentSchema.index({ serverId: 1, userId: 1 }, { unique: true });
-

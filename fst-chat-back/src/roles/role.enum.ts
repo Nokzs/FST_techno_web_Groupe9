@@ -4,4 +4,3 @@ export enum Role {
   MEMBER = 'MEMBER',
   READER = 'READER',
 }
-

@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { Role } from './role.enum';
@@ -31,7 +37,8 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     // recupere l id du user via la requete http posé par le authguard
-    const userId: string | undefined = request?.user?.sub ?? request?.['user']?.sub;
+    const userId: string | undefined =
+      request?.user?.sub ?? request?.['user']?.sub;
     if (!userId) throw new ForbiddenException('Unauthorized');
 
     const serverId = await this.resolveServerId(request);
@@ -57,14 +64,19 @@ export class RolesGuard implements CanActivate {
   private async resolveServerId(request: any): Promise<string | undefined> {
     const params = request?.params ?? {};
     if (params.serverId) return params.serverId;
-    if (params.id && (request.baseUrl?.includes('/servers') || request.route?.path?.includes(':id'))) {
+    if (
+      params.id &&
+      (request.baseUrl?.includes('/servers') ||
+        request.route?.path?.includes(':id'))
+    ) {
       return params.id;
     }
     const channelId = params.channelId || params.id;
-    if (channelId && !(request.baseUrl?.includes('/servers'))) {
+    if (channelId && !request.baseUrl?.includes('/servers')) {
       try {
         const ch = await this.channelService.getById(channelId);
-        const sid = (ch as any)?.serverId?.toString?.() || (ch as any)?.serverId;
+        const sid =
+          (ch as any)?.serverId?.toString?.() || (ch as any)?.serverId;
         return sid;
       } catch {
         return undefined;
@@ -76,7 +88,8 @@ export class RolesGuard implements CanActivate {
 
   private getEffectiveRole(server: any, userId: string): Role {
     // au cas ou : ownerId => CREATOR, others => MEMBER
-    const owner = (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
+    const owner =
+      (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
     if (owner && owner === userId) return Role.CREATOR;
     return Role.MEMBER;
   }

@@ -1,4 +1,12 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket, OnGatewayDisconnect, OnGatewayConnection } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+  OnGatewayDisconnect,
+  OnGatewayConnection,
+} from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import type { Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
@@ -35,7 +43,9 @@ export class ServerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
       client.data.id = payload.sub as string;
-      Logger.log(`[ServerGateway] connected socket=${client.id} user=${client.data.id}`);
+      Logger.log(
+        `[ServerGateway] connected socket=${client.id} user=${client.data.id}`
+      );
     } catch {
       client.disconnect();
     }
@@ -63,7 +73,8 @@ export class ServerGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const map = this.presence.get(serverId);
     if (!map) return;
     const current = (map.get(userId) ?? 0) - 1;
-    if (current <= 0) map.delete(userId); else map.set(userId, current);
+    if (current <= 0) map.delete(userId);
+    else map.set(userId, current);
   }
 
   private emitPresence(serverId: string) {
@@ -74,22 +85,33 @@ export class ServerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   emitServerMemberJoined(serverId: string, user: any) {
     // Debug: émission d'un event d'entrée membre
-    console.log('[Gateway] emitServerMemberJoined ->', { serverId, userId: user?.id || user?._id });
+    console.log('[Gateway] emitServerMemberJoined ->', {
+      serverId,
+      userId: user?.id || user?._id,
+    });
     // diffuse uniquement aux sockets qui regardent ce serveur
-    this.server.to(this.serverRoom(serverId)).emit('serverMemberJoined', { serverId, user });
+    this.server
+      .to(this.serverRoom(serverId))
+      .emit('serverMemberJoined', { serverId, user });
   }
 
   emitServerPresenceUpdate(serverId: string, onlineUserIds: string[]) {
-    this.server.to(this.serverRoom(serverId)).emit('serverPresenceUpdate', { serverId, onlineUserIds });
+    this.server
+      .to(this.serverRoom(serverId))
+      .emit('serverPresenceUpdate', { serverId, onlineUserIds });
   }
 
   emitServerMemberLeft(serverId: string, userId: string) {
-    this.server.to(this.serverRoom(serverId)).emit('serverMemberLeft', { serverId, userId });
+    this.server
+      .to(this.serverRoom(serverId))
+      .emit('serverMemberLeft', { serverId, userId });
   }
 
   emitChannelDeleted(serverId: string, channelId: string) {
     // Inform all watchers of this server that a channel was deleted
-    this.server.to(this.serverRoom(serverId)).emit('channelDeleted', { serverId, channelId });
+    this.server
+      .to(this.serverRoom(serverId))
+      .emit('channelDeleted', { serverId, channelId });
     // Also notify sockets in the channel room directly if any remain
     this.server.to(channelId).emit('channelDeleted', { serverId, channelId });
   }
@@ -99,14 +121,22 @@ export class ServerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   emitServerDeleted(serverId: string) {
-    this.server.to(this.serverRoom(serverId)).emit('serverDeleted', { serverId });
+    this.server
+      .to(this.serverRoom(serverId))
+      .emit('serverDeleted', { serverId });
   }
 
   @SubscribeMessage('watchServer')
-  async handleWatchServer(@MessageBody() data: { serverId: string }, @ConnectedSocket() client: Socket) {
+  async handleWatchServer(
+    @MessageBody() data: { serverId: string },
+    @ConnectedSocket() client: Socket
+  ) {
     const serverId = data?.serverId;
     if (!serverId) return;
-    console.log('[Gateway] watchServer -> client joins room', { serverId, socketId: client.id });
+    console.log('[Gateway] watchServer -> client joins room', {
+      serverId,
+      socketId: client.id,
+    });
     client.join(this.serverRoom(serverId));
     const userId: string | undefined = client.data?.id;
     if (userId) {
@@ -116,10 +146,16 @@ export class ServerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('unwatchServer')
-  handleUnwatchServer(@MessageBody() data: { serverId: string }, @ConnectedSocket() client: Socket) {
+  handleUnwatchServer(
+    @MessageBody() data: { serverId: string },
+    @ConnectedSocket() client: Socket
+  ) {
     const serverId = data?.serverId;
     if (!serverId) return;
-    console.log('[Gateway] unwatchServer -> client leaves room', { serverId, socketId: client.id });
+    console.log('[Gateway] unwatchServer -> client leaves room', {
+      serverId,
+      socketId: client.id,
+    });
     client.leave(this.serverRoom(serverId));
     const userId: string | undefined = client.data?.id;
     if (userId) {

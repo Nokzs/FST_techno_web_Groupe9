@@ -48,7 +48,9 @@ export class ChannelController {
 
   @Get('/detail/:channelId')
   @UseGuards(AuthGuard)
-  async getChannelDetail(@Param('channelId') channelId: string): Promise<ChannelDto | null> {
+  async getChannelDetail(
+    @Param('channelId') channelId: string
+  ): Promise<ChannelDto | null> {
     const chan = await this.channelService.getById(channelId);
     if (!chan) return null;
     return plainToInstance(ChannelDto, chan);
@@ -62,7 +64,8 @@ export class ChannelController {
     if (!chan) return { success: false };
     await this.channelService.deleteById(channelId);
     try {
-      const sid = (chan as any)?.serverId?.toString?.() || (chan as any)?.serverId;
+      const sid =
+        (chan as any)?.serverId?.toString?.() || (chan as any)?.serverId;
       if (sid) this.serverGateway.emitChannelDeleted(sid, channelId);
     } catch {}
     // Optionally: cleanup storage bucket

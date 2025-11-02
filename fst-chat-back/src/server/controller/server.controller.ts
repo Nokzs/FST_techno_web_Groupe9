@@ -1,4 +1,14 @@
-﻿import { Body, Controller, Get, Post, Req, UseGuards, NotFoundException, Param, Delete } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  NotFoundException,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ServerService } from '../service/server.service';
 import { plainToInstance } from 'class-transformer';
 import { ServerDto } from '../DTO/server.dto';
@@ -60,18 +70,27 @@ export class ServerController {
     const userId = request['user'].sub;
     const server = await this.serverService.joinByInviteCode(userId, body.code);
     if (!server) {
-      console.log("pas de serveur recup")
+      console.log('pas de serveur recup');
       throw new NotFoundException("Code d'invitation invalide");
     }
     try {
-      const profile = await this.userService.findById(userId as unknown as string);
-      const srvId =  (server as any)._id?.toString?.();
-      console.log('[ServerController] joinServer -> emitting member joined', { srvId });
+      const profile = await this.userService.findById(
+        userId as unknown as string
+      );
+      const srvId = (server as any)._id?.toString?.();
+      console.log('[ServerController] joinServer -> emitting member joined', {
+        srvId,
+      });
       this.serverGateway.emitServerMemberJoined(srvId, profile);
       if (srvId) {
         // Attribue le rôle par défaut configuré sur le serveur (fallback MEMBER)
-        const defaultRole = ((server as any)?.defaultRole as Role) ?? Role.MEMBER;
-        await this.rolesService.setUserRole(srvId, userId as string, defaultRole);
+        const defaultRole =
+          ((server as any)?.defaultRole as Role) ?? Role.MEMBER;
+        await this.rolesService.setUserRole(
+          srvId,
+          userId as string,
+          defaultRole
+        );
       }
     } catch (e) {
       console.error('[ServerController] joinServer emit failed', e);
@@ -99,13 +118,17 @@ export class ServerController {
       if (assigned) return { role: assigned };
     } catch {}
     // Fallback to owner heuristic
-    const owner = (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
+    const owner =
+      (server as any)?.ownerId?.toString?.() || (server as any)?.ownerId;
     return { role: owner === userId ? Role.CREATOR : Role.MEMBER };
   }
 
   @Post('leave')
   @UseGuards(AuthGuard)
-  async leaveServer(@Req() request: Request, @Body() body: { serverId: string }) {
+  async leaveServer(
+    @Req() request: Request,
+    @Body() body: { serverId: string }
+  ) {
     const userId = request['user'].sub;
     const server = await this.serverService.leaveServer(body.serverId, userId);
     if (server) {
@@ -128,7 +151,3 @@ export class ServerController {
     return { success: ok };
   }
 }
-
-
-
-

@@ -127,13 +127,15 @@ export class MessageGateway
   }
 
   @SubscribeMessage('getMessages')
-  async handleGetMessages(@MessageBody() channelId: string) {
-    const messages = await this.messageService.findByChannel(channelId);
+  async handleGetMessages(
+    @MessageBody() channelId: string,
+    @ConnectedSocket() client: Socket
+  ) {
+    const userId = client?.data?.id as string | undefined;
+    const messages = await this.messageService.findByChannel(channelId, userId);
     Logger.log('message', messages);
 
-    return messages.map((msg) => {
-      return plainToInstance(MessageDto, msg);
-    });
+    return messages.map((msg) => plainToInstance(MessageDto, msg));
   }
 
   @SubscribeMessage('newReactions')

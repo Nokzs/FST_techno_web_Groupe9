@@ -1,34 +1,41 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { MessageFile, MessageFileSchema } from './messageFile.schema';
+
 export type MessageDocument = HydratedDocument<Message>;
 
 @Schema({ timestamps: true })
 export class Message {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  senderId: Types.ObjectId;
+  @Prop({ type: String, ref: 'User', required: true })
+  senderId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
-  receiverId?: Types.ObjectId;
+  @Prop({ type: String, ref: 'User', required: false })
+  receiverId?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Channel', required: true })
-  channelId: Types.ObjectId;
+  @Prop({ type: String, ref: 'Channel', required: true })
+  channelId: string;
 
   @Prop({ required: false })
   content: string;
 
-  // Liste des utilisateurs qui ont lu le message
   @Prop({ type: [MessageFileSchema], default: [] })
   files: MessageFile[];
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-  readBy: Types.ObjectId[];
+  @Prop({ type: [String], ref: 'User', default: [] })
+  readBy: string[];
 
-  @Prop({ type: Types.ObjectId, ref: 'Message' })
-  replyMessage: Types.ObjectId;
+  @Prop({ type: String, ref: 'Message' })
+  replyMessage?: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Reaction' }], default: [] })
-  reactions: Types.ObjectId[];
+  @Prop({ type: [String], ref: 'Reaction', default: [] })
+  reactions: string[];
+
+  // 🟢 Ajout pour la traduction automatique
+  @Prop({ type: String, required: false })
+  detectedLanguage?: string;
+
+  @Prop({ type: Object, default: {} })
+  translations?: Record<string, string>;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

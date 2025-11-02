@@ -9,6 +9,8 @@ interface MessageProps {
   message: Message;
   onReply?: (message: Message) => void;
   channelId?: string;
+  preferredLanguageCode?: string;
+  showTranslations?: boolean;
 }
 
 export function MessageItem({
@@ -16,6 +18,8 @@ export function MessageItem({
   currentUserId,
   onReply,
   channelId,
+  preferredLanguageCode,
+  showTranslations = true,
 }: MessageProps) {
   const isOwnMessage = message.senderId._id === currentUserId;
   const [showReactionMenu, setShowReactionMenu] = useState(false);
@@ -30,6 +34,18 @@ export function MessageItem({
     acc[r.emoji] = acc[r.emoji] ? [...acc[r.emoji], r.userId] : [r.userId];
     return acc;
   }, {});
+  const baseContent = message.content ?? "";
+  const translatedContent =
+    preferredLanguageCode && message.translations
+      ? message.translations[preferredLanguageCode]
+      : undefined;
+      console.log(translatedContent)
+  const shouldUseTranslation = Boolean(showTranslations && translatedContent);
+  const displayContent = shouldUseTranslation
+    ? (translatedContent ?? "")
+    : baseContent;
+  const showOriginal =
+    shouldUseTranslation && Boolean(baseContent) && translatedContent !== baseContent;
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -72,9 +88,14 @@ export function MessageItem({
         )}
 
         {/* Texte */}
-        {message.content && (
+        {displayContent && (
           <div className="whitespace-pre-wrap break-words mb-1">
-            {message.content}
+            {displayContent}
+          </div>
+        )}
+        {showOriginal && baseContent && (
+          <div className="text-xs opacity-80 italic">
+            Original: {baseContent}
           </div>
         )}
 

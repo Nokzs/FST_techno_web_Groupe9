@@ -19,4 +19,6 @@ export interface Message {
   files: MessageFile[];
   replyMessage: Message | null;
   reactions: reaction[];
+  detectedLanguage?: string | null;
+  translations?: Record<string, string>;
 }

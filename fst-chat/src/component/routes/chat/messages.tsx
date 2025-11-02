@@ -1,5 +1,5 @@
 // component/routes/MessagesPage.tsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChatInput } from "./ChatInput";
 import { getSignedUrl } from "../../../api/storage/signedUrl";
 import { v4 as uuidv4 } from "uuid";
@@ -13,6 +13,7 @@ import { LanguageSwitcher } from "../../ui/languageSwitcher";
 import { useTranslation } from "react-i18next";
 import type { User } from "../../../types/user";
 import { getUserProfile } from "../../../api/user/getUserProfile";
+import ISO6391 from "iso-639-1";
 
 
 export function Messages() {
@@ -21,13 +22,50 @@ export function Messages() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
+  const preferredLanguageCode = useMemo(() => {
+    if (!user?.language) {
+      return null;
+    }
+    const trimmed = user.language.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const lower = trimmed.toLowerCase();
+    if (ISO6391.validate(lower)) {
+      return lower;
+    }
+    const base = lower.split("-")[0];
+    if (base && ISO6391.validate(base)) {
+      return base;
+    }
+    const fromName = ISO6391.getCode(trimmed);
+    if (fromName) {
+      return fromName.toLowerCase();
+    }
+    return null;
+  }, [user?.language]);
+
+  const [showTranslations, setShowTranslations] = useState<boolean>(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    const stored = window.localStorage.getItem("chat:showTranslations");
+    return stored !== "false";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("chat:showTranslations", String(showTranslations));
+    }
+  }, [showTranslations]);
+
   const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
   const { channelId } = useParams<{ channelId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll automatique après chaque nouveau message
+  // Scroll automatique aprÃ¨s chaque nouveau message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -38,13 +76,13 @@ export function Messages() {
         const profile = await getUserProfile();
         setUser(profile);
       } catch (err) {
-        console.error("Erreur récupération user :", err);
+        console.error("Erreur rÃ©cupÃ©ration user :", err);
       }
     };
     fetchUser();
   }, []);
 
-  // 🔹 Connexion socket + récupération des messages
+  // ðŸ”¹ Connexion socket + rÃ©cupÃ©ration des messages
   useEffect(() => {
     if (!channelId) return;
 
@@ -53,25 +91,25 @@ export function Messages() {
     socket.emit("joinChannelRoom", channelId);
 
     socket.emit("getMessages", channelId, (messages: Message[]) => {
-      console.log("Récupération des messages pour le channel :", channelId);
-      console.log("Messages reçus :", messages);
+      console.log("RÃ©cupÃ©ration des messages pour le channel :", channelId);
+      console.log("Messages reÃ§us :", messages);
       setMessages(messages);
-      console.log("Messages chargés :", messages);
+      console.log("Messages chargÃ©s :", messages);
       setLoading(false);
       scrollToBottom();
     });
 
     socket.on("newMessage", (message: Message) => {
-      console.log("Événement newMessage reçu :", message);
+      console.log("Ã‰vÃ©nement newMessage reÃ§u :", message);
       if (message.channelId === channelId) {
-        console.log("Nouveau message reçu :", message);
+        console.log("Nouveau message reÃ§u :", message);
         setMessages((prev) => [message, ...prev]);
         scrollToBottom();
       }
     });
     socket.on("newReactions", (updatedMessage: Message) => {
       console.log(
-        "Message mis à jour avec de nouvelles réactions :",
+        "Message mis Ã  jour avec de nouvelles rÃ©actions :",
         updatedMessage,
       );
       setMessages((messages) =>
@@ -87,12 +125,12 @@ export function Messages() {
     };
   }, [channelId]);
 
-  // 🔹 Envoi d’un message
+  // ðŸ”¹ Envoi dâ€™un message
   const addMessage = async (text: string, files: File[]) => {
     if (!user.id || !channelId) return;
     const messagesFiles: MessageFile[] = [];
     if (files.length > 0) {
-      // pour chaque image, on demande un lien d'upload à l'aide de la fonction getPresignedUrl
+      // pour chaque image, on demande un lien d'upload Ã  l'aide de la fonction getPresignedUrl
       await Promise.all(
         files.map(async (file) => {
           const { signedUrl, path } = await getSignedUrl(
@@ -122,10 +160,10 @@ export function Messages() {
     };
 
     socket.emit("sendMessage", { ...newMessage, files: messagesFiles });
-    console.log("Message envoyé :", newMessage);
+    console.log("Message envoyÃ© :", newMessage);
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="h-screen flex items-center justify-center text-gray-800 dark:text-white">
         {t("tchat.loadingMessages")}
@@ -135,22 +173,36 @@ export function Messages() {
 
   return (
     <div className="h-screen flex flex-col p-10">
-      <LanguageSwitcher className="absolute top-0 right-0 mt-4" />
-      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        <NavLink to="/servers">{"<-"}</NavLink>
-        {t("tchat.tchatRoom")}
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <NavLink to="/servers">{"<-"}</NavLink>
+          {t("tchat.tchatRoom")}
+        </h1>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowTranslations((prev) => !prev)}
+            className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-100 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            aria-pressed={showTranslations}
+          >
+            {showTranslations ? "Désactiver la traduction" : "Activer la traduction"}
+          </button>
+          <LanguageSwitcher />
+        </div>
+      </div>
 
       {/* Liste des messages */}
       <div className="flex-1 overflow-y-auto flex flex-col-reverse gap-4 messages-container">
         <div ref={messagesEndRef} />
-        {messages.slice().map((msg, index: number) => (
+        {messages.slice().map((msg) => (
           <MessageItem
-            key={index}
+            key={msg._id}
             message={msg}
             currentUserId={user.id}
             channelId={channelId!}
             onReply={setReplyMessage}
+            preferredLanguageCode={preferredLanguageCode ?? undefined}
+            showTranslations={showTranslations}
           />
         ))}
       </div>

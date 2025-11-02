@@ -1,4 +1,4 @@
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import EmojiPicker, {
   type EmojiClickData,
   SkinTones,
@@ -6,21 +6,18 @@ import EmojiPicker, {
 import { AudioRecorder } from "./AudioRecorder";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../../utils/cn";
-import type { Message } from "../../../types/messageFileType";
+import type { Message } from "./messageFileType";
 import { useTranslation } from "react-i18next";
-import { socket } from "../../../socket";
 type ChatInputProps = {
   sendMessage: (message: string, files: File[]) => void;
   replyMessage?: Message;
   onReply: React.Dispatch<React.SetStateAction<Message | undefined>>;
-  channelId?: string;
 };
 
 export function ChatInput({
   sendMessage,
   replyMessage,
   onReply,
-  channelId,
 }: ChatInputProps) {
   const { t } = useTranslation();
   const [message, setMessage] = useState("");
@@ -32,62 +29,9 @@ export function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordRef = useRef<HTMLDivElement>(null);
 
-  // ref de la derniere fois qu'on a notifier le serv
-  const typingLastEmitRef = useRef<number>(0);
-  // ref du dernier timer d'inactivité
-  const typingStopTimerRef = useRef<number | null>(null);
-
-  // notifie le serveur qu on est en train d ecrire si ça fait 800ms (pour pas sur-appeler le serv)
-  const emitTypingThrottled = () => {
-    if (!channelId) return;
-    const now = Date.now();
-    if (now - typingLastEmitRef.current >= 800) {
-      socket.emit("typing", { channelId });
-      typingLastEmitRef.current = now;
-    }
-  };
-
-  // lance un timer qui notifie qu on arrete d'ecrire si inactif pendant 2 secs
-  const scheduleStopTyping = () => {
-    if (!channelId) return;
-    // annule l ancien timer
-    if (typingStopTimerRef.current) window.clearTimeout(typingStopTimerRef.current);
-    typingStopTimerRef.current = window.setTimeout(() => {
-      socket.emit("stopTyping", { channelId });
-      typingStopTimerRef.current = null;
-    }, 2000);
-  };
-
-
-  // force le stopTyping au serveur (quand le message est envoyé)
-  const stopTypingNow = () => {
-    if (!channelId) return;
-    if (typingStopTimerRef.current) {
-      window.clearTimeout(typingStopTimerRef.current);
-      typingStopTimerRef.current = null;
-    }
-    socket.emit("stopTyping", { channelId });
-  };
-
-  useEffect(() => {
-    // on arrete d'écrire si on quitte le salon
-    return () => {
-      if (channelId) {
-        if (typingStopTimerRef.current) {
-          window.clearTimeout(typingStopTimerRef.current);
-          typingStopTimerRef.current = null;
-        }
-        socket.emit("stopTyping", { channelId });
-      }
-    };
-  }, [channelId]);
-
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     messageRef.current = e.target.value;
     setMessage(e.target.value);
-    
-    emitTypingThrottled();
-    scheduleStopTyping();
   };
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -101,15 +45,14 @@ export function ChatInput({
   };
 
   const handleSend = () => {
-    console.log("envoi du message :", message);
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
-    setMessage(() => "");
+    setMessage("");
     onReply?.(undefined);
     filesLengthRef.current = 0;
     setFiles([]);
-    stopTypingNow();
   };
+
   const onStopRecording = (file: File) => {
     console.log("je recois le fichier audio");
     setFiles((prev) => [...prev, file]);
@@ -249,7 +192,6 @@ export function ChatInput({
         <input
           type="text"
           value={message}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
           onChange={handleTextChange}
           placeholder="Écris un message..."
           className="w-full border-2 dark:border-white border-black  rounded-lg px-3 py-2 focus:outline-none text-black dark:text-white bg-white dark:bg-gray-800 transition-all duration-75"
@@ -271,7 +213,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "-100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "-100%" }}
-                transition={{ duration: 0.05, ease: "easeInOut" }}
+                transition={{ duration: 0.3 }}
                 onAnimationStart={() => {
                   // background actif dès le début de l'animation
                   if (recordRef.current)
@@ -287,7 +229,7 @@ export function ChatInput({
                 initial={{ opacity: 0, y: "100%" }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "100%" }}
-                transition={{ duration: 0.05, ease: "easeInOut" }}
+                transition={{ duration: 0.3 }}
                 onAnimationStart={() => {
                   if (recordRef.current)
                     recordRef.current.classList.add("bg-green-700");

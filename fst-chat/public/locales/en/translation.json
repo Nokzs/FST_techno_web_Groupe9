@@ -30,6 +30,12 @@
                 "send": "Send"
             },
             "typing": "Bot is typing..."
+        },
+        "tchatRoom": "Chat Room",
+        "typing": {
+            "one": "{{name}} is typing…",
+            "two": "{{name1}} and {{name2}} are typing…",
+            "many": "{{name1}}, {{name2}} and {{count}} others are typing…"
         }
     },
     "profil": {

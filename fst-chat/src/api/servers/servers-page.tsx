@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { ServersList } from "./servers-list";
 import { CreateServerForm } from "./create-server-form";
 import { JoinServerForm } from "./join-server-form";
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
 export interface Server {
   _id: string;
+  id?: string;
   name: string;
   ownerId: string;
   description?: string;
@@ -15,6 +16,8 @@ export interface Server {
   updatedAt?: string;
   tags: string[]; // obligatoire
   isPublic: boolean; // indique si le serveur est ouvert au public
+  inviteCode?: string;
+  defaultRole?: 'MEMBER' | 'READER';
 }
 export interface Channel {
   _id: string;
@@ -38,6 +41,8 @@ export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [roles, setRoles] = useState<Record<string, string>>({});
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const { t } = useTranslation();
   useEffect(() => {
@@ -48,9 +53,25 @@ export function ServersPage() {
           credentials: "include",
         });
         const data = await res.json();
-        setServers(Array.isArray(data) ? data : []);
+        const list: Server[] = Array.isArray(data) ? data : [];
+        setServers(list);
+        const entries: [string, string][] = [];
+        await Promise.all(
+          list.map(async (srv: Server) => {
+            const id = srv._id || srv.id;
+            if (!id) return;
+            try {
+              const r = await fetch(`${API_URL}/servers/${id}/me`, { credentials: 'include' });
+              const jr = await r.json();
+              if (jr?.role) entries.push([id, jr.role]);
+            } catch { /* ignore */ }
+          })
+        );
+        console.log("roles pour chaque serveur: " + entries)
+
+        setRoles(Object.fromEntries(entries));
       } catch (err) {
-        console.error("Erreur récupération serveurs :", err);
+        console.error("Erreur rÃ©cupÃ©ration serveurs :", err);
       } finally {
         setLoading(false);
       }
@@ -59,17 +80,53 @@ export function ServersPage() {
     fetchServers();
   }, [API_URL]);
 
+
+  // si roles pas encore attribuÃ© pour des serveurs, on les attributs (lors de la crÃ©ation d'un nouveau serveur)
+  useEffect(() => {
+    // RÃ©cupÃ¨re tous les ID des serveurs
+    const ids = servers
+      .map((s: Server) => (s?._id ?? s?.id) as string);
+      
+    // Ne garde que ceux qui n'ont pas encore d'entrÃ©e dans la map `roles`
+    const missing = ids.filter((id) => !(id in roles));
+    if (missing.length === 0) return;
+    (async () => {
+      const entries: [string, string][] = [];
+      await Promise.all(
+        missing.map(async (id) => {
+          try {
+            const r = await fetch(`${API_URL}/servers/${id}/me`, { credentials: 'include' });
+            const jr = await r.json();
+            if (jr?.role) entries.push([id, jr.role]);
+          } catch { /* ignore */ }
+        })
+      );
+      // 4) Fusionne proprement dans la map `roles` (sans Ã©craser les valeurs existantes)
+      if (entries.length) setRoles((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+    })();
+  }, [servers, roles, API_URL]);
+
   const handleServerAdded = (newServer: Server) => {
-    setServers((prev) => [...prev, newServer]);
-    console.log("Nouveau serveur ajouté :", newServer);
-    console.log("Serveurs actuels :", servers);
+    setServers((prev) => {
+      const exists = prev.some((s) => s._id === newServer._id);
+      if (exists) {
+        setJoinError("Ce serveur est dÃ©jÃ  dans votre liste.");
+        return prev;
+      }
+      setJoinError(null);
+      return [...prev, newServer];
+    });
     setActiveForm(null);
   };
 
+  const handleServerRemoved = (serverId: string) => {
+    setServers((prev) => prev.filter((s) => s._id !== serverId));
+  };
+  if (loading) return <div>Chargement des serveurs...</div>;
   if (loading) return <div>{t("server.loading")}</div>;
 
   return (
-    <div className="p-4">
+    <div className=" p-4 min-h-screen">
       <h1 className="text-2xl font-bold mb-4 dark:text-white text-black ">
         {t("server.list")}
       </h1>
@@ -95,12 +152,38 @@ export function ServersPage() {
         </NavLink>
       </div>
 
+      {joinError && (
+        <div className="mb-4 text-red-500 text-sm">{joinError}</div>
+      )}
+
       {activeForm === "create" && (
         <CreateServerForm onCreated={handleServerAdded} />
       )}
       {activeForm === "join" && <JoinServerForm onJoined={handleServerAdded} />}
 
-      <ServersList servers={servers} />
+      <div className="max-h-[70vh] overflow-y-auto pr-1">
+        <ServersList servers={servers} roles={roles} onRemoved={handleServerRemoved} />
+      </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

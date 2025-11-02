@@ -36,6 +36,12 @@
                 "theme": "theme"
             },
             "typing": "Le bot est en train d'écrire"
+        },
+        "tchatRoom": "Salle de discussion",
+        "typing": {
+            "one": "{{name}} est en train d'écrire…",
+            "two": "{{name1}} et {{name2}} sont en train d'écrire…",
+            "many": "{{name1}}, {{name2}} et {{count}} autres écrivent…"
         }
     },
     "room": {

@@ -10,7 +10,6 @@ import { StorageModule } from './storage/storage.module';
 import { provider } from './config/constante';
 import { ServerModule } from './server/module/server.module';
 import { ChannelModule } from './channel/module/channel.module';
-import { CustomCacheModule } from './cache/module/Cache.module';
 import { GuardModule } from './guards/guards.module';
 import { TokenModule } from './token/token.module';
 import { AuthGuard } from './guards/authGuard';
@@ -35,7 +34,6 @@ import { AuthGuard } from './guards/authGuard';
     StorageModule.register(provider),
     ServerModule,
     ChannelModule,
-    CustomCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard],

@@ -25,6 +25,7 @@ export const useMessages = (
   setReplyMessage: Dispatch<SetStateAction<Message | undefined>>,
   user: User | null,
   messageRef: RefObject<HTMLDivElement | null>,
+  setTypingUsers: Dispatch<SetStateAction<string[]>>
 ): {
   messages: Message[];
   pinnedMessage: Message[];
@@ -35,7 +36,6 @@ export const useMessages = (
 
   const [pinnedMessage, setPinnedMessage] = useState<Message[]>(pinnedMessages);
   const hasMoreRef = useRef<boolean>(hasMore);
-  const API_URL = import.meta.env.API_URL || "http://localhost:3000";
   const scrollToBottom = () => {
     messagesEndRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -198,6 +198,20 @@ export const useMessages = (
       // ⚡ On n’écoute la reconnexion que si on vient de se déconnecter
       socket.on("reconnect", handleReconnect);
     });
+
+    socket.on(
+      "typingUpdate",
+      ({ channelId: chId, users }: { channelId: string; users: { id: string; pseudo: string }[] }) => {
+        if (chId !== channelId) return;
+        const currentId = user?.id;
+        const names = users
+          .filter((u) => u.id !== currentId)
+          .map((u) => u.pseudo || u.id);
+        setTypingUsers(names);
+      },
+    );
+
+
     return () => {
       console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
@@ -207,6 +221,8 @@ export const useMessages = (
       socket.off("updateMessageFiles");
       socket.off("pinMessage");
       socket.off("disconnect");
+      socket.off("typingUpdate");
+
     };
   }, [channelId, user]);
   return { messages, pinnedMessage };

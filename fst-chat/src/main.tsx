@@ -73,7 +73,7 @@ const routes = [
       },
       {
         loader: messageLoader,
-        path: "/messages/:channelId",
+        path: "/messages/:serverId/:channelId",
         Component: Chat,
         key: ({ params }) => params.channelId,
       },

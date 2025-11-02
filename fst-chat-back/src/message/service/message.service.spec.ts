@@ -12,6 +12,15 @@ describe('MessageService', () => {
     findByIdAndDelete: jest.fn(),
     exec: jest.fn(),
   };
+  const mockMessageFileModel = {
+    create: jest.fn(),
+    save: jest.fn(),
+  } as any;
+  const mockReactionModel = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,6 +29,14 @@ describe('MessageService', () => {
         {
           provide: getModelToken('Message'),
           useValue: mockMessageModel,
+        },
+        {
+          provide: getModelToken('MessageFile'),
+          useValue: mockMessageFileModel,
+        },
+        {
+          provide: getModelToken('Reaction'),
+          useValue: mockReactionModel,
         },
       ],
     }).compile();

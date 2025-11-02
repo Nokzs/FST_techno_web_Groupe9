@@ -24,6 +24,7 @@ import { ChannelModule } from 'src/channel/module/channel.module';
     ]),
     UserModule,
     TokenModule,
+    UserModule,
     StorageModule.register(provider),
     ConfigModule,
     IaModule.register(iaProvider),

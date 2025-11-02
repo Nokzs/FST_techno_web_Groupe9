@@ -43,7 +43,7 @@ export class Server {
   @ApiProperty({
     description: "le code d'invitation du serveur",
   })
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, index: true })
   inviteCode: string;
 
   @ApiProperty({
@@ -58,6 +58,10 @@ export class Server {
   })
   @Prop({ type: [String], default: [] })
   tags: string[];
+
+  // Rôle par défaut attribué aux nouveaux membres (MEMBER ou READER)
+  @Prop({ required: false, enum: ['MEMBER', 'READER'], default: 'MEMBER' })
+  defaultRole?: string;
 }
 
 export const ServerSchema = SchemaFactory.createForClass(Server);

@@ -1,7 +1,6 @@
 import { redirect, type LoaderFunction } from "react-router-dom";
 import type { Server, Channel } from "../api/servers/servers-page.js";
 import type { messageBotType } from "../component/ui/ChatBotWindows.js";
-import { socket } from "../socket.js";
 import { fileCache, avatarCache } from "../cache/fileCache.js";
 import type { Message, MessageFile } from "../types/messageFileType";
 import { gunzipSync } from "fflate";

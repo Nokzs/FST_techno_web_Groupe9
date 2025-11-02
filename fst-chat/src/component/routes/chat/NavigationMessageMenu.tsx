@@ -275,9 +275,9 @@ export function NavigationMessageMenu({
                           {channels.map((channel:Channel) => (
                             <li key={channel._id}>
                               <NavLink
-                                to={`/messages/${channel._id}`}
+                                to={`/messages/${channel.serverId}/${channel._id}`}
                                 className="truncate"
-                                onMouseEnter={() => fetcher.load(`/messages/${channel._id}`)}
+                                onMouseEnter={() => fetcher.load(`/messages/${channel.serverId}/${channel._id}`)}
                                 onMouseDown={()=>readNotif(channel._id,activeServer._id)}
                               >
                                 <button

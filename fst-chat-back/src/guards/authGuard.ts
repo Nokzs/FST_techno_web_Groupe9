@@ -12,6 +12,7 @@ export class AuthGuard implements CanActivate {
   constructor(private tokenService: TokenService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    Logger.log('AuthGuard: Checking authentication');
     const request: Request = context.switchToHttp().getRequest();
     const token: string = request.cookies['fst_chat_token'];
     if (!token) {

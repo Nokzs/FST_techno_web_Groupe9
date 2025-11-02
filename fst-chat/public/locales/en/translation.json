@@ -5,6 +5,8 @@
             "part2": "Meet new people that share the same hobbies as you",
             "learn": "Learn more"
         },
+        "signin": "Sign in",
+        "signup": "Sign up",
         "translate": "Don't be scared by the language barrier, our app takes it for you"
     },
     "profile": {

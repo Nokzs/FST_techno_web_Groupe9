@@ -7,7 +7,86 @@ import type { Message, MessageFile } from "../types/messageFileType";
 import { gunzipSync } from "fflate";
 import type { UserID } from "../types/user.js";
 import { authRouterContext } from "../context/authRouterContext.js";
+import { messages } from "../assets/exportData.js";
 
+const fetchPinnedMessages = async (channelId: string): Promise<Message[]> => {
+  try {
+    const params = new URLSearchParams({ channelId });
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const response = await fetch(
+      `${API_URL}/messages/pinned?${params.toString()}`,
+      { credentials: "include" },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const messages: Message[] = await response.json();
+
+    return messages;
+  } catch (error) {
+    console.error("Error fetching pinned messages:", error);
+    throw error;
+  }
+};
+export const fetchMessages = async (channelId: string, date: string) => {
+  try {
+    const params = new URLSearchParams({
+      channelId,
+      date, // pas de date pour le fetch initial
+    });
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const response = await fetch(`${API_URL}/messages?${params.toString()}`, {
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: { messages: Message[]; hasMore: boolean } =
+      await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    throw error;
+  }
+};
+const fetchInitialMessages = async (
+  channelId: string,
+): Promise<{
+  messagesArr: Message[];
+  InitialHasMore: boolean;
+}> => {
+  try {
+    const data: { messages: Message[]; hasMore: boolean } = await fetchMessages(
+      channelId,
+      "",
+    );
+    console.log("les messages sont ", messages);
+    // On prend les premiers messages visibles
+    const visibleMessages: Message[] = data.messages.slice(0, 10);
+
+    // Décompression des fichiers et avatars
+    for (const msg of visibleMessages) {
+      if (msg.files?.length) {
+        const decompressedFiles = await Promise.all(
+          msg.files.map(decompressMessageFile),
+        );
+        msg.files = decompressedFiles;
+      }
+
+      if (msg.senderId.urlPicture) {
+        await decompressAvatar(msg.senderId.urlPicture);
+      }
+    }
+
+    return { messagesArr: data.messages, InitialHasMore: data.hasMore };
+  } catch (error) {
+    console.error("Error fetching initial messages:", error);
+    throw error;
+  }
+};
 async function decompressAvatar(url?: string): Promise<void> {
   if (!url) return undefined;
 
@@ -111,8 +190,9 @@ export const messageLoader: LoaderFunction = async (
           text: "Salut 👋, voici les commandes que tu peux utiliser \n -/question suivi de ta question sur la discussion de ce channel",
         },
       ];
+
   // initiliasation des messages
-  const { messagesArr, InitialHasMore } = await new Promise<{
+  /* const { messagesArr, InitialHasMore } = await new Promise<{
     messagesArr: Message[];
     InitialHasMore: boolean;
   }>((resolve, reject) => {
@@ -145,18 +225,18 @@ export const messageLoader: LoaderFunction = async (
 
     // Optionnel : si le serveur ne répond pas après 5s
     setTimeout(() => reject(new Error("Socket timeout")), 10000);
-  });
-
+  }); */
+  const { messagesArr, InitialHasMore } = await fetchInitialMessages(channelId);
   // initiliasation des messages
-  const messagesPinnedArr = await new Promise<Message[]>((resolve, reject) => {
+  /* const messagesPinnedArr = await new Promise<Message[]>((resolve, reject) => {
     socket.emit("getPinnedMessages", channelId, (messages: Message[]) => {
       resolve(messages);
     });
 
     // Optionnel : si le serveur ne répond pas après 5s
     setTimeout(() => reject(new Error("Socket timeout")), 10000);
-  });
-
+  });*/
+  const messagesPinnedArr = await fetchPinnedMessages(channelId);
   return {
     channelId,
     serversData: servers,

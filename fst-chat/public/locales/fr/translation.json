@@ -5,6 +5,8 @@
             "part2": "Découvre de nouvelles personnes qui partagent vos passions",
             "learn": "En savoir plus"
         },
+        "signin": "Se connecter",
+        "signup": "S'inscrire",
         "translate": "N'ayez plus peur de la barrière de la langue, notre application la franchit pour vous"
     },
     "profile": {

@@ -4,6 +4,7 @@ import type { Channel, Server } from "./servers-page";
 import { ChannelList } from "../channels/channels-list";
 import { useOutletContext } from "react-router";
 import { useTranslation } from "react-i18next";
+import { ServerModal } from "../../component/routes/servers/ServerModal";
 
 export function ServerItem({ server }: { server: Server }) {
   const [showChannels, setShowChannels] = useState(false);
@@ -11,7 +12,6 @@ export function ServerItem({ server }: { server: Server }) {
   const [loadingChannels, setLoadingChannels] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
-  const [tags, setTags] = useState(server.tags?.join(", ") || "");
   const [isPublic, setIsPublic] = useState(server.isPublic || false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -41,8 +41,9 @@ export function ServerItem({ server }: { server: Server }) {
 
   const isOwner = currentUser?.id === server.ownerId;
 
-  const handleOpenServer = async () => {
+  const handleOpenServer = async (tags: string) => {
     console.log("Ouverture serveur", server);
+    const splitTags = tags.split(",").map((t) => t.trim());
     try {
       const res = await fetch(`${API_URL}/servers/open`, {
         method: "PUT",
@@ -51,12 +52,13 @@ export function ServerItem({ server }: { server: Server }) {
         body: JSON.stringify({
           serverId: server._id,
           isPublic: true,
-          tags: tags.split(",").map((t) => t.trim()),
+          tags: splitTags,
         }),
       });
       if (!res.ok) throw new Error("Impossible d'ouvrir le serveur");
       setIsPublic(true);
       setShowModal(false);
+      server.tags = splitTags;
     } catch (err) {
       console.error(err);
     }
@@ -134,74 +136,15 @@ export function ServerItem({ server }: { server: Server }) {
       )}
 
       {/* Modal */}
-      {showModal &&
-        createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            {/* Fond semi-transparent + blur */}
-            <div
-              className="absolute inset-0 bg-black opacity-40 backdrop-blur-sm pointer-events-auto transition-opacity duration-300"
-              onClick={() => setShowModal(false)}
-            />
-
-            {/* Contenu de la modal */}
-            <div className="relative bg-gray-300 dark:bg-gray-800 text-white rounded-2xl shadow-2xl w-full max-w-md p-6 pointer-events-auto animate-fadeIn scale-95">
-              <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
-                {isPublic ? t("room.update") : t("room.open")}
-              </h2>
-
-              <label className="block dark:text-white text-black text:black text-sm font-medium mb-1">
-                {t("room.tags")}
-              </label>
-              <input
-                type="text"
-                value={tags}
-                required
-                onChange={(e) => setTags(e.target.value)}
-                className="w-full p-3 rounded-lg mb-4 text-black dark:text-white bg-gray-300 dark:bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 dark:placeholder-gray-300 placeholder-neutral-950"
-                placeholder={t("room.tagsPlaceholder")}
-              />
-
-              <div className="flex justify-between items-center mt-6">
-                {/* Annuler modal */}
-                <button
-                  className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
-                  onClick={() => setShowModal(false)}
-                >
-                  {t("room.cancel")}
-                </button>
-
-                <div className="flex gap-2">
-                  {/* Fermer serveur si déjà public */}
-                  {isPublic && (
-                    <button
-                      className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
-                      onClick={handleCloseServer}
-                    >
-                      {t("room.close")}
-                    </button>
-                  )}
-
-                  {/* Confirmer ouverture / modification */}
-                  <button
-                    className="px-4 py-2 bg-green-500 rounded-lg hover:bg-green-600 transition-colors"
-                    onClick={handleOpenServer}
-                  >
-                    {t("room.confirm")}
-                  </button>
-                </div>
-              </div>
-
-              {/* Bouton fermer (X) */}
-              <button
-                className="absolute top-3 right-3 text-gray-300 hover:text-white font-bold"
-                onClick={() => setShowModal(false)}
-              >
-                X
-              </button>
-            </div>
-          </div>,
-          document.body,
-        )}
+      {showModal && (
+        <ServerModal
+          server={server}
+          isPublic={isPublic}
+          setShowModal={setShowModal}
+          handleCloseServer={handleCloseServer}
+          handleOpenServer={handleOpenServer}
+        />
+      )}
     </li>
   );
 }

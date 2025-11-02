@@ -41,15 +41,30 @@ export class MessageGateway
   ) {
     this.eventEmitter = new EventEmitter();
   }
+  /**
+   * Méthode appelée après l'initialisation du gateway
+   * @description Ecoute l'evenement d'embedding de message afin de soulager le processus d'envoi de message
+   *
+   */
   afterInit() {
     this.eventEmitter.on('embedding', (message: Message) => {
-      Logger.log('je vais embbed');
-      this.messageService.embedMessage(message._id.toString()).then((msg) => {
-        Logger.log(msg);
-      });
+      try{
+        this.messageService.embedMessage(message._id.toString()).then((msg) => {
+          Logger.log(msg);
+        });
+      }
+      catch(E){
+        Logger.log('Erreur lors de l\'embedding du message : ' + E);
+      }
+      
     });
   }
-
+  /**
+   *
+   * Méthode appelée lorsqu'un client se connecte au gateway
+   * @param client Le socket du client connecté
+   * Enregistre l'ID utilisateur dans le socket après vérification du token d'authentification
+   */
   async handleConnection(client: Socket) {
     Logger.log(`New client connected: ${client.id}`);
     const rawCookie = client.handshake?.headers?.cookie;
@@ -91,7 +106,11 @@ export class MessageGateway
       }
     });
   }
-
+  /**
+   * Méthode appelée lorsqu'un client s'initialise
+   * @param server Le serveur WebSocket
+   * @description intègre le client dans la room du channel spécifié
+   */
   @SubscribeMessage('joinChannelRoom')
   handleJoinRoom(
     @MessageBody() channelId: string,
@@ -102,6 +121,11 @@ export class MessageGateway
   }
 
   // Quitter une room
+  /**
+   *
+   * Méthode appelée lorsqu'un client quitte une room
+   * @param channelId L'ID du channel à quitter
+   */
   @SubscribeMessage('leaveChannelRoom')
   handleLeaveRoom(
     @MessageBody() channelId: string,
@@ -111,6 +135,11 @@ export class MessageGateway
     console.log(`Client ${client.id} left channel room ${channelId}`);
   }
 
+  /**
+   *
+   * Méthode appelée lorsqu'un client rejoint la room d'un serveur
+   *
+   */
   @SubscribeMessage('joinServer')
   async handleJoinServerRoom(
     @MessageBody() serverId: string,
@@ -119,7 +148,10 @@ export class MessageGateway
     Logger.log('clientConnected');
     await socket.join(`serveur-${serverId}`);
   }
-
+  /**
+   *
+   * Méthode appelée lorsqu'un client quitte la room d'un serveur
+   */
   @SubscribeMessage('leaveServer')
   async handleLeaveServerRoom(
     @MessageBody() serverId: string,
@@ -128,11 +160,21 @@ export class MessageGateway
     await socket.leave(`serveur-${serverId}`);
   }
 
+  /**
+   * Méthode appelée pour notifier les clients d'une mise à jour du serveur
+   * @param serverId L'ID du serveur mis à jour
+   * @description Émet un événement 'updateServer' à tous les clients dans la room du serveur spécifié
+   */
   @SubscribeMessage('updateServer')
   handleUpdateServer(@MessageBody() serverId: string) {
     this.server.to(`serveur-${serverId}`).emit('updateServer', serverId);
   }
 
+  /**
+   * Méthode appelée lorsqu'un client envoie un message
+   * @param data Les données du message envoyées par le client
+   * @param socket Le socket du client envoyant le message
+   */
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() data: any,
@@ -170,7 +212,11 @@ export class MessageGateway
     }
     return message;
   }
-
+  /**
+   * Méthode appelée lorsqu'un client marque les notifications comme lues
+   * @param messagesData Les données contenant l'ID du channel et l'ID de l'utilisateur
+   * @description Met à jour les notifications pour l'utilisateur spécifié dans le channel donné
+   */
   @SubscribeMessage('read')
   async readNotif(
     @MessageBody() messagesData: { channelId: string; userId: string }
@@ -181,6 +227,12 @@ export class MessageGateway
     await this.channelService.read(messagesData.userId, messagesData.channelId);
   }
 
+  /**
+   *
+   * Méthode appelée lorsqu'un client demande les messages d'un channel
+   * @param messagesData Les données contenant l'ID du channel et la date de référence
+   * @description Récupère les messages du channel spécifié avant la date donnée
+   */
   @SubscribeMessage('getMessages')
   async handleGetMessages(
     @MessageBody() messagesData: { channelId: string; date: string }
@@ -197,6 +249,11 @@ export class MessageGateway
       hasMore,
     };
   }
+  /**
+   * Méthode appelée lorsqu'un client demande les messages épinglés d'un channel
+   * @param channelId L'ID du channel dont les messages épinglés sont demandés
+   * @description Récupère les messages épinglés du channel spécifié
+   */
   @SubscribeMessage('getPinnedMessages')
   async handleGetPinnedMessages(
     @MessageBody() channelId: string
@@ -204,6 +261,14 @@ export class MessageGateway
     const pinnedMessages = await this.messageService.findPinnedMsg(channelId);
     return pinnedMessages.map((msg) => plainToInstance(MessageDto, msg));
   }
+  /**
+   *
+   * Méthode appelée lorsqu'un client ajoute une réaction à un message
+   * @param reaction Les données de la réaction envoyée par le client
+   * @param socket Le socket du client ajoutant la réaction
+   * @description Ajoute la réaction au message spécifié et émet un événement 'newReactions' à tous les clients dans la room du channel
+   *
+   */
   @SubscribeMessage('newReactions')
   async handleNewMessageReaction(
     @MessageBody() reaction: reactionType,
@@ -217,6 +282,11 @@ export class MessageGateway
     );
     this.server.to(reaction.channelId).emit('newReactions', message);
   }
+  /**
+   *
+   * Méthode appelée lorsqu'un client met à jour les fichiers d'un message
+   * @param data Les données du message mises à jour envoyées par le client
+   */
   @SubscribeMessage('updateMessageFiles')
   async handleUpdateMessageFiles(@MessageBody() data: MessageDto) {
     const updatedMessage = await this.messageService.updateMessageFiles(data);
@@ -224,6 +294,11 @@ export class MessageGateway
       .to(updatedMessage.channelId.toString())
       .emit('updateMessageFiles', updatedMessage);
   }
+
+  /**
+   * Méthode appelée lorsqu'un client supprime un message
+   * @param data Les données contenant l'ID du message et l'ID du channel
+   */
   @SubscribeMessage('deleteMessage')
   async handleDeleteMessage(
     @MessageBody() data: { messageId: string; channelId: string }
@@ -231,6 +306,10 @@ export class MessageGateway
     await this.messageService.deleteMessage(data.messageId);
     this.server.to(data.channelId).emit('deleteMessage', data.messageId);
   }
+  /**
+   * Méthode appelée lorsqu'un client épingle un message
+   * @param data Les données du message à épingler
+   */
   @SubscribeMessage('pinMessage')
   async handlePinMessage(@MessageBody() data: MessageDto): Promise<void> {
     if (!data._id) {

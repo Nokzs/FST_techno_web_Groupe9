@@ -17,7 +17,6 @@ export function UserAvatar({ url, rootRef }: UserAvatarProps) {
     let objectUrl: string | null = null;
 
     const loadAvatar = async () => {
-      console.log(url);
       if (avatarCache.has(url)) {
         objectUrl = URL.createObjectURL(avatarCache.get(url)!);
         setAvatarUrl(objectUrl);
@@ -27,7 +26,6 @@ export function UserAvatar({ url, rootRef }: UserAvatarProps) {
         const res = await fetch(url);
         const blob = await res.blob();
         objectUrl = URL.createObjectURL(blob);
-        console.log("l'url est objectUrl", objectUrl);
         avatarCache.set(url, blob);
         if (isMounted) setAvatarUrl(objectUrl);
       } catch (e) {
@@ -55,7 +53,6 @@ export function UserAvatar({ url, rootRef }: UserAvatarProps) {
     }
 
     return () => {
-      console.log("cleanup avatar");
       isMounted = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       observer.disconnect();

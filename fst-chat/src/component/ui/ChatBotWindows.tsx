@@ -61,7 +61,6 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
       userId.language,
       useUserLanguage,
     );
-    return "";
   };
 
   const updateMessagesInStorage = (
@@ -76,28 +75,28 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     return messageAfterUpdate;
   };
 
-const handleSend = async () => {
-  if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-  // Ajouter le message utilisateur
-  const userMessage: messageBotType = { from: "user", text: input };
-  setMessages((prev) => updateMessagesInStorage(prev, userMessage));
+    // Ajouter le message utilisateur
+    const userMessage: messageBotType = { from: "user", text: input };
+    setMessages((prev) => updateMessagesInStorage(prev, userMessage));
 
-  setInput("");
+    setInput("");
 
-  // Afficher le typing avant de générer la réponse
-  setTyping(true);
+    // Afficher le typing avant de générer la réponse
+    setTyping(true);
 
-  // Attendre la réponse
-  const answer = await parseInput(input);
+    // Attendre la réponse
+    const answer = await parseInput(input);
 
-  // Ajouter le message du bot
-  const botMessage: messageBotType = { from: "bot", text: answer };
-  setMessages((prev) => updateMessagesInStorage(prev, botMessage));
+    // Ajouter le message du bot
+    const botMessage: messageBotType = { from: "bot", text: answer };
+    setMessages((prev) => updateMessagesInStorage(prev, botMessage));
 
-  // Arrêter le typing
-  setTyping(false);
-};
+    // Arrêter le typing
+    setTyping(false);
+  };
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
@@ -138,7 +137,6 @@ const handleSend = async () => {
 
             {/* Zone de messages */}
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 flex flex-col-reverse bg-gray-50">
-
               {typing && (
                 <div className="flex justify-start">
                   <div className="px-3 py-2 rounded-xl bg-gray-200 text-gray-800 text-sm animate-pulse rounded-bl-none">

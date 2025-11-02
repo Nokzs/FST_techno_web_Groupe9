@@ -102,7 +102,6 @@ export function NavigationMessageMenu({
     init();
    // rejoindre les rooms WebSocket
     serversData.forEach((serverId:Server) => {
-      console.log(serverId._id)
       socket.emit("joinServer", serverId._id);
     });
     return ()=>{
@@ -126,9 +125,7 @@ export function NavigationMessageMenu({
       });
     }
     socket.on("newNotification",(newNotif:notification)=>{
-     console.log("coucou") 
       if(newNotif.channelId!== channelId && !newNotif.seenBy.includes(userId)){
-        console.log(newNotif) 
         SetNotif(prev => {
           const server = prev[newNotif.serverId] || { total: 0, channels: {} };
           const channelNotifs = server.channels[newNotif.channelId] || [];
@@ -144,9 +141,6 @@ export function NavigationMessageMenu({
             },
           };
         });
-      }
-      else{
-        console.log("j'ignore")
       }
     })
     return () => {

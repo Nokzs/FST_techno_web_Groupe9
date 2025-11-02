@@ -34,7 +34,6 @@ export function MessageItem({
     message.replyMessage && message.receiverId?._id === currentUserId;
 
   const date = new Date(message.createdAt);
-  console.log(message);
   const formattedDate = date.toLocaleTimeString([], {
     day: "2-digit",
     month: "2-digit",
@@ -79,12 +78,7 @@ export function MessageItem({
   );
 
   function deleteMessage() {
-    fetch(`/api/messages/delete`, {
-      method: "POST",
-      credentials: "include",
-    }).then(() => {
-      socket.emit("deleteMessage", { messageId: message._id, channelId });
-    });
+    socket.emit("deleteMessage", { messageId: message._id, channelId });
   }
 
   const pinMessage = () => {

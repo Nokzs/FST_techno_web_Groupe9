@@ -20,7 +20,6 @@ export const sendCommand = async (
     useUserLanguage,
   });
 
-  console.log("Sending command to chatbot:", body);
   const answerData = await fetch(
     `${import.meta.env.VITE_API_URL}/chatBot/command`,
     {

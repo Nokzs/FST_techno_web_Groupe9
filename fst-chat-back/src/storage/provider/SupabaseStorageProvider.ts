@@ -61,10 +61,10 @@ export class SupabaseStorageProvider implements IStorageProvider {
     salonId?: string
   ): string {
     const bucket: string = this.getBucket(eventType, salonId);
-    const { data, error } = this.supabaseClient.storage
+    const { data } = this.supabaseClient.storage
       .from(bucket)
       .getPublicUrl(fileName);
-    if (error || !data.publicUrl) {
+    if (!data.publicUrl) {
       throw new Error("impossible de récupérer l'url publique");
     }
     return data.publicUrl;

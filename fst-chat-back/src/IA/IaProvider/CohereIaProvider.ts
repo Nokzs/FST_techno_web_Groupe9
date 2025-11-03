@@ -151,7 +151,6 @@ ${text}
     const cachedAnswers: QuestionCache[] =
       await this.cacheService.getCachedAnswers(channelId);
 
-    
     // 2️⃣ Vérifier le cache
     for (const cacheEntry of cachedAnswers) {
       const similarity = this.cosineSimilarity(

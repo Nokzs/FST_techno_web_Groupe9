@@ -25,7 +25,7 @@ export const useMessages = (
   setReplyMessage: Dispatch<SetStateAction<Message | undefined>>,
   user: User | null,
   messageRef: RefObject<HTMLDivElement | null>,
-  setTypingUsers: Dispatch<SetStateAction<string[]>>
+  setTypingUsers: Dispatch<SetStateAction<string[]>>,
 ): {
   messages: Message[];
   pinnedMessage: Message[];
@@ -201,7 +201,13 @@ export const useMessages = (
 
     socket.on(
       "typingUpdate",
-      ({ channelId: chId, users }: { channelId: string; users: { id: string; pseudo: string }[] }) => {
+      ({
+        channelId: chId,
+        users,
+      }: {
+        channelId: string;
+        users: { id: string; pseudo: string }[];
+      }) => {
         if (chId !== channelId) return;
         const currentId = user?.id;
         const names = users
@@ -210,7 +216,6 @@ export const useMessages = (
         setTypingUsers(names);
       },
     );
-
 
     return () => {
       console.log("je quitte la room");
@@ -222,7 +227,6 @@ export const useMessages = (
       socket.off("pinMessage");
       socket.off("disconnect");
       socket.off("typingUpdate");
-
     };
   }, [channelId, user]);
   return { messages, pinnedMessage };

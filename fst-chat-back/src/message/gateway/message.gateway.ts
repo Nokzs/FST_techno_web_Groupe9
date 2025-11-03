@@ -45,7 +45,6 @@ export class MessageGateway
 
   private userPseudoCache = new Map<string, string>();
 
-  
   eventEmitter: EventEmitter;
   constructor(
     private readonly messageService: MessageService,
@@ -54,7 +53,6 @@ export class MessageGateway
     private readonly userService: UserService
   ) {
     this.eventEmitter = new EventEmitter();
-  
   }
   /**
    * Méthode appelée après l'initialisation du gateway
@@ -63,18 +61,15 @@ export class MessageGateway
    */
   afterInit() {
     this.eventEmitter.on('embedding', (message: Message) => {
-      try{
+      try {
         this.messageService.embedMessage(message._id.toString()).then((msg) => {
           Logger.log(msg);
         });
+      } catch (E) {
+        Logger.log("Erreur lors de l'embedding du message : " + E);
       }
-      catch(E){
-        Logger.log('Erreur lors de l\'embedding du message : ' + E);
-      }
-      
     });
   }
-
 
   private async getUserPseudo(userId: string): Promise<string> {
     const cached = this.userPseudoCache.get(userId);

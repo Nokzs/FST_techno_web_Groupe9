@@ -24,7 +24,8 @@ export default defineConfig({
     },
   },
   // ne pas toucher pour permettre le deploiement
-  base: "/fst-tchat-front/",
+  base: "./",
+
   test: {
     environment: "jsdom",
     globals: true,

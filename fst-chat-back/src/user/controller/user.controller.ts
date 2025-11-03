@@ -44,20 +44,21 @@ export class UserController {
   @Get('/profilPictureUrl')
   async getPublicProfilePicture(@Req() req: Request): Promise<PublicUrlDTO> {
     const id = req['user'].sub as string;
+    Logger.log('');
     const user = await this.userService.findById(id);
     if (!user) {
       throw new NotFoundException();
     }
     const url = this.storage.getPublicUrl(
-      `${id}/profilePicture`,
-      'profilePicture'
+      `/${id}/profilePicture`,
+      'profilePicture',
+      id
     );
     return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
   @UseGuards(AuthGuard)
   @Put('update')
   async updateUser(@Body() body: UpdateUserDTO, @Req() req: Request) {
-    Logger.log('update requested');
     console.log(body);
     const id = req['user'].sub as string;
     const user = await this.userService.findById(id);

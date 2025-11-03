@@ -5,7 +5,7 @@ export const uploadFile = async (
   compress: boolean,
 ) => {
   const formData = new FormData();
-  let fileUrl;
+  let fileUrl = file;
   if (compress) {
     // Lire le fichier en ArrayBuffer
     const arrayBuffer = new Uint8Array(await file.arrayBuffer());

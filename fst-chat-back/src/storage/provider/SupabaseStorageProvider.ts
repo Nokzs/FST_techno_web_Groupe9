@@ -1,6 +1,6 @@
 import { IStorageProvider } from './IStorageProvider';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TYPE_EVENT } from '../typeEvent';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
@@ -22,9 +22,9 @@ export class SupabaseStorageProvider implements IStorageProvider {
     this.supabaseClient = createClient(supabaseUrl, supabaseKey);
   }
 
-  getBucket(eventType: 'profilePicture' | 'messageFile', Id?: string): string {
-    if (!Id) throw new Error('id requis');
-    return TYPE_EVENT[eventType].bucket + Id;
+  getBucket(eventType: 'profilePicture' | 'messageFile', Id2?: string): string {
+    Logger.log('dans getBucket', Id2);
+    return TYPE_EVENT[eventType].bucket + Id2;
   }
 
   async SendSignUploadUrl(
@@ -32,7 +32,9 @@ export class SupabaseStorageProvider implements IStorageProvider {
     eventType: 'profilePicture' | 'messageFile',
     id?: string
   ): Promise<SignedUrlDTO> {
+    Logger.log('début,upload', id);
     const bucket = this.getBucket(eventType, id);
+    Logger.log(bucket, 'apres gutBuckets');
     const { data, error } = await this.supabaseClient.storage
       .from(bucket)
       .createSignedUploadUrl(fileName, {

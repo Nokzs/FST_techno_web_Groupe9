@@ -1,4 +1,4 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards, Logger } from '@nestjs/common';
 import { Inject, Body, Req, Post } from '@nestjs/common';
 import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
@@ -20,10 +20,12 @@ export class StorageController {
     console.log('body', body);
     const payload: JwtPayload = req['user'] as JwtPayload;
     const id = payload.sub;
+    const effectID = body.salonId ? body.salonId : id;
+    Logger.log(id, 'dans la route');
     const data = await this.storage.SendSignUploadUrl(
       `${id}/${body.fileName}`,
       body.eventType,
-      body.salonId || id
+      effectID
     );
     return data;
   }

@@ -42,7 +42,8 @@ export function Profil() {
         "profilePicture",
         "profilePicture",
       );
-
+      console.log(signedUrl);
+      console.log(pictureRef.current);
       await uploadFile(pictureRef.current, signedUrl, false);
       const { publicUrl } = await getProfilUrl();
       user.urlPicture = publicUrl || user.urlPicture;

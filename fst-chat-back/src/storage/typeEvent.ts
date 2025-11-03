@@ -1,4 +1,4 @@
 export const TYPE_EVENT = {
-  profilPicture: { bucket: 'fstChatProfilPictureBucket' },
+  profilePicture: { bucket: 'fstChatProfilPictureBucket' },
   messageFile: { bucket: 'fstChatMessageFileBucket' },
 };

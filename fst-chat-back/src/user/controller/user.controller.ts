@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  Param,
   UseGuards,
   Inject,
   Put,
@@ -50,7 +49,7 @@ export class UserController {
       throw new NotFoundException();
     }
     const url = this.storage.getPublicUrl(
-      `${id}/profilPicture`,
+      `${id}/profilePicture`,
       'profilePicture'
     );
     return plainToInstance(PublicUrlDTO, { publicUrl: url });

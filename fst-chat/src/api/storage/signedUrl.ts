@@ -1,6 +1,6 @@
 export const getSignedUrl = async (
   fileName: string,
-  eventType: "profilPicture" | "messageFile",
+  eventType: "profilePicture" | "messageFile",
   salonId?: string,
 ): Promise<{ signedUrl: string; path: string }> => {
   const apiUrl = import.meta.env.VITE_API_URL;

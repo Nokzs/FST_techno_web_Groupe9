@@ -39,8 +39,8 @@ export function Profil() {
   const onUpdateSubmit = async () => {
     if (pictureRef.current) {
       const { signedUrl } = await getSignedUrl(
-        "profilPicture",
-        "profilPicture",
+        "profilePicture",
+        "profilePicture",
       );
 
       await uploadFile(pictureRef.current, signedUrl, false);

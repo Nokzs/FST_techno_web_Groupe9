@@ -50,11 +50,7 @@ export class MessageController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  async create(
-    @Body() createMessageDto: CreateMessageDto,
-    @Req() req: Request
-  ): Promise<Message> {
-    const id = req['user'].sub;
+  async create(@Body() createMessageDto: CreateMessageDto): Promise<Message> {
     const message = await this.messageService.create(createMessageDto);
     if (!message) {
       throw new InternalServerErrorException(

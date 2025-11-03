@@ -1,4 +1,10 @@
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  type ChangeEvent,
+  type DragEvent,
+  useEffect,
+} from "react";
 import EmojiPicker, {
   type EmojiClickData,
   SkinTones,
@@ -51,13 +57,13 @@ export function ChatInput({
   const scheduleStopTyping = () => {
     if (!channelId) return;
     // annule l ancien timer
-    if (typingStopTimerRef.current) window.clearTimeout(typingStopTimerRef.current);
+    if (typingStopTimerRef.current)
+      window.clearTimeout(typingStopTimerRef.current);
     typingStopTimerRef.current = window.setTimeout(() => {
       socket.emit("stopTyping", { channelId });
       typingStopTimerRef.current = null;
     }, 2000);
   };
-
 
   // force le stopTyping au serveur (quand le message est envoyé)
   const stopTypingNow = () => {
@@ -85,14 +91,15 @@ export function ChatInput({
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     messageRef.current = e.target.value;
     setMessage(e.target.value);
-    
+
     emitTypingThrottled();
     scheduleStopTyping();
   };
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     filesLengthRef.current += e.target.files.length;
-    setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+    const fileArr = e.target.files ? Array.from(e.target.files) : [];
+    setFiles((prev) => [...prev, ...fileArr]);
   };
 
   const handleRemoveFile = (index: number) => {

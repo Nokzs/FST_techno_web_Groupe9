@@ -18,7 +18,7 @@ export function Compte() {
       "confirm",
       confirmPasswordRef.current?.value,
     );
-    if (passwordRef.current?.value?.length < 6) {
+    if (passwordRef.current && passwordRef.current?.value?.length < 6) {
       setError(true);
       return;
     } else {

@@ -48,7 +48,10 @@ export function MembersList({
               />
             ))}
             <div className="fixed bottom-0 w-full md:w-64 p-3 bg-gray-50 dark:bg-gray-900">
-              <ProfilItem user={user} isOnline={onlineIds.includes(user?.id)} />
+              <ProfilItem
+                user={user}
+                isOnline={onlineIds.includes(user?.id || "")}
+              />
             </div>
           </ul>
         ) : (

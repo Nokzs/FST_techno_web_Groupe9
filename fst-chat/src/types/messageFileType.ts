@@ -1,4 +1,4 @@
-import type { User } from "../../../types/user";
+import type { User } from "./user";
 export interface MessageFile {
   _id?: string;
   originalName: string;
@@ -12,6 +12,7 @@ export type reaction = {
 };
 export interface Message {
   _id: string;
+  id?: string;
   channelId: string;
   receiverId?: User;
   content: string;

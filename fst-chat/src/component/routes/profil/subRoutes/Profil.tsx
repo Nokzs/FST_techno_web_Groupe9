@@ -18,15 +18,22 @@ export function Profil() {
   const pictureRef = useRef<File>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const cancelUpdate = () => {
-    pseudoRef.current.value = user.pseudo;
-    bioRef.current.value = user.bio;
-    langsRef.current.value = user.language;
-    imgRef.current.src =
-      user.urlPicture || "https://avatar.iran.liara.run/public/20";
+    if (pseudoRef.current) {
+      pseudoRef.current.value = user.pseudo;
+    }
+    if (bioRef.current) {
+      bioRef.current.value = user.bio || "";
+    }
+    if (langsRef.current) {
+      langsRef.current.value = user.language;
+    }
+    if (imgRef.current) {
+      imgRef.current.src =
+        user.urlPicture || "https://avatar.iran.liara.run/public/20";
+    }
     setModif(false);
   };
   const handleModif = () => {
-    console.log("j'affiche");
     if (!modif) setModif(true);
   };
   const onUpdateSubmit = async () => {
@@ -69,7 +76,7 @@ export function Profil() {
         handleModif={handleModif}
       />
       <UpdateInput
-        value={user.bio}
+        value={user.bio || ""}
         name="bio"
         type="textarea"
         ref={bioRef}

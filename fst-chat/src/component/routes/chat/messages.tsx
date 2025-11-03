@@ -63,14 +63,14 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
   }, []);
 
   const addMessage = async (text: string, files: File[]) => {
-    if (!user.id || !channelId) return;
+    if (!user?.id || !channelId) return;
 
     const messagesFiles: MessageFile[] = [];
 
     // Cas avec fichiers
     if (files.length > 0) {
       const optimisticMessage = {
-        senderId: user.id,
+        senderId: user?.id,
         channelId,
         content: text,
         receiverId: replyMessage ? replyMessage.senderId._id : undefined,
@@ -81,6 +81,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
 
       // Envoi de la version finale avec fichiers
       const finalMessage = {
+        _id:"",
         senderId: user.id,
         channelId,
         content: text,
@@ -119,10 +120,10 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     } else {
       // Cas sans fichiers : envoi direct
       const message = {
-        senderId: user.id,
+        senderId: user?.id,
         channelId,
         content: text,
-        receiverId: replyMessage ? replyMessage.senderId._id : undefined,
+        receiverId: replyMessage ? replyMessage.senderId?._id : undefined,
         replyMessage: replyMessage || null,
         files: [],
         sending: false,
@@ -278,7 +279,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
 
         {/* Bouton pour ouvrir le drawer des messages épinglés */}
         <button
-          onClick={() => setDrawerOpen(draw => !draw)}
+          onClick={() => setDrawerOpen((draw) => !draw)}
           className="px-4 py-2 bg-yellow-400 text-black rounded mb-2 self-start"
         >
           📌 Messages épinglés
@@ -295,10 +296,10 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
             <MessageItem
               ROLE={myRole}
               key={msg._id + index}
-              messageRef={messagesRef!}
+              messageRef={messagesRef}
               message={msg}
               isOwner={msg.senderId._id === user?.id}
-              currentUserId={user?.id}
+              currentUserId={user?.id || ""}
               channelId={channelId!}
               onReply={setReplyMessage}
             />

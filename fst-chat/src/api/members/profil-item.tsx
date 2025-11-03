@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import type { User } from "../../types/user";
 import { useTranslation } from "react-i18next";
 type profilItemProps = {
-  user: User;
+  user: User | null;
   isOnline: boolean;
 };
 export const ProfilItem = ({ user, isOnline }: profilItemProps) => {

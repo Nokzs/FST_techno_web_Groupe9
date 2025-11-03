@@ -16,7 +16,7 @@ interface MessageProps {
   message: Message;
   onReply?: (message: Message) => void;
   channelId?: string;
-  messageRef?: React.RefObject<HTMLDivElement>;
+  messageRef?: React.RefObject<HTMLDivElement | null>;
   isOwner: boolean;
   ROLE?: AppRole;
 }
@@ -35,7 +35,7 @@ export function MessageItem({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isReplyToMe =
-    message.replyMessage && message.receiverId?._id === currentUserId;
+    message.replyMessage && (message.receiverId?._id as string) === currentUserId;
 
   const date = new Date(message.createdAt);
   const formattedDate = date.toLocaleTimeString([], {
@@ -213,7 +213,7 @@ export function MessageItem({
                           onClick={() => {
                             onReply?.({
                               ...message,
-                              receiverId: message.senderId._id,
+                              receiverId: message.senderId,
                             });
                             setMenuOpen(false);
                           }}
@@ -264,7 +264,7 @@ export function MessageItem({
               <AnimatePresence mode="popLayout">
                 {Object.entries(grouped).map(([emoji, users]) => {
                   const reacted = users.some(
-                    (user) => user._id === currentUserId,
+                    (user) => {return user._id === currentUserId},
                   );
                   return (
                     <motion.button

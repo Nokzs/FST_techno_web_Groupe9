@@ -4,7 +4,7 @@ export type UserID = {
 
 export type User = {
   id: string;
-
+  _id?:string;
   email: string;
 
   pseudo: string;

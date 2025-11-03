@@ -3,7 +3,7 @@ import { avatarCache } from "../../cache/fileCache";
 
 interface UserAvatarProps {
   url?: string;
-  rootRef?: React.RefObject<HTMLElement>; // scroll container
+  rootRef?: React.RefObject<HTMLElement | null>; // scroll container
 }
 
 export function UserAvatar({ url, rootRef }: UserAvatarProps) {

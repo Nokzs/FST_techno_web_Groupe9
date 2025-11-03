@@ -105,7 +105,7 @@ export async function decompressMessageFile(
 ): Promise<MessageFile> {
   try {
     // On récupère le fichier compressé
-    let fileUrl = fileCache.get(file._id);
+    let fileUrl = fileCache.get(file._id || "");
     const nameWithoutGz = file.originalName.replace(/\.gz$/, "");
     if (!file.originalMymeType) {
       return file;
@@ -122,7 +122,7 @@ export async function decompressMessageFile(
         type: file.originalMymeType || file.mimetype || "image/",
       });
       fileUrl = URL.createObjectURL(blob);
-      fileCache.set(file._id, fileUrl);
+      fileCache.set(file._id || "", fileUrl);
     }
 
     return {

@@ -6,7 +6,7 @@ import { AudioPlayer } from "react-audio-play";
 import { useDarkMode } from "../../../hooks/useDarkMode";
 type FilePreviewProps = {
   file: MessageFile;
-  scrollContainerRef?: React.RefObject<HTMLElement>; // facultatif
+  scrollContainerRef?: React.RefObject<HTMLElement | null>; // facultatif
 };
 
 export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {

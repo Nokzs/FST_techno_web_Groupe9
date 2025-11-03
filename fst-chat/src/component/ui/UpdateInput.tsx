@@ -1,5 +1,5 @@
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
-import penSvg from "../../assets/edit-pen-svgrepo-com.svg";
+import penSvg from "../../assets/edit-pen-svgrepo-com.svg?url";
 import { cn } from "../../utils/cn";
 type updateInputProps = {
   value: string;

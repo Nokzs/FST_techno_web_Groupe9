@@ -23,16 +23,18 @@ type ServerNotifications = {
 };
 async function fetchAllNotifications(userServers: Server[],userId:string) {
   const notifications: Record<string, ServerNotifications> = {};
+  console.log("user",userId)
+  const param =  new URLSearchParams({userId})
   const apiUrl = import.meta.env.VITE_API_URL
   await Promise.all(
     userServers.map(async server => {
       // Récupération des channels + notifications pour ce serveur
       const signal = new AbortController().signal
-      const userChannel = await fetch(`${apiUrl}/channels/${server._id}`, {
+      const userChannel = await fetch(`${apiUrl}/channels/${server._id}?${param.toString()}`, {
         signal,
         credentials: "include",
       }).then((r) => r.json());
-
+      console.log(userChannel)
       const channels: ChannelNotifications = {};
       let total = 0;
 
@@ -273,7 +275,8 @@ export function NavigationMessageMenu({
                     ) : (
                       <ul className="space-y-1 mt-2">
                           {channels.map((channel:Channel) => (
-                            <li key={channel._id}>
+
+                            <li key={channel.id}>
                               <NavLink
                                 to={`/messages/${channel.serverId}/${channel._id}`}
                                 className="truncate"

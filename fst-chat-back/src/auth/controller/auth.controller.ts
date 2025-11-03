@@ -114,6 +114,18 @@ export class AuthController {
       message: 'Connexion reussie.',
     };
   }
+  @Post('/logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Déconnecte un utilisateur',
+    description: 'Cette route permet de déconnecter un utilisateur.',
+  })
+  async logout(@Res() res: Response) {
+    await this.authService.clearCookie(res);
+    return {
+      message: 'Déconnexion réussie.',
+    };
+  }
   @ApiUnauthorizedResponse({
     description: 'Token manquant',
   })

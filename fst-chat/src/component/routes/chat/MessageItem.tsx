@@ -8,6 +8,8 @@ import { cn } from "../../../utils/cn";
 import { AnimatePresence, motion, easeInOut, easeIn } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "../../ui/userAvatar";
+import { can } from "../../../utils/roles";
+import type { AppRole } from "../../../utils/roles";
 
 interface MessageProps {
   currentUserId: string;
@@ -16,6 +18,7 @@ interface MessageProps {
   channelId?: string;
   messageRef?: React.RefObject<HTMLDivElement>;
   isOwner: boolean;
+  ROLE?: AppRole;
 }
 
 export function MessageItem({
@@ -25,6 +28,7 @@ export function MessageItem({
   channelId,
   messageRef,
   isOwner,
+  ROLE,
 }: MessageProps) {
   const { t } = useTranslation();
   const [showReactionMenu, setShowReactionMenu] = useState(false);
@@ -229,16 +233,19 @@ export function MessageItem({
                           {t("tchat.deleteMessage")}
                         </li>
                       )}
-
-                      <li
-                        className="px-3 py-2 hover:bg-gray-200 cursor-pointer text-black font-medium"
-                        onClick={() => {
-                          pinMessage();
-                          setMenuOpen(false);
-                        }}
-                      >
-                        {t("tchat.pinMessage")}
-                      </li>
+                      {can(ROLE, "ADMIN") && (
+                        <li
+                          className="px-3 py-2 hover:bg-gray-200 cursor-pointer text-black font-medium"
+                          onClick={() => {
+                            pinMessage();
+                            setMenuOpen(false);
+                          }}
+                        >
+                          {!message.isPin
+                            ? t("tchat.pinMessage")
+                            : t("tchat.unpinMessage")}
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}

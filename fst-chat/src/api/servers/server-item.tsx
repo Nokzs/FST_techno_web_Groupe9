@@ -7,7 +7,15 @@ import { useTranslation } from "react-i18next";
 import { ServerModal } from "../../component/routes/servers/ServerModal";
 
 // ðŸ”¹ Composant interne pour un seul serveur
-export function ServerItem({ server, role, onRemoved }: { server: Server; role?: AppRole; onRemoved?: (serverId: string) => void }) {
+export function ServerItem({
+  server,
+  role,
+  onRemoved,
+}: {
+  server: Server;
+  role?: AppRole;
+  onRemoved?: (serverId: string) => void;
+}) {
   const [showChannels, setShowChannels] = useState(false);
   const [channels, setChannels] = useState(server.channels || []);
   const [loadingChannels, setLoadingChannels] = useState(false);
@@ -99,37 +107,36 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
   async function leaveServer(serverId: string) {
     try {
       const res = await fetch(`${API_URL}/servers/leave`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ serverId }),
       });
       if (res.ok) {
         onRemoved?.(serverId);
       } else {
-        console.error('Erreur quitter serveur:', await res.text());
+        console.error("Erreur quitter serveur:", await res.text());
       }
     } catch (err) {
-      console.error('Erreur quitter serveur:', err);
+      console.error("Erreur quitter serveur:", err);
     }
   }
 
   async function deleteServer(serverId: string) {
     try {
       const res = await fetch(`${API_URL}/servers/${serverId}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
       if (res.ok) {
         onRemoved?.(serverId);
       } else {
-        console.error('Erreur suppression serveur:', await res.text());
+        console.error("Erreur suppression serveur:", await res.text());
       }
     } catch (err) {
-      console.error('Erreur suppression serveur:', err);
+      console.error("Erreur suppression serveur:", err);
     }
   }
-
 
   return (
     <li className="w-[98%] max-w-full p-4 rounded-2xl shadow-md  dark:bg-gray-100 text-gray-900 border border-gray-200 transition-transform duration-200 transform hover:shadow-lg hover:scale-[1.02] origin-center">
@@ -169,25 +176,38 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
           )}
         </div>
         <div className="flex items-center gap-3">
-          {role !== 'CREATOR' && (
+          {role !== "CREATOR" && (
             <button
               className="text-red-600 text-sm hover:underline"
-              onClick={(e) => { e.stopPropagation(); leaveServer((server._id ?? server.id)!); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                leaveServer((server._id ?? server.id)!);
+              }}
               title="Quitter ce serveur"
             >
-              Quitter
+              {t("server.leave")}
             </button>
           )}
-          {can(role, 'CREATOR') && (
-          <button
-            className="text-red-700 text-sm hover:underline"
-            onClick={(e) => { e.stopPropagation(); deleteServer((server._id ?? server.id)!); }}
-            title="Supprimer le serveur"
-          >
-            Supprimer
-          </button>
+          {can(role, "CREATOR") && (
+            <button
+              className="text-red-700 text-sm hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteServer((server._id ?? server.id)!);
+              }}
+              title="Supprimer le serveur"
+            >
+              Supprimer
+            </button>
           )}
-          <button className="text-gray-500" onClick={(e) => { e.stopPropagation(); toggleChannels(); }} title={showChannels ? "Réduire" : "Dérouler"}>
+          <button
+            className="text-gray-500"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleChannels();
+            }}
+            title={showChannels ? "Réduire" : "Dérouler"}
+          >
             {showChannels ? "▼" : "►"}
           </button>
         </div>
@@ -211,7 +231,7 @@ export function ServerItem({ server, role, onRemoved }: { server: Server; role?:
       )}
 
       {/* Bouton pour ouvrir la modal */}
-      {isOwner && (
+      {can(role, "CREATOR") && (
         <button
           className={`mt-4 px-3 py-1 rounded text-white ${
             isPublic

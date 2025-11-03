@@ -229,7 +229,6 @@ export class MessageGateway
         message._id.toString(),
         dto.senderId
       );
-      Logger.log(notif.serverId);
       this.server
         .to(`serveur-${notif.serverId}`)
         .emit('newNotification', notif);

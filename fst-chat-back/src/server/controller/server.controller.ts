@@ -19,7 +19,6 @@ import { ServerDto } from '../DTO/server.dto';
 import { AuthGuard } from '../../guards/authGuard';
 import { CreateServerDto } from '../DTO/create-server.dto';
 import { CreateServerRequestDto } from '../DTO/create-server-request-dto';
-import { isAdminGuard } from 'src/guards/isAdminGuard';
 import type { Request } from 'express';
 import {
   ApiBearerAuth,
@@ -27,7 +26,6 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiProperty,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -229,23 +227,18 @@ export class ServerController {
       throw new NotFoundException("Code d'invitation invalide");
     }
     const profile = await this.userService.findById(
-        userId as unknown as string
-      );
-      const srvId = (server as any)._id?.toString?.();
-      console.log('[ServerController] joinServer -> emitting member joined', {
-        srvId,
-      });
-      this.serverGateway.emitServerMemberJoined(srvId, profile);
-      if (srvId) {
-        // Attribue le rôle par défaut configuré sur le serveur (fallback MEMBER)
-        const defaultRole =
-          ((server as any)?.defaultRole as Role) ?? Role.MEMBER;
-        await this.rolesService.setUserRole(
-          srvId,
-          userId as string,
-          defaultRole
-        );
-      }
+      userId as unknown as string
+    );
+    const srvId = (server as any)._id?.toString?.();
+    console.log('[ServerController] joinServer -> emitting member joined', {
+      srvId,
+    });
+    this.serverGateway.emitServerMemberJoined(srvId, profile);
+    if (srvId) {
+      // Attribue le rôle par défaut configuré sur le serveur (fallback MEMBER)
+      const defaultRole = ((server as any)?.defaultRole as Role) ?? Role.MEMBER;
+      await this.rolesService.setUserRole(srvId, userId as string, defaultRole);
+    }
     return;
   }
 
@@ -259,8 +252,9 @@ export class ServerController {
   })
   @ApiNotFoundResponse({})
   @ApiBearerAuth()
+  @Roles(Role.CREATOR)
   @Put('open')
-  @UseGuards(AuthGuard, isAdminGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   async open(
     @Req() request: Request,
     @Body() body: { serverId: string; tags: string[] }
@@ -289,8 +283,9 @@ export class ServerController {
   @ApiInternalServerErrorResponse({
     description: 'Erreur lors de la fermeture du serveur',
   })
+  @Roles(Role.CREATOR)
   @Put('close')
-  @UseGuards(AuthGuard, isAdminGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   async close(
     @Req() request: Request,
     @Body() body: { serverId: string; tags: string[] }
@@ -303,12 +298,22 @@ export class ServerController {
     return plainToInstance(ServerDto, server);
   }
 
+  @ApiOperation({
+    description: 'Récupère le serveur associé à un salon donné',
+  })
+  @ApiOkResponse({
+    type: ServerDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Serveur introuvable',
+  })
   @Get('/channel/:channelId')
   @UseGuards(AuthGuard)
   async getServersFromChannel(
     @Param('channelId') channelId: string
   ): Promise<ServerDto | null> {
     const server = await this.serverService.getFromChannelId(channelId);
+    if (!server) throw new NotFoundException('Serveur introuvable');
     const dto = plainToInstance(ServerDto, server);
     return dto;
   }

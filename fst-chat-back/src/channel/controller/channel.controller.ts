@@ -6,10 +6,12 @@ import {
   Param,
   Post,
   UseGuards,
+  Query,
   Logger,
   ServiceUnavailableException,
   NotFoundException,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { AuthGuard } from '../../guards/authGuard';
@@ -37,7 +39,6 @@ export class ChannelController {
     private readonly channelService: ChannelService,
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider,
     private readonly serverGateway: ServerGateway
-
   ) {}
 
   @ApiUnauthorizedResponse({
@@ -79,13 +80,23 @@ export class ChannelController {
   @Get('/:id')
   @UseGuards(AuthGuard)
   async getChannelsByServer(
-    @Param('id') serverId: string
+    @Param('id') serverId: string,
+    @Req() req: Request
   ): Promise<ChannelDto[]> {
-    const channels = await this.channelService.getChannelsByServer(serverId);
+    const id = req['user'].sub;
+    const channels = await this.channelService.getChannelsWithNotifications(
+      id,
+      serverId
+    );
     if (!channels) {
       throw new NotFoundException("il n'y a aucun channel pour ce serveur");
     }
-    return channels.map((channel) => plainToInstance(ChannelDto, channel));
+
+    const channelsDto = channels.map((channel) =>
+      plainToInstance(ChannelDto, channel)
+    );
+
+    return channelsDto;
   }
 
   @Get('/detail/:channelId')

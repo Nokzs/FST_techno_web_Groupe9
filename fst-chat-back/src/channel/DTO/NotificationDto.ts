@@ -38,4 +38,10 @@ export class NotificationDto {
   })
   @Expose()
   seenBy: string[];
+
+  @ApiProperty({
+    description: 'date de création et de mise à jour de la notification',
+  })
+  @Expose()
+  createdAt: Date;
 }

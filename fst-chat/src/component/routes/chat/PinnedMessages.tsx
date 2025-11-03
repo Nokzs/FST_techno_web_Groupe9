@@ -3,11 +3,13 @@ import { FilePreview } from "./FilePreview";
 import type { Message, MessageFile } from "../../../types/messageFileType";
 import { socket } from "../../../socket";
 import { UserAvatar } from "../../ui/userAvatar";
+import { can, type AppRole } from "../../../utils/roles";
 type PinnedMessagesProps = {
   messages: Message[];
+  role:AppRole
 };
 
-export const PinnedMessages: React.FC<PinnedMessagesProps> = ({ messages }) => {
+export const PinnedMessages: React.FC<PinnedMessagesProps> = ({ messages,role }) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pinMessage = (message: Message) => {
     socket.emit("pinMessage", message);
@@ -65,15 +67,16 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = ({ messages }) => {
                   </div>
                 )}
               </div>
-
+                
               {/* Punaise cliquable seulement au hover */}
+              {can(role,"CREATOR") &&
               <span
                 onClick={() => pinMessage(msg)}
                 className="absolute top-2 right-2 text-yellow-400 hover:text-yellow-300 text-lg cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 title="Désépingler"
               >
                 📌
-              </span>
+              </span>}
             </li>
           ))}
       </ul>

@@ -7,7 +7,6 @@ import { gunzipSync } from "fflate";
 import type { UserID } from "../types/user.js";
 import { authRouterContext } from "../context/authRouterContext.js";
 import { messages } from "../assets/exportData.js";
-
 const fetchPinnedMessages = async (channelId: string): Promise<Message[]> => {
   try {
     const params = new URLSearchParams({ channelId });
@@ -186,7 +185,8 @@ export const messageLoader: LoaderFunction = async (
     : [
         {
           from: "bot",
-          text: "Salut 👋, voici les commandes que tu peux utiliser \n -/question suivi de ta question sur la discussion de ce channel",
+          custom: false,
+          text: "chatBot.welcomeMessage",
         },
       ];
 

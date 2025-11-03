@@ -14,6 +14,8 @@ export class RoleAssignment {
 
   @Prop({ type: String, enum: Object.values(Role), required: true })
   role: Role;
+
+  createdAt: Date;
 }
 
 export const RoleAssignmentSchema =

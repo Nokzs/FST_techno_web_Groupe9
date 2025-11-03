@@ -151,9 +151,7 @@ ${text}
     const cachedAnswers: QuestionCache[] =
       await this.cacheService.getCachedAnswers(channelId);
 
-    Logger.log(
-      `Vérification du cache pour ${cachedAnswers.length} réponses en cache... pour le channel ${channelId}`
-    );
+    
     // 2️⃣ Vérifier le cache
     for (const cacheEntry of cachedAnswers) {
       const similarity = this.cosineSimilarity(
@@ -259,6 +257,7 @@ Texte utilisateur :
 ${question}
 
 Instructions :
+0. Ne réponds pas aux question ne sont pas à propos d'un utilisateur ou de la discussion
 1. Réponds aux questions **en rapport avec la discussion ou les utilisateurs mentionnés**, y compris l'utilisateur lui-même.
 2. Si la question est en rapport avec le contexte, répond de manière concise et utile.
 3. Si le texte n'est pas une question ou ne peut pas être répondu à partir du contexte, répond par :
@@ -348,67 +347,91 @@ Texte : ${dateString}
     if (!date) {
       return "Désolé, je n'ai pas pu comprendre la date fournie.";
     }
-    // 2️⃣ Récupération des messages principaux (depuis la date)
+
+    // 1️⃣ Messages après la date
     const messagesAfter = await this.messageModel
       .find({ createdAt: { $gte: date }, channelId })
       .populate('senderId', 'pseudo _id')
       .exec();
 
+    // 2️⃣ Messages avant la date (contexte)
     const messagesBefore = await this.messageModel
-      .find({ createdAt: { $lt: date } })
-      .sort({ createdAt: -1 }) // derniers messages avant la date
+      .find({ createdAt: { $lt: date }, channelId })
+      .sort({ createdAt: -1 })
       .limit(10)
       .populate('senderId', 'pseudo _id')
       .exec();
 
-    // 4️⃣ Concaténation du contexte et des messages principaux
-    const textToSummarize = [
-      ...messagesBefore
-        .reverse()
-        .map((m) => {
-          const sender = m.senderId as unknown as {
-            pseudo: string;
-            _id: string;
-          };
-          return `[${sender.pseudo}(${sender._id})]: ${m.content?.trim()}`;
-        })
-        .filter(Boolean),
-      ...messagesAfter
-        .map((m) => {
-          const sender = m.senderId as unknown as {
-            pseudo: string;
-            _id: string;
-          };
-          return `[${sender.pseudo}(${sender._id})]: ${m.content?.trim()}`;
-        })
-        .filter(Boolean),
-    ].join('\n');
+    // 3️⃣ Transformation en listes de textes
+    const listBefore = messagesBefore
+      .reverse()
+      .map((m) => {
+        const sender = m.senderId as unknown as { pseudo: string; _id: string };
+        return `[${sender.pseudo}(${sender._id})]: ${m.content?.trim()}`;
+      })
+      .filter(Boolean);
 
+    const listAfter = messagesAfter
+      .map((m) => {
+        const sender = m.senderId as unknown as { pseudo: string; _id: string };
+        return `[${sender.pseudo}(${sender._id})]: ${m.content?.trim()}`;
+      })
+      .filter(Boolean);
+
+    // 4️⃣ Si tu veux encore la version concaténée, tu peux la garder :
+    const textToSummarize = [...listBefore, ...listAfter].join('\n');
     if (!textToSummarize) {
       return 'Aucun contenu à résumer.';
     }
-
     const prompt = `
-Considère que ${userId}, c’est moi.
+Considère que **${userId}**, c’est moi (l’utilisateur principal).
 
-Voici des messages issus d’une discussion :
-${textToSummarize}
+---
+
+🧭 **Contexte technique :**
+- Les messages proviennent d'une discussion de groupe (canal : ${channelId}).
+- Deux listes sont fournies :
+  • *Messages avant la date donnée* : contexte conversationnel  
+  • *Messages après la date donnée* : échanges récents
+
+---
+
+🗂️ **Listes des messages :**
+
+**Messages avant la date donnée (contexte)** :
+${listBefore && listBefore.length > 0 ? listBefore.join('\n') : 'Aucun message avant la date donnée.'}
+
+**Messages après la date donnée (principaux échanges)** :
+${listAfter && listAfter.length > 0 ? listAfter.join('\n') : "Il n'y a pas eu de messages après la date donnée."}
+
+---
 
 Ta tâche :
-- Ne fais pas un résumé chronologique message par message.
-- Analyse et regroupe les échanges pour en dégager les **grandes idées, thèmes ou décisions**.
+- Ne fais **pas** un résumé chronologique message par message.  
+- Analyse et regroupe les échanges pour en dégager les **grandes idées, thèmes ou décisions**.  
 - Identifie clairement les participants :
   • Si tu trouves des **prénoms**, utilise-les.  
   • Sinon, utilise leurs **pseudos** (jamais les user IDs).  
-  • Si aucun nom n’est identifiable, utilise une désignation cohérente (ex. "Participant A", "Participant B").
-- Pour chaque idée importante, indique **qui a exprimé quoi**, de manière fluide et naturelle.
-- Rédige un **résumé conceptuel**, synthétique et clair, centré sur les **idées, positions, arguments et décisions**.
-- Structure le texte de manière **lisible et hiérarchisée**, avec :
-  • **Thèmes / idées principales**
-  • **Sous-sections** (*Contexte*, *Participants*, *Points clés / Discussion*, *Décision / Conclusion*)  
-  • **Sauts de ligne** pour aérer le texte et faciliter la lecture.
+  • Si aucun nom n’est identifiable, attribue une désignation cohérente (*Participant A*, *Participant B*, etc.).  
 
-Format attendu :
+---
+
+🧩 **Objectif :**
+Rédige un **résumé conceptuel**, synthétique et clair, centré sur les **idées, positions, arguments et décisions**.  
+Structure le texte de manière **lisible et hiérarchisée**, avec :
+
+- **Thèmes / idées principales**
+- **Sous-sections** :  
+  • *Contexte*  
+  • *Participants*  
+  • *Points clés / Discussion*  
+  • *Décision / Conclusion*  
+
+Utilise des **sauts de ligne** et des **titres visuels** pour aérer et rendre le texte agréable à lire.
+
+---
+
+📘 **Format attendu :**
 ============================================================
 🟢 **[Thème ou idée principale]**
 
@@ -416,7 +439,7 @@ Format attendu :
 [Brève description du sujet et du contexte]
 
 *Participants*  
-[Prénom ou pseudo 1 — sa position ou idée principale ; Prénom ou pseudo 2 — sa réponse ou avis, etc.]
+[Pseudo 1 — sa position ou idée principale ; Pseudo 2 — sa réponse ou avis, etc.]
 
 *Points clés / Discussion*  
 [Résumé des échanges principaux, arguments et positions de chacun]
@@ -425,25 +448,14 @@ Format attendu :
 [Résultat ou état final du point, si applicable]
 
 🟢 **[Thème ou idée suivante]**
-*Contexte*  
-[idem ci-dessus]
-
-*Participants*  
-[idem ci-dessus]
-
-*Points clés / Discussion*  
-[idem ci-dessus]
-
-*Décision / Conclusion*  
-[idem ci-dessus]
+[... répéter le même format ...]
 
 📘 **Synthèse finale**  
-[Résumé global de la discussion : principaux accords, désaccords, orientations ou points à approfondir]
+[Résumé global de la discussion : accords, désaccords, décisions ou pistes restantes]
 
 ============================================================
 
-- Le texte doit rester **fluide, structuré, hiérarchisé, et agréable à lire**, avec **sauts de ligne**.  
-- Langue de réponse : ${useUserLanguage ? lang : detectedLanguage}.
+Langue de réponse : ${useUserLanguage ? lang : detectedLanguage}.
 `;
     const sumarize = await this.prompt(prompt);
     if (!sumarize) {

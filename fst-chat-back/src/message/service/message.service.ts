@@ -115,9 +115,14 @@ export class MessageService {
       .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
+        path: 'replyMessage',
+        select: '_id content createdAt isDeleted',
+      })
+      .populate({
         path: 'reactions',
         populate: { path: 'userId', select: 'pseudo urlPicture' },
       })
+      .lean()
       .sort({ createdAt: -1 })
       .exec();
     return messages;
@@ -251,21 +256,31 @@ export class MessageService {
     message.isPin = !message.isPin;
     return await message.save();
   }
-/**
- * syncMessage
- */
-public async syncMessage(channelId:string,lastSync:string,lastMessage:string) { 
- const query = {
-    channelId,
-    updatedAt: { $gt: new Date(lastSync) },
-    createdAt: { $gt: new Date(lastMessage) },
-  };
-    if(!channelId || !lastSync || !lastMessage || isNaN(new Date(lastMessage).getTime()) || isNaN(new Date(lastSync).getTime())){
+  /**
+   * syncMessage
+   */
+  public async syncMessage(
+    channelId: string,
+    lastSync: string,
+    lastMessage: string
+  ) {
+    const query = {
+      channelId,
+      updatedAt: { $gt: new Date(lastSync) },
+      createdAt: { $gt: new Date(lastMessage) },
+    };
+    if (
+      !channelId ||
+      !lastSync ||
+      !lastMessage ||
+      isNaN(new Date(lastMessage).getTime()) ||
+      isNaN(new Date(lastSync).getTime())
+    ) {
       throw new BadRequestException('Missing required query parameters');
-          }
-  return this.messageModel
-    .find(query)
-    .populate('senderId', 'pseudo _id urlPicture')
+    }
+    return this.messageModel
+      .find(query)
+      .populate('senderId', 'pseudo _id urlPicture')
       .populate('receiverId', '_id pseudo urlPicture')
       .populate({
         path: 'replyMessage',
@@ -278,5 +293,5 @@ public async syncMessage(channelId:string,lastSync:string,lastMessage:string) {
       .lean()
       .sort({ createdAt: -1 })
       .exec();
-}
+  }
 }

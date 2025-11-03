@@ -93,15 +93,17 @@ export class ServerService {
       .exec();
     if (!srv) return [];
     const members = (srv as any).members as any[];
-    return (members || []).map((m) =>
-      plainToInstance(CompleteUserResponseDto, {
+
+    return (members || []).map((m) => {
+      Logger.log("l'user", m );
+      return plainToInstance(CompleteUserResponseDto, {
         id: m._id?.toString?.() ?? m.id,
         pseudo: m.pseudo,
         email: m.email,
         urlPicture: m.urlPicture,
         bio: m.bio,
-      })
-    );
+      });
+    });
   }
 
   async deleteById(serverId: string): Promise<boolean> {
@@ -156,7 +158,7 @@ export class ServerService {
     if (!server.members.some((m) => m.toString() === userId)) {
       server.members.push(new Types.ObjectId(userId));
       await server.save();
-        return server;
+      return server;
     }
     return null;
   }

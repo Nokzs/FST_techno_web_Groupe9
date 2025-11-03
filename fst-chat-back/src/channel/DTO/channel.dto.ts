@@ -1,6 +1,6 @@
 // src/channels/dto/channel.dto.ts
 import { IsString, IsOptional, IsMongoId } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { NotificationDto } from './NotificationDto';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -63,5 +63,6 @@ export class ChannelDto {
     isArray: true, // indique que c’est un tableau
   })
   @Expose()
+  @Type(() => NotificationDto)
   notification: NotificationDto[];
 }

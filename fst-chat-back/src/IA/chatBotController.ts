@@ -78,7 +78,9 @@ export class ChatBotController {
       const answer = await handler(jsonCommand.content);
       return answer;
     } catch (error) {
-      throw new ServiceUnavailableException('le bot à un problème');
+      throw new ServiceUnavailableException(
+        `le bot à un problème interne ${error}`
+      );
     }
   }
 }

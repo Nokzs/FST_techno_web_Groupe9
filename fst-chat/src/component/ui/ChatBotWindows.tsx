@@ -10,16 +10,9 @@ type ChatBotWindowType = {
 };
 export type messageBotType = {
   from: "user" | "bot";
+  custom: boolean;
   text: string;
 };
-/**
- * Fonction de traduction qui servira à traduire les messages en cache si nécessaire et enregistra dans le cache
- */
-/* const translateMessage = (text: string, lang: string): string => {
-  // Fonction fictive de traduction
-  return text;
-}; */
-
 /**
  * Composant ChatBotWindow
  * Affiche une fenêtre de chat flottante avec un chatbot.
@@ -45,7 +38,8 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
       : [
           {
             from: "bot",
-            text: "Salut 👋, voici les commandes que tu peux utiliser \n - /question suivi de ta question sur la discussion de ce channel",
+            custom: false,
+            text: "tchat.chatBot.welcomeMessage",
           },
         ];
     setMessages(tchatBotData);
@@ -57,7 +51,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     return await sendCommand(
       channelId,
       text,
-      userId._id,
+      userId.id,
       userId.language,
       useUserLanguage,
     );
@@ -79,7 +73,11 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     if (!input.trim()) return;
 
     // Ajouter le message utilisateur
-    const userMessage: messageBotType = { from: "user", text: input };
+    const userMessage: messageBotType = {
+      from: "user",
+      custom: true,
+      text: input,
+    };
     setMessages((prev) => updateMessagesInStorage(prev, userMessage));
 
     setInput("");
@@ -91,7 +89,11 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
     const answer = await parseInput(input);
 
     // Ajouter le message du bot
-    const botMessage: messageBotType = { from: "bot", text: answer };
+    const botMessage: messageBotType = {
+      from: "bot",
+      custom: true,
+      text: answer,
+    };
     setMessages((prev) => updateMessagesInStorage(prev, botMessage));
 
     // Arrêter le typing
@@ -99,7 +101,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="fixed bottom-15 right-5 z-50 flex flex-col items-end">
       <AnimatePresence initial={false} mode="sync">
         {open ? (
           <motion.div
@@ -156,7 +158,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                         : "bg-gray-200 text-gray-800 rounded-bl-none"
                     }`}
                   >
-                    {msg.text}
+                    {!msg.custom ? t(msg.text) : msg.text}
                   </div>
                 </div>
               ))}
@@ -169,7 +171,7 @@ export function ChatBotWindow({ channelId, userId }: ChatBotWindowType) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder={t("Écris un message...")}
+                placeholder={t("tchat.chatBot.input.placeholder")}
                 className="flex-1 min-w-0 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 break-words"
               />
 

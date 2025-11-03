@@ -33,7 +33,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
   const [replyMessage, setReplyMessage] = useState<Message | undefined>(
     undefined,
   );
-  const { serverId } = useParams<{ serverId: string}>();
+  const { serverId } = useParams<{ serverId: string }>();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const { messages, pinnedMessage } = useMessages(
@@ -44,7 +44,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     setReplyMessage,
     user,
     messagesRef,
-    setTypingUsers
+    setTypingUsers,
   );
 
   /*Résumé du UseEffect : récupération du profil utilisateur au montage du composant.*/
@@ -134,62 +134,99 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
   const [members, setMembers] = useState<User[]>([]);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [membersCollapsed, setMembersCollapsed] = useState(false);
-  const [myRole, setMyRole] = useState<import('../../../utils/roles').AppRole>(null);
+  const [myRole, setMyRole] =
+    useState<import("../../../utils/roles").AppRole>(null);
   const [memberRoles, setMemberRoles] = useState<Record<string, string>>({});
   useEffect(() => {
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
     if (!serverId) return;
     // rejoindre la room du serveur pour recevoir les updates temps réel
-    console.log('[Messages] watchServer emit', { serverId });
-    socket.emit('watchServer', { serverId });
-    const onMemberJoined = ({ serverId: sid, user }: { serverId: string; user: User }) => {
-      console.log('[Messages] serverMemberJoined received', { sid, expected: serverId, userId: user?.id });
+    console.log("[Messages] watchServer emit", { serverId });
+    socket.emit("watchServer", { serverId });
+    const onMemberJoined = ({
+      serverId: sid,
+      user,
+    }: {
+      serverId: string;
+      user: User;
+    }) => {
+      console.log("[Messages] serverMemberJoined received", {
+        sid,
+        expected: serverId,
+        userId: user?.id,
+      });
       if (sid !== serverId) return;
-      setMembers((prev) => (prev.some((u) => u.id === user.id) ? prev : [...prev, user]));
+      setMembers((prev) =>
+        prev.some((u) => u.id === user.id) ? prev : [...prev, user],
+      );
     };
-    const onMemberLeft = ({ serverId: sid, userId }: { serverId: string; userId: string }) => {
+    const onMemberLeft = ({
+      serverId: sid,
+      userId,
+    }: {
+      serverId: string;
+      userId: string;
+    }) => {
       if (sid !== serverId) return;
       setMembers((prev) => prev.filter((u) => u.id !== userId));
     };
-    socket.on('serverMemberJoined', onMemberJoined);
-    socket.on('serverMemberLeft', onMemberLeft);
-    socket.on('serverPresenceUpdate', ({ serverId: sid, onlineUserIds }: { serverId: string; onlineUserIds: string[] }) => {
-      if (sid !== serverId) return;
-      setOnlineIds(onlineUserIds || []);
-    });
-    socket.on('serverDeleted', ({ serverId: sid }: { serverId: string }) => {
+    socket.on("serverMemberJoined", onMemberJoined);
+    socket.on("serverMemberLeft", onMemberLeft);
+    socket.on(
+      "serverPresenceUpdate",
+      ({
+        serverId: sid,
+        onlineUserIds,
+      }: {
+        serverId: string;
+        onlineUserIds: string[];
+      }) => {
+        if (sid !== serverId) return;
+        setOnlineIds(onlineUserIds || []);
+      },
+    );
+    socket.on("serverDeleted", ({ serverId: sid }: { serverId: string }) => {
       if (sid === serverId) {
-        window.location.href = '/servers';
+        window.location.href = "/servers";
       }
     });
     (async () => {
       try {
         const res = await fetch(`${API_URL}/servers/${serverId}/members`, {
-          credentials: 'include',
+          credentials: "include",
         });
         const data = await res.json();
         if (Array.isArray(data)) setMembers(data);
         try {
-          const rr = await fetch(`${API_URL}/servers/${serverId}/me`, { credentials: 'include' });
+          const rr = await fetch(`${API_URL}/servers/${serverId}/me`, {
+            credentials: "include",
+          });
           const jr = await rr.json();
           if (jr?.role) setMyRole(jr.role);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         try {
-          const rmap = await fetch(`${API_URL}/roles/server/${serverId}`, { credentials: 'include' });
+          const rmap = await fetch(`${API_URL}/roles/server/${serverId}`, {
+            credentials: "include",
+          });
           const jmap = await rmap.json();
-          if (jmap && typeof jmap === 'object') setMemberRoles(jmap as Record<string, string>);
-        } catch { /* ignore */ }
+          if (jmap && typeof jmap === "object")
+            setMemberRoles(jmap as Record<string, string>);
+        } catch {
+          /* ignore */
+        }
       } catch (e) {
-        console.error('Erreur récupération membres:', e);
+        console.error("Erreur récupération membres:", e);
       }
     })();
     return () => {
-      socket.off('serverMemberJoined', onMemberJoined);
-      socket.off('serverMemberLeft', onMemberLeft);
-      socket.off('serverPresenceUpdate');
-      socket.off('serverDeleted');
-      console.log('[Messages] unwatchServer emit', { serverId });
-      socket.emit('unwatchServer', { serverId });
+      socket.off("serverMemberJoined", onMemberJoined);
+      socket.off("serverMemberLeft", onMemberLeft);
+      socket.off("serverPresenceUpdate");
+      socket.off("serverDeleted");
+      console.log("[Messages] unwatchServer emit", { serverId });
+      socket.emit("unwatchServer", { serverId });
     };
   }, [serverId]);
 
@@ -198,13 +235,13 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     if (!serverId || !channelId) return;
     const handler = ({ channelId: deletedId }: { channelId: string }) => {
       if (deletedId === channelId) {
-        socket.emit('leaveRoom', channelId);
+        socket.emit("leaveRoom", channelId);
         window.location.href = `/servers`;
       }
     };
-    socket.on('channelDeleted', handler);
+    socket.on("channelDeleted", handler);
     return () => {
-      socket.off('channelDeleted', handler);
+      socket.off("channelDeleted", handler);
     };
   }, [serverId, channelId]);
 
@@ -229,21 +266,25 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
             className="text-sm text-blue-600 hover:underline ml-auto"
             onClick={() => setMembersCollapsed((v) => !v)}
             aria-expanded={!membersCollapsed}
-            title={membersCollapsed ? 'Afficher la liste des membres' : 'Masquer la liste des membres'}
+            title={
+              membersCollapsed
+                ? "Afficher la liste des membres"
+                : "Masquer la liste des membres"
+            }
           >
-            {membersCollapsed ? 'Afficher membres' : 'Masquer membres'}
+            {membersCollapsed ? "Afficher membres" : "Masquer membres"}
           </button>
         </h1>
 
         {/* Bouton pour ouvrir le drawer des messages épinglés */}
         <button
-          onClick={() => setDrawerOpen(true)}
+          onClick={() => setDrawerOpen(draw => !draw)}
           className="px-4 py-2 bg-yellow-400 text-black rounded mb-2 self-start"
         >
           📌 Messages épinglés
         </button>
 
-       {/* Liste des messages */}
+        {/* Liste des messages */}
         <div
           key={channelId}
           ref={messagesRef}
@@ -252,6 +293,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
           <div ref={messagesEndRef} />
           {messages.slice().map((msg, index: number) => (
             <MessageItem
+              ROLE={myRole}
               key={msg._id + index}
               messageRef={messagesRef!}
               message={msg}
@@ -270,28 +312,31 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
           )}
         </div>
         {typingUsers.length > 0 && (
-        <div className="px-2 pb-2 text-sm text-gray-600 dark:text-gray-300">
-          {typingUsers.length === 1
-            ? t("tchat.typing.one", { name: typingUsers[0] })
-            : typingUsers.length === 2
-            ? t("tchat.typing.two", { name1: typingUsers[0], name2: typingUsers[1] })
-            : t("tchat.typing.many", {
-                name1: typingUsers[0],
-                name2: typingUsers[1],
-                count: typingUsers.length - 2,
-              })}
-        </div>
-      )}
-        {!can(myRole, 'MEMBER') ? (
+          <div className="px-2 pb-2 text-sm text-gray-600 dark:text-gray-300">
+            {typingUsers.length === 1
+              ? t("tchat.typing.one", { name: typingUsers[0] })
+              : typingUsers.length === 2
+                ? t("tchat.typing.two", {
+                    name1: typingUsers[0],
+                    name2: typingUsers[1],
+                  })
+                : t("tchat.typing.many", {
+                    name1: typingUsers[0],
+                    name2: typingUsers[1],
+                    count: typingUsers.length - 2,
+                  })}
+          </div>
+        )}
+        {!can(myRole, "MEMBER") ? (
           <div className="p-4 border-t text-sm text-gray-500 dark:text-gray-400">
             Lecture seule sur ce serveur.
           </div>
         ) : (
-        <ChatInput
-          sendMessage={addMessage}
-          replyMessage={replyMessage}
-          onReply={setReplyMessage}
-        />
+          <ChatInput
+            sendMessage={addMessage}
+            replyMessage={replyMessage}
+            onReply={setReplyMessage}
+          />
         )}
 
         {/* Drawer des messages épinglés */}
@@ -307,13 +352,18 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <PinnedMessages messages={pinnedMessage} />
+              <PinnedMessages messages={pinnedMessage} role={myRole} />
             </div>
           </div>
         )}
       </div>
-        {/* Members sidebar */}
-      <div className={(membersCollapsed ? "w-0 " : "w-64 ") + "transition-all duration-200 overflow-hidden border-l border-gray-200 dark:border-gray-700 bg-white/40 dark:bg-gray-900/20 shrink-0 flex flex-col"}>
+      {/* Members sidebar */}
+      <div
+        className={
+          (membersCollapsed ? "w-0 " : "w-64 ") +
+          "transition-all duration-200 overflow-hidden border-l border-gray-200 dark:border-gray-700 bg-white/40 dark:bg-gray-900/20 shrink-0 flex flex-col"
+        }
+      >
         {!membersCollapsed && (
           <>
             <div className="p-2 flex items-center justify-between">
@@ -322,13 +372,16 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
               </span>
             </div>
             <MembersList
+              user={user}
               serverId={serverId!}
               users={members}
               onlineIds={onlineIds}
               className="bg-transparent p-2"
               myRole={myRole || undefined}
               rolesByUserId={memberRoles}
-              onRoleChange={(uid, role) => setMemberRoles(prev => ({ ...prev, [uid]: role }))}
+              onRoleChange={(uid, role) =>
+                setMemberRoles((prev) => ({ ...prev, [uid]: role }))
+              }
             />
           </>
         )}

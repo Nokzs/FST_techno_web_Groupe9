@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Schema()
+export type NotificationDocument = HydratedDocument<Notification>;
+
+@Schema({ timestamps: true })
 export class Notification {
   @ApiProperty({ description: "L'ID du canal associé à la notification" })
   @Prop({ required: true })

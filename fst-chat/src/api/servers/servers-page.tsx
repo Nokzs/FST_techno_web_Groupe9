@@ -17,7 +17,7 @@ export interface Server {
   tags: string[]; // obligatoire
   isPublic: boolean; // indique si le serveur est ouvert au public
   inviteCode?: string;
-  defaultRole?: 'MEMBER' | 'READER';
+  defaultRole?: "MEMBER" | "READER";
 }
 export interface Channel {
   _id: string;
@@ -26,9 +26,9 @@ export interface Channel {
   serverId: string;
   createdAt?: string;
   updatedAt?: string;
-  notification:notification[]
+  notification: notification[];
 }
-export type notification = {  
+export type notification = {
   _id: string;
 
   channelId: string;
@@ -36,7 +36,8 @@ export type notification = {
   serverId: string;
 
   seenBy: string[];
-}
+  createdAt:Date;
+};
 export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,13 +62,17 @@ export function ServersPage() {
             const id = srv._id || srv.id;
             if (!id) return;
             try {
-              const r = await fetch(`${API_URL}/servers/${id}/me`, { credentials: 'include' });
+              const r = await fetch(`${API_URL}/servers/${id}/me`, {
+                credentials: "include",
+              });
               const jr = await r.json();
               if (jr?.role) entries.push([id, jr.role]);
-            } catch { /* ignore */ }
-          })
+            } catch {
+              /* ignore */
+            }
+          }),
         );
-        console.log("roles pour chaque serveur: " + entries)
+        console.log("roles pour chaque serveur: " + entries);
 
         setRoles(Object.fromEntries(entries));
       } catch (err) {
@@ -80,13 +85,11 @@ export function ServersPage() {
     fetchServers();
   }, [API_URL]);
 
-
   // si roles pas encore attribuÃ© pour des serveurs, on les attributs (lors de la crÃ©ation d'un nouveau serveur)
   useEffect(() => {
     // RÃ©cupÃ¨re tous les ID des serveurs
-    const ids = servers
-      .map((s: Server) => (s?._id ?? s?.id) as string);
-      
+    const ids = servers.map((s: Server) => (s?._id ?? s?.id) as string);
+
     // Ne garde que ceux qui n'ont pas encore d'entrÃ©e dans la map `roles`
     const missing = ids.filter((id) => !(id in roles));
     if (missing.length === 0) return;
@@ -95,14 +98,19 @@ export function ServersPage() {
       await Promise.all(
         missing.map(async (id) => {
           try {
-            const r = await fetch(`${API_URL}/servers/${id}/me`, { credentials: 'include' });
+            const r = await fetch(`${API_URL}/servers/${id}/me`, {
+              credentials: "include",
+            });
             const jr = await r.json();
             if (jr?.role) entries.push([id, jr.role]);
-          } catch { /* ignore */ }
-        })
+          } catch {
+            /* ignore */
+          }
+        }),
       );
       // 4) Fusionne proprement dans la map `roles` (sans Ã©craser les valeurs existantes)
-      if (entries.length) setRoles((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+      if (entries.length)
+        setRoles((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
     })();
   }, [servers, roles, API_URL]);
 
@@ -161,29 +169,13 @@ export function ServersPage() {
       )}
       {activeForm === "join" && <JoinServerForm onJoined={handleServerAdded} />}
 
-      <div className="max-h-[70vh] overflow-y-auto pr-1">
-        <ServersList servers={servers} roles={roles} onRemoved={handleServerRemoved} />
+      <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500 rounded-lg">
+        <ServersList
+          servers={servers}
+          roles={roles}
+          onRemoved={handleServerRemoved}
+        />
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

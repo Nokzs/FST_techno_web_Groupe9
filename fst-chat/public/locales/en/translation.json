@@ -13,6 +13,8 @@
         "config": "settings"
     },
     "tchat": {
+        "profile": "Profile",
+        "logout": "Logout",
         "send": "Send",
         "pinMessage": "Pin message",
         "loadingMessages": "Loading messages...",
@@ -24,7 +26,7 @@
             "noServer": "Any server available. Please add one server to start chatting!"
         },
         "chatBot": {
-            "welcomeMessage": "Hi 👋, here the command you can use \n -/question followed by your question about the discussion of this channel",
+            "welcomeMessage": "Hi 👋, here are the commands you can use in this channel:\n\n• /question [your question]\n  → Ask a question about a discussion in this channel.\n    Example: /question Who approved the decision from the last meeting?\n\n• /summarize [date]\n  → Get a summary of the conversation from the specified date.\n    You can use an ISO date or natural language.\n    Example: /summarize 2025-11-01T15:30:00\n    Example in natural language: /summarize yesterday afternoon",
             "input": {
                 "placeholder": "Write a message...",
                 "send": "Send"
@@ -60,6 +62,7 @@
         "confirm": "confirm"
     },
     "server": {
+        "leave": "Leave server",
         "loading": "Server loading...",
         "list": "List of servers",
         "create": "Create a server",

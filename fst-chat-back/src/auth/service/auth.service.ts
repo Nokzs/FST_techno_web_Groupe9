@@ -38,6 +38,12 @@ export class UserAuthService {
     this.isSecureCookie =
       this.configService.get<string>('NODE_ENV') === 'production';
   }
+  /**
+   * Supprime les informations sensibles d'un user avant de le renvoyer au client.
+   * @param
+   * user L'utilisateur à assainir.
+   * @returns L'utilisateur assaini.
+   */
   sanitizeUser(user: User | UserDocument): SanitizedUser {
     const plain = this.toPlainUser(user);
     const { password: _password, _id, id, ...rest } = plain;
@@ -53,7 +59,11 @@ export class UserAuthService {
       createdAt: rest.createdAt,
     };
   }
-
+  /**
+   * Attache un token JWT pour un utilisateur donné.
+   * @param user L'utilisateur pour lequel générer le token.
+   * @returns Le token JWT généré.
+   */
   attachAuthCookie(res: Response, token: string): void {
     console.log('Attaching auth cookie with token:', token);
     res.cookie(this.authCookieName, token, {
@@ -63,7 +73,11 @@ export class UserAuthService {
       maxAge: this.cookieMaxAgeMs,
     });
   }
-
+  /**
+   * Récupère l'ID utilisateur à partir d'un objet User ou UserDocument.
+   * @param user L'utilisateur dont on veut obtenir l'ID.
+   * @returns L'ID utilisateur sous forme de chaîne de caractères.
+   */
   getUserId(user: User | UserDocument): string {
     const documentCandidate = user as UserDocument;
     if (
@@ -78,6 +92,11 @@ export class UserAuthService {
       (user as { _id?: unknown })._id
     );
   }
+  /**
+   * Résout la durée maximale du cookie à partir d'une chaîne de caractères.
+   * @param duration La durée sous forme de chaîne (ex: "3600", "1h", "30m").
+   * @returns La durée en millisecondes.
+   */
   private resolveCookieMaxAge(duration: string): number {
     const numericValue = Number(duration);
     if (!Number.isNaN(numericValue)) {
@@ -104,6 +123,11 @@ export class UserAuthService {
 
     return value * (unitMap[unit] ?? unitMap.h);
   }
+  /**
+   * Convertit un User ou UserDocument en PlainUser.
+   * @param user L'utilisateur à convertir.
+   * @returns L'utilisateur converti en PlainUser.
+   */
   private toPlainUser(user: User | UserDocument): PlainUser {
     if (typeof (user as UserDocument).toObject === 'function') {
       return (user as UserDocument).toObject() as PlainUser;
@@ -122,6 +146,13 @@ export class UserAuthService {
       _id: (plainUser as { _id?: unknown })._id,
     };
   }
+  /**
+   *
+   * Résout l'ID utilisateur à partir de différentes sources.
+   * @param id L'ID utilisateur sous forme de chaîne (optionnel).
+   * @param rawId L'ID utilisateur sous forme brute (optionnel).
+   * @returns L'ID utilisateur sous forme de chaîne.
+   */
   private resolveId(id?: string, rawId?: unknown): string {
     if (id && id.length > 0) {
       return id;
@@ -140,7 +171,10 @@ export class UserAuthService {
 
     return '';
   }
-
+  /**
+   * Supprime le cookie d'authentification.
+   * @param res La réponse Express pour laquelle supprimer le cookie.
+   */
   public clearCookie(res: Response): void {
     res.clearCookie('fst_chat_token', {
       httpOnly: true,

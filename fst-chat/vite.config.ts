@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   // ne pas toucher pour permettre le deploiement
-  base: "./",
+  base: "/",
 
   test: {
     environment: "jsdom",

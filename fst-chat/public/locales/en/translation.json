@@ -13,7 +13,7 @@
         "config": "settings"
     },
     "tchat": {
-        "profile": "Profile",
+        "profil": "Profile",
         "logout": "Logout",
         "send": "Send",
         "pinMessage": "Pin message",

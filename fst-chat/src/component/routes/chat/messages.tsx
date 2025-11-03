@@ -134,7 +134,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
 
   const [members, setMembers] = useState<User[]>([]);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
-  const [membersCollapsed, setMembersCollapsed] = useState(false);
+  const [membersCollapsed, setMembersCollapsed] = useState(true);
   const [myRole, setMyRole] =
     useState<import("../../../utils/roles").AppRole>(null);
   const [memberRoles, setMemberRoles] = useState<Record<string, string>>({});

@@ -13,8 +13,8 @@
         "config": "Configuration"
     },
     "tchat": {
-        "profile": "Profile",
-        "logout": "Logout",
+        "profil": "Profil",
+        "logout": "Déconnexion",
         "send": "Envoyer",
         "pinMessage": "Epingler le message",
         "loadingMessages": "Chargement des messages...",

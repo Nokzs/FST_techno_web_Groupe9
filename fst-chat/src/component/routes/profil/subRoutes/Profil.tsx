@@ -1,6 +1,6 @@
 import { useOutletContext } from "react-router";
 import type { User } from "../../../../types/user";
-import penSvg from "../../../../assets/edit-pen-svgrepo-com.svg";
+import penSvg from "../../../../assets/edit-pen-svgrepo-com.svg?url";
 import { ProfilePicture } from "../../../ui/ProfilePicture";
 import { UpdateInput } from "../../../ui/UpdateInput";
 import { LangList } from "../../../ui/LangList";

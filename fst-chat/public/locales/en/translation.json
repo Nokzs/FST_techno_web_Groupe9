@@ -15,6 +15,9 @@
     "tchat": {
         "profil": "Profile",
         "logout": "Logout",
+        "showMembers": "show Members",
+        "hideMembers": "hide Members",
+        "unpinMessage": "Unpin message",
         "send": "Send",
         "pinMessage": "Pin message",
         "loadingMessages": "Loading messages...",

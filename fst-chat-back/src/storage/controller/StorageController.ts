@@ -4,6 +4,7 @@ import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
 import { JwtPayload } from '../../token/types/jwtPayload';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
+import { ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 type eventType = 'profilePicture';
 @Controller('/storage')
 export class StorageController {
@@ -11,6 +12,11 @@ export class StorageController {
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
 
+  @ApiOperation({
+    description:"demande une urlSigné afin d'upload un fichier de profile ou d'envoie de fichier sur le chat",
+  })
+  @ApiOkResponse()
+  @ApiInternalServerErrorResponse()
   @UseGuards(AuthGuard)
   @Post('/signedUrl')
   async getSignedUrl(

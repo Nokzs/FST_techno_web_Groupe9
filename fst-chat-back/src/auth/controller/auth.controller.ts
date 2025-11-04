@@ -10,6 +10,8 @@
   Res,
   UnauthorizedException,
   Inject,
+  Logger,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { UserService } from '../../user/service/user.service';
@@ -28,6 +30,7 @@ import {
   ApiUnauthorizedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { AuthGuard } from 'src/guards/authGuard';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -116,15 +119,14 @@ export class AuthController {
   }
   @Post('/logout')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Déconnecte un utilisateur',
     description: 'Cette route permet de déconnecter un utilisateur.',
   })
   async logout(@Res() res: Response) {
-    await this.authService.clearCookie(res);
-    return {
-      message: 'Déconnexion réussie.',
-    };
+   this.authService.clearCookie(res)
+    return res.status(200).json({ message: 'Logged out' })
   }
   @ApiUnauthorizedResponse({
     description: 'Token manquant',

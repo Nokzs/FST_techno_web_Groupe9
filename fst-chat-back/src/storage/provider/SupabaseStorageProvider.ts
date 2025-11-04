@@ -1,10 +1,12 @@
 import { IStorageProvider } from './IStorageProvider';
 import { ConfigService } from '@nestjs/config';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { TYPE_EVENT } from '../typeEvent';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
-
+/*
+implémantation de supabase storage 
+*/
 @Injectable()
 export class SupabaseStorageProvider implements IStorageProvider {
   supabaseClient: SupabaseClient;
@@ -48,7 +50,7 @@ export class SupabaseStorageProvider implements IStorageProvider {
     }
 
     if (!data || !data.signedUrl) {
-      throw new Error('No signed URL returned by Supabase');
+      throw new InternalServerErrorException('No signed URL returned by Supabase');
     }
 
     return data;

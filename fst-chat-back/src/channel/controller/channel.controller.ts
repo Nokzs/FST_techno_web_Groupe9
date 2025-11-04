@@ -53,7 +53,7 @@ export class ChannelController {
   @ApiBearerAuth()
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.CREATOR)
+  @Roles(Role.ADMIN)
   async createChannel(@Body() dto: CreateChannelDto): Promise<ChannelDto> {
     const channel = await this.channelService.create(dto);
     try {

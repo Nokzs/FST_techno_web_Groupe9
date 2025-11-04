@@ -13,6 +13,9 @@
         "config": "Configuration"
     },
     "tchat": {
+        "showMembers": "Afficher les membres",
+        "hideMembers": "Cacher les membres",
+        "unpinMessage": "désépingler",
         "profil": "Profil",
         "logout": "Déconnexion",
         "send": "Envoyer",

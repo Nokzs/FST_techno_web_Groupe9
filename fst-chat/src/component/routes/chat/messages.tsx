@@ -259,7 +259,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
         <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
           <NavLink to="/servers">
             {"<-"}
-            {t("tchat.tchatRoom")}
           </NavLink>
 
           <span className="mx-2">{t("tchat.tchatRoom")}</span>

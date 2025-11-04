@@ -139,7 +139,7 @@ export function ServerItem({
   }
 
   return (
-    <li className="w-[98%] max-w-full p-4 rounded-2xl shadow-md  dark:bg-gray-100 text-gray-900 border border-gray-200 transition-transform duration-200 transform hover:shadow-lg hover:scale-[1.02] origin-center">
+    <li className="w-[98%] max-w-full p-4 rounded-2xl shadow-md  dark:bg-gray-100 text-gray-900 border border-gray-200 transition-transform duration-200 transform hover:shadow-lg  origin-center">
       {/* Titre et bascule channels */}
       <div
         className="flex justify-between items-center cursor-pointer"

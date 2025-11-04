@@ -1,5 +1,8 @@
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
+/*
+interface de la classe de gestion des s3
 
+*/
 export interface IStorageProvider {
   SendSignUploadUrl(
     fileName: string,

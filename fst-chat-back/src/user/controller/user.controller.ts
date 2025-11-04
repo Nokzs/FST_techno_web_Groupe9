@@ -20,13 +20,23 @@ import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from '../../storage/provider/IStorageProvider';
 import type { Request } from 'express';
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
-
+  @ApiOperation({
+    description:"retourne le profil de l'utilisteur"
+    
+  })
+  @ApiOkResponse({
+    type: CompleteUserResponseDto
+  })
+  @ApiUnauthorizedResponse({
+    description:"utilisteur non connecté"
+  })
   @Get('/profile/')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
@@ -40,6 +50,9 @@ export class UserController {
     return userDto;
   }
 
+  @ApiResponse({
+    description:"Récupere l'url de l'image de profil de l'utilisteur"
+  })
   @UseGuards(AuthGuard)
   @Get('/profilPictureUrl')
   async getPublicProfilePicture(@Req() req: Request): Promise<PublicUrlDTO> {
@@ -56,6 +69,13 @@ export class UserController {
     );
     return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
+  @ApiOperation({
+    description:"met à jour l'utilisateur"
+  })
+  @ApiOkResponse({})
+  @ApiNotFoundResponse({
+     description:"utilisateur non connecté"
+  })
   @UseGuards(AuthGuard)
   @Put('update')
   async updateUser(@Body() body: UpdateUserDTO, @Req() req: Request) {

@@ -13,6 +13,8 @@
         "config": "Configuration"
     },
     "tchat": {
+        "showMembers": "Afficher les membres",
+        "hideMembers": "Cacher les membres",
         "profil": "Profil",
         "logout": "Déconnexion",
         "send": "Envoyer",

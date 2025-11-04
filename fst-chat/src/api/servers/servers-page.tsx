@@ -3,7 +3,8 @@ import { ServersList } from "./servers-list";
 import { CreateServerForm } from "./create-server-form";
 import { JoinServerForm } from "./join-server-form";
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router";
+import { NavLink, redirect, useNavigate } from "react-router";
+import { LanguageSwitcher } from "../../component/ui/languageSwitcher";
 export interface Server {
   _id: string;
   id?: string;
@@ -36,7 +37,7 @@ export type notification = {
   serverId: string;
 
   seenBy: string[];
-  createdAt:Date;
+  createdAt: Date;
 };
 export function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
@@ -44,6 +45,7 @@ export function ServersPage() {
   const [activeForm, setActiveForm] = useState<"create" | "join" | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [roles, setRoles] = useState<Record<string, string>>({});
+  const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const { t } = useTranslation();
   useEffect(() => {
@@ -133,8 +135,34 @@ export function ServersPage() {
   if (loading) return <div>Chargement des serveurs...</div>;
   if (loading) return <div>{t("server.loading")}</div>;
 
+  const handleLogout = async () => {
+    const API_URL = import.meta.env.API_URL || "http://localhost:3002";
+    console.log("se deconnecter");
+
+    try {
+      const res = await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        navigate("/login");
+      } else {
+        console.error("Erreur lors de la déconnexion :", await res.text());
+      }
+    } catch (err) {
+      console.error("Erreur réseau :", err);
+    }
+  };
   return (
     <div className=" p-4 min-h-screen">
+      <div className="absolute top-5 right-0">
+        <LanguageSwitcher />
+      </div>
+      <div className="fixed bottom-5 right-5">
+        <button className="bg-white p-2" onClick={handleLogout}>
+          {t("tchat.logout")}
+        </button>
+      </div>
       <h1 className="text-2xl font-bold mb-4 dark:text-white text-black ">
         {t("server.list")}
       </h1>

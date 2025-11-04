@@ -17,19 +17,24 @@ export const ProfilItem = ({ user, isOnline }: profilItemProps) => {
     .slice(0, 2)
     .toUpperCase();
 
-  function handleLogout(): void {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    fetch(`${API_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    }).then((response) => {
-      if (response.ok) {
+  const handleLogout = async () => {
+    const API_URL = import.meta.env.API_URL || "http://localhost:3002";
+    console.log("se deconnecter");
+
+    try {
+      const res = await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
         navigate("/login");
       } else {
-        console.error("Logout failed");
+        console.error("Erreur lors de la déconnexion :", await res.text());
       }
-    });
-  }
+    } catch (err) {
+      console.error("Erreur réseau :", err);
+    }
+  };
 
   return (
     <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">

@@ -101,15 +101,15 @@ export function MembersList({
                   {(() => {
                     const targetRole = rolesByUserId[selected.id] || "MEMBER";
                     const isCreator = targetRole === "CREATOR";
+                    const isSelf = selected.id === (user?.id || "");
                     const canEdit =
-                      myRole === "CREATOR" ||
-                      (myRole === "ADMIN" && !isCreator);
+                      !isSelf && (myRole === "CREATOR" || (myRole === "ADMIN" && !isCreator));
                     if (!canEdit) return null;
                     const options =
+                    
                       myRole === "CREATOR"
                         ? ["ADMIN", "MEMBER", "READER"]
-                        : ["MEMBER", "READER"];
-                    const current = editingRole ?? targetRole;
+                        : ["MEMBER", "READER"];                    const current = editingRole ?? targetRole;
                     return (
                       <div className="flex items-center gap-2">
                         <label className="text-sm text-gray-700 dark:text-gray-300">

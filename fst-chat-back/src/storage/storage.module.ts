@@ -7,7 +7,9 @@ import { AuthGuard } from '../guards/authGuard';
 export enum StorageProviderType {
   supabase = 'supabase',
 }
-
+/*
+module dynamique permettant l'instanciation de différents s3
+*/
 export const STORAGE_PROVIDER = Symbol('STORAGE_PROVIDER');
 @Module({})
 export class StorageModule {

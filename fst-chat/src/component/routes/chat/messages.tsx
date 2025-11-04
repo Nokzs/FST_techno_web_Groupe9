@@ -264,16 +264,16 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
 
           <span className="mx-2">{t("tchat.tchatRoom")}</span>
           <button
-            className="text-sm text-blue-600 hover:underline ml-auto"
+            className="text-sm text-blue-600 bg-black-200 hover:underline ml-auto"
             onClick={() => setMembersCollapsed((v) => !v)}
             aria-expanded={!membersCollapsed}
             title={
               membersCollapsed
-                ? "Afficher la liste des membres"
-                : "Masquer la liste des membres"
+                ? t("tchat.showMembers")
+                : t("hideMembers")
             }
           >
-            {membersCollapsed ? "Afficher membres" : "Masquer membres"}
+            {membersCollapsed ? t("tchat.showMembers"): t("tchat.hideMembers")}
           </button>
         </h1>
 
@@ -328,17 +328,19 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
                   })}
           </div>
         )}
-        {!can(myRole, "MEMBER") ? (
+        {myRole ? 
+        !can(myRole, "MEMBER") ? (
           <div className="p-4 border-t text-sm text-gray-500 dark:text-gray-400">
             Lecture seule sur ce serveur.
           </div>
         ) : (
           <ChatInput
+            channelId={channelId}
             sendMessage={addMessage}
             replyMessage={replyMessage}
             onReply={setReplyMessage}
           />
-        )}
+        ) : <></>}
 
         {/* Drawer des messages épinglés */}
         {drawerOpen && (

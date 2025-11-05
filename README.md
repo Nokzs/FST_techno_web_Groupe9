@@ -95,14 +95,66 @@ Plateforme de messagerie temps réel développée à la FST . L’application co
 ### Installation des dépendances
 ```bash
 
-
+Back
 cd fst-chat-back
 npm install
 npm run dev
 
-cd ../fst-chat
+Front
+cd fst-chat
 npm install
 npm run dev
 ```
+
+
+## 🎬 Démonstrations vidéo
+
+###  [Authentification et connexion]
+
+https://github.com/user-attachments/assets/4b7281b2-be3a-42da-a369-73bb7098d3e9
+
+
+
+###  [Création d’un serveur]
+
+https://github.com/user-attachments/assets/550f719b-75f5-4fd2-940b-f2bde70af5b6
+
+
+
+###  [Fonctionnalités principales du chat]
+
+https://github.com/user-attachments/assets/1a291875-b899-4dd2-acc9-e00df92024a5
+
+
+###  [Reaction chat]
+https://github.com/user-attachments/assets/8d87558c-4248-4a92-b5fe-7ca365f4fa03
+
+
+###  [Gestion des membres]
+
+https://github.com/user-attachments/assets/32ad33fd-9679-4b66-b4cf-7953818d4236
+
+
+###  [Gestion du profil utilisateur]
+
+
+https://github.com/user-attachments/assets/81a70bbb-95b9-4e39-8486-cb9901057026
+
+
+###  [Gestion des rôles et permissions]
+
+
+https://github.com/user-attachments/assets/c7de386c-683b-4c42-a7b5-0ae221235de0
+
+
+###  [Interaction IA : question ]
+
+https://github.com/user-attachments/assets/42f4433c-ea5f-4dab-a1c7-a1dc9d067eb7
+
+
+###  [Interaction IA :  résumé]
+
+
+https://github.com/user-attachments/assets/55bc2f14-2d9f-4576-8ebb-035a05fdff96
 
 

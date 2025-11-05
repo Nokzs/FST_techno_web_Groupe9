@@ -2,7 +2,19 @@
 import { useNavigate } from "react-router";
 import { can, type AppRole } from "../../utils/roles";
 
-export function ChannelItem({ _id, name, serverId, role, onRemoved }: { _id: string; name: string; serverId: string; role?: AppRole; onRemoved?: (id: string) => void }) {
+export function ChannelItem({
+  _id,
+  name,
+  serverId,
+  role,
+  onRemoved,
+}: {
+  _id: string;
+  name: string;
+  serverId: string;
+  role?: AppRole;
+  onRemoved?: (id: string) => void;
+}) {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -10,16 +22,16 @@ export function ChannelItem({ _id, name, serverId, role, onRemoved }: { _id: str
     e.stopPropagation();
     try {
       const res = await fetch(`${API_URL}/channels/${_id}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
       if (res.ok) {
         onRemoved?.(_id);
       } else {
-        console.error('Suppression channel échouée:', await res.text());
+        console.error("Suppression channel échouée:", await res.text());
       }
     } catch (err) {
-      console.error('Suppression channel erreur:', err);
+      console.error("Suppression channel erreur:", err);
     }
   }
 
@@ -29,7 +41,7 @@ export function ChannelItem({ _id, name, serverId, role, onRemoved }: { _id: str
       onClick={() => navigate(`/messages/${serverId}/${_id}`)}
     >
       <span>{name}</span>
-      {can(role, 'CREATOR') && (
+      {can(role, "ADMIN") && (
         <button
           className="text-xs text-red-600 hover:underline"
           title="Supprimer le salon"

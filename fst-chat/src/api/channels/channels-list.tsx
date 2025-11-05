@@ -29,7 +29,7 @@ export function ChannelList({
         <h3 className="font-semibold text-gray-800">
           Salons ({channels.length})
         </h3>
-        {can(role, 'CREATOR') && (
+        {can(role, "ADMIN") && (
           <button
             onClick={() => setShowForm((prev) => !prev)}
             className="text-sm text-blue-500 hover:underline"
@@ -39,7 +39,7 @@ export function ChannelList({
         )}
       </div>
 
-      {can(role, 'CREATOR') && showForm && (
+      {can(role, "CREATOR") && showForm && (
         <CreateChannelForm serverId={serverId} onCreated={onChannelAdded} />
       )}
 

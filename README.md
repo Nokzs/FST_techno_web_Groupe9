@@ -95,12 +95,13 @@ Plateforme de messagerie temps réel développée à la FST . L’application co
 ### Installation des dépendances
 ```bash
 
-
+Back
 cd fst-chat-back
 npm install
 npm run dev
 
-cd ../fst-chat
+Front
+cd fst-chat
 npm install
 npm run dev
 ```

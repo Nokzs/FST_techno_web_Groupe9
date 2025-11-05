@@ -18,17 +18,14 @@ export function DarkModeProvider({
       setDarkMode(prefersDark);
     },
   );
-  console.log("mon navigateur prefere", preferMedia);
 
   const darkModeStorage: string | null = localStorage.getItem("darkMode");
   const [darkMode, setDarkMode] = useState<boolean>(
     (!darkModeStorage && preferMedia) || darkModeStorage === "true",
   );
 
-  console.log("le résultat est ", darkMode);
   const changeDarkMode = () => {
     setDarkMode((darkMode) => {
-      console.log(!darkMode);
       localStorage.setItem("darkMode", !darkMode ? "true" : "false");
       return !darkMode;
     });

@@ -20,7 +20,6 @@ export const ServerModal = ({
 }: ServerModalProps) => {
   const { t } = useTranslation();
   const [tags, setTags] = useState<string[]>(server.tags || []);
-  console.log(tags);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 

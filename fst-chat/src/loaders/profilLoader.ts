@@ -8,7 +8,6 @@ export const profilLoader: LoaderFunction = async (data): Promise<User> => {
 
   const user: User | null = await getUserProfile();
   if (!user) {
-    console.log("utilisateur non trouvé");
     throw redirect("/login");
   }
   return { ...user, ...userID };

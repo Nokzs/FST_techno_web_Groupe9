@@ -7,7 +7,6 @@ import type { UserID } from "../../types/user";
 
 export async function getConnectedUser(): Promise<UserID | null> {
   const apiUrl = import.meta.env.VITE_API_URL || "";
-  console.log(apiUrl);
   try {
     const userReq = await fetch(`${apiUrl}/auth/user`, {
       credentials: "include",

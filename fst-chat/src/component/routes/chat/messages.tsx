@@ -142,7 +142,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
     if (!serverId) return;
     // rejoindre la room du serveur pour recevoir les updates temps réel
-    console.log("[Messages] watchServer emit", { serverId });
     socket.emit("watchServer", { serverId });
     const onMemberJoined = ({
       serverId: sid,
@@ -151,11 +150,7 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
       serverId: string;
       user: User;
     }) => {
-      console.log("[Messages] serverMemberJoined received", {
-        sid,
-        expected: serverId,
-        userId: user?.id,
-      });
+    
       if (sid !== serverId) return;
       setMembers((prev) =>
         prev.some((u) => u.id === user.id) ? prev : [...prev, user],
@@ -226,7 +221,6 @@ export function Messages({ channelId, prefetchData }: MessagesProps) {
       socket.off("serverMemberLeft", onMemberLeft);
       socket.off("serverPresenceUpdate");
       socket.off("serverDeleted");
-      console.log("[Messages] unwatchServer emit", { serverId });
       socket.emit("unwatchServer", { serverId });
     };
   }, [serverId]);

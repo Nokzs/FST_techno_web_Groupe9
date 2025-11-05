@@ -77,9 +77,6 @@ export class MessageController {
     @Query('channelId') channelId: string,
     @Query('date') date: string
   ) {
-    Logger.log(
-      `Récupération des messages du channel ${channelId} avant la date ${date}`
-    );
     const { messages, hasMore } = await this.messageService.findByChannel(
       channelId,
       date

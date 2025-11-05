@@ -63,7 +63,6 @@ export function ServerItem({
   const isOwner = currentUser?.id === server.ownerId;
 
   const handleOpenServer = async (tags: string) => {
-    console.log("Ouverture serveur", server);
     const splitTags = tags.split(",").map((t) => t.trim());
     try {
       const res = await fetch(`${API_URL}/servers/open`, {

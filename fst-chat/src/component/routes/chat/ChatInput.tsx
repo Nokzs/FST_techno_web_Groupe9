@@ -108,7 +108,6 @@ export function ChatInput({
   };
 
   const handleSend = () => {
-    console.log("envoi du message :", message);
     if (!message.trim() && files.length === 0) return;
     sendMessage(message, files);
     setMessage(() => "");
@@ -118,7 +117,6 @@ export function ChatInput({
     stopTypingNow();
   };
   const onStopRecording = (file: File) => {
-    console.log("je recois le fichier audio");
     setFiles((prev) => [...prev, file]);
     filesLengthRef.current += 1;
   };
@@ -300,7 +298,6 @@ export function ChatInput({
                     recordRef.current.classList.add("bg-green-700");
                 }}
                 onAnimationComplete={() => {
-                  console.log(messageRef.current);
                   // quand le micro est complètement visible, on retire le background
                   if (recordRef.current && !messageRef.current.trim()) {
                     recordRef.current.classList.remove("bg-green-700");

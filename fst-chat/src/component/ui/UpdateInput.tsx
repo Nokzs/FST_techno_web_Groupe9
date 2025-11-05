@@ -44,9 +44,6 @@ export const UpdateInput = forwardRef<
     const [inputValue, setInputValue] = useState(value);
     const inputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    console.log(
-      showError ? (error ? "border-red-500" : "border-green-700") : "",
-    );
     //permet d'associer le ref passé en props au ref interne du composant
     useImperativeHandle(
       ref,

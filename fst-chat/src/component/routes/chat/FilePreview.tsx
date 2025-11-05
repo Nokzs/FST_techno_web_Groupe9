@@ -30,7 +30,6 @@ export function FilePreview({ file, scrollContainerRef }: FilePreviewProps) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          console.log("je suis vu");
           setIsVisible(true);
           observer.disconnect(); // plus besoin d'observer après déclenchement
         } else {

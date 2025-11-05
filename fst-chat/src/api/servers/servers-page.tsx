@@ -74,7 +74,6 @@ export function ServersPage() {
             }
           }),
         );
-        console.log("roles pour chaque serveur: " + entries);
 
         setRoles(Object.fromEntries(entries));
       } catch (err) {
@@ -137,7 +136,6 @@ export function ServersPage() {
 
   const handleLogout = async () => {
     const API_URL = import.meta.env.API_URL || "http://localhost:3002";
-    console.log("se deconnecter");
 
     try {
       const res = await fetch(`${API_URL}/auth/logout`, {

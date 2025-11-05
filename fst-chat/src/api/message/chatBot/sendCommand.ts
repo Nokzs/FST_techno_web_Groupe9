@@ -32,6 +32,5 @@ export const sendCommand = async (
     },
   );
   const answer = await answerData.text();
-  console.log(answer);
   return answer;
 };

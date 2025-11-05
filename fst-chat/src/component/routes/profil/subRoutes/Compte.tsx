@@ -12,12 +12,7 @@ export function Compte() {
   const [error, setError] = useState<boolean>(false);
   const handleModif = () => {
     if (!modif) setModif(true);
-    console.log(
-      "password",
-      passwordRef.current?.value,
-      "confirm",
-      confirmPasswordRef.current?.value,
-    );
+
     if (passwordRef.current && passwordRef.current?.value?.length < 6) {
       setError(true);
       return;

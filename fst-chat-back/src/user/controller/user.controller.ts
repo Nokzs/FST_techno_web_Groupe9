@@ -20,7 +20,13 @@ import { plainToInstance } from 'class-transformer';
 import type { IStorageProvider } from '../../storage/provider/IStorageProvider';
 import type { Request } from 'express';
 import { UpdateUserDTO } from '../DTO/UpdateUserDTO';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 @Controller('user')
 export class UserController {
   constructor(
@@ -28,14 +34,13 @@ export class UserController {
     @Inject('STORAGE_PROVIDER') private readonly storage: IStorageProvider
   ) {}
   @ApiOperation({
-    description:"retourne le profil de l'utilisteur"
-    
+    description: "retourne le profil de l'utilisteur",
   })
   @ApiOkResponse({
-    type: CompleteUserResponseDto
+    type: CompleteUserResponseDto,
   })
   @ApiUnauthorizedResponse({
-    description:"utilisteur non connecté"
+    description: 'utilisteur non connecté',
   })
   @Get('/profile/')
   @HttpCode(HttpStatus.OK)
@@ -51,13 +56,12 @@ export class UserController {
   }
 
   @ApiResponse({
-    description:"Récupere l'url de l'image de profil de l'utilisteur"
+    description: "Récupere l'url de l'image de profil de l'utilisteur",
   })
   @UseGuards(AuthGuard)
   @Get('/profilPictureUrl')
   async getPublicProfilePicture(@Req() req: Request): Promise<PublicUrlDTO> {
     const id = req['user'].sub as string;
-    Logger.log('');
     const user = await this.userService.findById(id);
     if (!user) {
       throw new NotFoundException();
@@ -70,11 +74,11 @@ export class UserController {
     return plainToInstance(PublicUrlDTO, { publicUrl: url });
   }
   @ApiOperation({
-    description:"met à jour l'utilisateur"
+    description: "met à jour l'utilisateur",
   })
   @ApiOkResponse({})
   @ApiNotFoundResponse({
-     description:"utilisateur non connecté"
+    description: 'utilisateur non connecté',
   })
   @UseGuards(AuthGuard)
   @Put('update')

@@ -53,7 +53,6 @@ export class UserService {
     if (password) {
       updatePayload.password = await bcrypt.hash(password, SALT_ROUNDS);
     }
-    Logger.log('user updated');
 
     return this.userModel
       .findByIdAndUpdate(id, updatePayload, { new: true })

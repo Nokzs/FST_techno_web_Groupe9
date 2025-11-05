@@ -43,7 +43,6 @@ export const fetchMessages = async (channelId: string, date: string) => {
 
     const data: { messages: Message[]; hasMore: boolean } =
       await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -61,7 +60,6 @@ const fetchInitialMessages = async (
       channelId,
       "",
     );
-    console.log("les messages sont ", messages);
     // On prend les premiers messages visibles
     const visibleMessages: Message[] = data.messages.slice(0, 10);
 

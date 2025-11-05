@@ -22,7 +22,6 @@ export function ChannelList({
 }: ChannelListProps) {
   const [showForm, setShowForm] = useState(false);
 
-  console.log(channels);
   return (
     <div className="mb-4 border rounded p-2 bg-gray-100">
       <div className="flex justify-between items-center mb-2">

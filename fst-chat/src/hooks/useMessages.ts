@@ -40,7 +40,6 @@ export const useMessages = (
     messagesEndRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
   const paginateMessagesHTTP = useCallback(async () => {
-    console.log("paginateMessagesHTTP called");
     if (!channelId || messages.length === 0) return;
     if (!hasMoreRef.current) return;
 
@@ -59,7 +58,6 @@ export const useMessages = (
     }
   }, [channelId, messages]);
   /*   const paginateMessages = useCallback(() => {
-    console.log("paginateMessages called");
     if (!channelId || messages.length === 0) return;
     if (!hasMoreRef.current) return;
     socket.emit(
@@ -99,7 +97,6 @@ export const useMessages = (
       },
     );
 
-    console.log("Observing topRef.current:", topRef.current);
     const current = topRef.current;
     if (current) observer.observe(current);
     return () => {
@@ -218,7 +215,6 @@ export const useMessages = (
     );
 
     return () => {
-      console.log("je quitte la room");
       socket.emit("leaveRoom", channelId);
       socket.off("newMessage");
       socket.off("deleteMessage");

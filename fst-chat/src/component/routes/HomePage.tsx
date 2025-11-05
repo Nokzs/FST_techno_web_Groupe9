@@ -8,7 +8,6 @@ export function HomePage() {
   const [showNextText, setShowNextText] = useState<boolean>(false);
   const secondScreenRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
-  console.log(t("homePage.heroMessage.part1") || "null");
   return (
     <>
       <NavBar />

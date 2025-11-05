@@ -79,12 +79,10 @@ export class MessageService {
     channelId: string,
     date: string
   ): Promise<{ messages: Message[]; hasMore: boolean }> {
-    Logger.log('date', date);
     const limit = 10;
     const findObj = date
       ? { channelId, createdAt: { $lt: date } }
       : { channelId };
-    Logger.log('findObj', findObj);
     const messages = await this.messageModel
       .find(findObj)
       .limit(limit + 1)
@@ -229,7 +227,6 @@ export class MessageService {
   }
 
   public async deleteMessage(messageId: string): Promise<Message | null> {
-    Logger.log('le message est supprimé');
     const message = await this.messageModel
       .findByIdAndUpdate(messageId, { isDeleted: true }, { new: true })
       .exec();

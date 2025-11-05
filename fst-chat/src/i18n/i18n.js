@@ -28,5 +28,4 @@ i18n
       loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
   });
-console.log("initialisation");
 export default i18n;

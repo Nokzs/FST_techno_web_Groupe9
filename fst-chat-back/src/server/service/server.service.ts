@@ -95,7 +95,6 @@ export class ServerService {
     const members = (srv as any).members as any[];
 
     return (members || []).map((m) => {
-      Logger.log("l'user", m);
       return plainToInstance(CompleteUserResponseDto, {
         id: m._id?.toString?.() ?? m.id,
         pseudo: m.pseudo,

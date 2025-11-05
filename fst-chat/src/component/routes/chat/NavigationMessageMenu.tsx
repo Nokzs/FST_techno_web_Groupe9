@@ -32,7 +32,6 @@ type ServerNotifications = {
 };
 async function fetchAllNotifications(userServers: Server[], userId: string) {
   const notifications: Record<string, ServerNotifications> = {};
-  console.log("user", userId);
   const param = new URLSearchParams({ userId });
   const apiUrl = import.meta.env.VITE_API_URL;
   await Promise.all(
@@ -46,7 +45,6 @@ async function fetchAllNotifications(userServers: Server[], userId: string) {
           credentials: "include",
         },
       ).then((r) => r.json());
-      console.log(userChannel);
       const channels: ChannelNotifications = {};
       let total = 0;
 

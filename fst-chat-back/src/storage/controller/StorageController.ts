@@ -4,7 +4,11 @@ import type { IStorageProvider } from '../provider/IStorageProvider';
 import { AuthGuard } from '../../guards/authGuard';
 import { JwtPayload } from '../../token/types/jwtPayload';
 import { SignedUrlDTO } from '../DTO/SignedUrlDTO';
-import { ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 type eventType = 'profilePicture';
 @Controller('/storage')
 export class StorageController {
@@ -13,7 +17,8 @@ export class StorageController {
   ) {}
 
   @ApiOperation({
-    description:"demande une urlSigné afin d'upload un fichier de profile ou d'envoie de fichier sur le chat",
+    description:
+      "demande une urlSigné afin d'upload un fichier de profile ou d'envoie de fichier sur le chat",
   })
   @ApiOkResponse()
   @ApiInternalServerErrorResponse()
@@ -27,7 +32,6 @@ export class StorageController {
     const payload: JwtPayload = req['user'] as JwtPayload;
     const id = payload.sub;
     const effectID = body.salonId ? body.salonId : id;
-    Logger.log(id, 'dans la route');
     const data = await this.storage.SendSignUploadUrl(
       `${id}/${body.fileName}`,
       body.eventType,

@@ -23,7 +23,6 @@ export function LangList({
           c.languages ? Object.values(c.languages) : [],
         );
         const uniqueLangs = new Set<string>(langs);
-        console.log(uniqueLangs);
         setLang(uniqueLangs);
       })
       .catch((err) => {
@@ -40,7 +39,9 @@ export function LangList({
       {lang && (
         <>
           {" "}
-          <label className="dark:text-white text-dark">Choisir une langue :</label>
+          <label className="dark:text-white text-dark">
+            Choisir une langue :
+          </label>
           <select
             onChange={() => handleModif && handleModif()}
             defaultValue={user.language}

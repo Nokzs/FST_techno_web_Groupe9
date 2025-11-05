@@ -3,7 +3,7 @@ import { ServersList } from "./servers-list";
 import { CreateServerForm } from "./create-server-form";
 import { JoinServerForm } from "./join-server-form";
 import { useTranslation } from "react-i18next";
-import { NavLink, redirect, useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { LanguageSwitcher } from "../../component/ui/languageSwitcher";
 export interface Server {
   _id: string;

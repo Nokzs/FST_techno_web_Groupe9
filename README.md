@@ -104,31 +104,25 @@ cd ../fst-chat
 npm install
 npm run dev
 ```
-##  Démonstrations vidéo
-
-###  Authentification et connexion
-<video src="demo/connexion.mp4" controls width="600"></video>
-
-###  Création d’un serveur
-<video src="demo/creationServeur.mp4" controls width="600"></video>
-
-###  Fonctionnalités principales du chat
-<video src="demo/fonctionnalite-chat.mp4" controls width="600"></video>
-<video src="demo/reaction-chat.mp4" controls width="600"></video>
-
-###  Gestion des membres
-<video src="demo/gestion-membres.mp4" controls width="600"></video>
-
-###  Gestion du profil utilisateur
-<video src="demo/gestion-profil.mp4" controls width="600"></video>
-
-###  Gestion des rôles et permissions
-<video src="demo/gestion-roles.mp4" controls width="600"></video>
-
-###  Interaction IA : question et résumé
-<video src="demo/questionIa.mp4" controls width="600"></video>
-<video src="demo/Resumela.mp4" controls width="600"></video>
 
 
+## 🎬 Démonstrations vidéo
+
+###  [Authentification et connexion](demo/connexion.mp4)
+
+###  [Création d’un serveur](demo/creationServeur.mp4)
+
+###  [Fonctionnalités principales du chat](demo/fonctionnalite-chat.mp4)
+###  [Reaction chat](demo/reaction-chat.mp4)
+
+
+###  [Gestion des membres](demo/gestion-membres.mp4)
+
+###  [Gestion du profil utilisateur](demo/gestion-profil.mp4)
+
+###  [Gestion des rôles et permissions](demo/gestion-roles.mp4)
+
+###  [Interaction IA : question ](demo/questionIa.mp4)
+###  [Interaction IA :  résumé](demo/ResumeIa.mp4)
 
 
